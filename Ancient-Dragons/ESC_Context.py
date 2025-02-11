@@ -1,5 +1,46 @@
 from typing import Type
 
+"""
+TODO:
+    - Für die Typen der Komponenten entscheiden.
+        -> Was sind sie? (Klasse; Struct; ...; ...)
+        -> Wie sind sie strukturiert?
+
+    - Für den "Speicher-Ort" der Komponenten entscheiden.
+        -> Die SQL-Datenbank? (Macht aber eigentlich keinen Sinn! Instanzen und so..)
+        -> Eigene Text-/Python-File?
+        -> Oder was ganz anderes?
+
+    - Die Komponenten definieren.
+        -> Die Karteneigenschaften zu ECS-Komponenten übersetzen
+
+-------------------------------------------------------------------------
+    Grobe Beschreibung..
+    
+    Prozessbeginn:
+    - Der Initiale Applikationstand wird hergestellt.
+        -> Applikations Kontext wird erstellt.
+        -> Event handler werden erstellt.
+        -> ECS Kontext wird erstellt.
+        -> Render Kontext wird erstellt.
+        -> Entity Factory wird erstellt.
+
+    - Die Entity Factory, bekommt/ließt die Karten-Daten aus der Datenbank.
+        -> Entities werden erstellt
+        -> Komponenten werden erstellt und den Entieties zugewiesen.
+
+    - Der ECS Kontext, wird von der Entity Factory mit Karten gefüllt.
+        -> Die erstellten Entities, sowie die alle erstellten Komponenten, die den Entities zugewiesen sind, sind hier.
+
+    - Die Charakter Factory, bekommt/ließt die Daten aus der Datenbank.
+        -> Die Charakter Klassen werden erstellt.
+        -> Die Entity Id's, die den Standart-Karten der Charaktere entsprechen, werden den Klassen übergeben.
+
+    Future:
+    - Der Game Mode wird erstellt. (Wie genau ist die Frage.. Datenbank, oder einfach Hard-Code)
+    - Die Level Factory bekommt/ließt die Daten aus der Datenbank.
+        -> Mit einem statischen seed, wird mit dem Abschluss eines Levels ein weiteres generiert.
+"""
 
 class ECS_Context():
     def __init__(self):

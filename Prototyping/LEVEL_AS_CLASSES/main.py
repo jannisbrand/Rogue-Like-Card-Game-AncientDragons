@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 
 levelManager = LevelManager(window)
 
-# Mini Level factories..
+# Mini Level factories...
 test_level = Level()
 for coord in range(0, 600):
     surface = pygame.Surface((coord, coord * 1.5))

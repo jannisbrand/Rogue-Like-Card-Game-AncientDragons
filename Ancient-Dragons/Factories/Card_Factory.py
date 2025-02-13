@@ -1,9 +1,15 @@
+import sqlite3
+from typing import Any
 from ESC_Context import ECS_Context
 from Components import Components
 
 
 class CardFactory():
-    def __init__(self, ecs_context: "ECS_Context"):   
+    def __init__(self, ecs_context: "ECS_Context", database_path: str = "Ancient-Dragons_Database.db"):
+        # ### Database ### #
+        self.database_connection = sqlite3.connect(database_path)
+        # ### Database ### #
+
         self.context = ecs_context
         
         # Card name: {}
@@ -15,6 +21,109 @@ class CardFactory():
         self.temp_card_blueprint["TEST_CARD"] = {}
         self.temp_card_blueprint["TEST_CARD"]["ATTACK"] = 5
         self.temp_card_blueprint["TEST_CARD"]["DEFENSE"] = 2
+
+        # ### Factory ### #
+        self.fabrication_process = {
+            "Name": self.handle_name,
+            "Type_ID": self.handle_type,
+            "Charakter_ID": self.handle_character_affiliation,
+            "Cost": self.handle_cost,
+            "Text": self.handle_text,
+            "Effect": self.handle_effects,
+            "Path_Picture": self.handle_image_path,
+        }
+
+    def get_database_column_names(self, table: str) -> list[str]:
+        table_info = self.database_connection.cursor().execute(f"PRAGMA table_info({table})")
+        column_names = list()
+        for column in table_info:
+            column_name = column[1]
+            column_names.append(column_name)
+        return column_names
+
+    def fabricate_all(self):
+        card_collection = self.database_connection.cursor().execute("SELECT * FROM Cards")
+        column_names = self.get_database_column_names("Cards")
+        for card_data in card_collection.fetchall():
+            # PATTERN
+            # CARD ID; CARD NAME; CHARACTER TYPE ID; CHARACTER ID; CARD COST; CARD TEXT; CARD EFFECTS; CARD IMAGE PATH
+            if len(card_data) != len(column_names):
+                print("[ECFactory] Card data and Colum names do not match!")
+                continue
+            print("[ECFactory] Card data: " + str(card_data))
+            self.parse_card(column_names, card_data)
+
+    def parse_card(self, column_names: list[str], card_data: tuple[int, str, int, int, int, str, str, str]) -> bool:
+        """Routes data to further processing
+
+        Args:
+            card_data (tuple[int, str, int, int, int, str, str, str])
+
+        Returns:
+            bool: True if no error occured.
+        """
+        card_entity = self.context.add_entity()  # Creates a new entity in the context
+        index = 0
+        for data in card_data:
+            try:
+                if column_names[index] != "ID":
+                    handler = self.fabrication_process[column_names[index]]
+                    created_components = handler(data) # Whacky solution | Could be a single object or a list of objects
+                    if isinstance(created_components, list):  # Check if its a list of objects
+                        if index == 6 or index == 1:  # Temp
+                            self.context.add_components(card_entity, created_components)
+                    else:
+                        if index == 6 or index == 1:  # Temp
+                            self.context.add_component(card_entity, created_components)
+                    print("[ECFactory] Created components: ", created_components)  # Names appear seperated bc strings are being casted to type list.. Temporaryly
+            except KeyError as e:
+                print(f"[ECFactory] Key not found: {e}")
+            except TypeError as e:
+                print(f"[ECFactory] Handler returned invalid type: {e}")
+            index += 1
+
+        return True
+    
+    def handle_name(self, value: str = "") -> Any:
+        component = Components.C_DISPLAY_NAME(value)
+        return component
+
+    def handle_type(self, value: int = -1) -> Any:
+        # TODO: Get type name from table "Types"
+        component = Components.C_CARD_TYPE()
+        return component
+
+    def handle_character_affiliation(self, value: int) -> Any:
+        # TODO: Implementation of a character factory first..
+        component = Components.C_CHARACTER_AFFILIATION()
+        return component
+
+    def handle_cost(self, value: int) -> Any:
+        component = Components.C_CARD_COSTS(value)
+        return component
+
+    def handle_text(self, value: str) -> Any:
+        component = Components.C_DISPLAY_TEXT(value)
+        return component
+
+    def handle_effects(self, value: str):   # TODO: Return value should be a tuple.. :)
+        # TODO: Addition of all effekt components :')
+        # TODO: Seperate sub effects eg.: ATK_RANDOM; ATK_ALL   (All different components)
+        list_of_effects = []
+        seperated_string = value.split("|")
+        for effect in seperated_string:
+            if "ATK_" in effect:
+                component = Components.C_ATTACK()
+            elif "DEF_" in effect:
+                component = Components.C_DEFENSE()
+            else:
+                component = ""
+            list_of_effects.append(component)
+        return list_of_effects
+
+    def handle_image_path(self, value: str) -> Any:
+        component = Components.C_IMAGE_PATH()
+        return component
 
     def build(self):
         entity = self.context.add_entity()

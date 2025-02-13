@@ -69,7 +69,7 @@ if __name__ == "__main__":
     application.initialise()
     application.set_window_caption("Ancient Dragons - Ver: 0.001")
     
-    event_handler = Event_Handler(application)    
+    event_handler = Event_Handler(application)
     
     renderer = Renderer(application)
     renderer.initialise((100, 35, 55), 60)
@@ -81,6 +81,9 @@ if __name__ == "__main__":
     factory.build()
     print("[MAIN]Entity Count: " + str(context.number_of_registered_entities))
     print(context.get_components(1))
+
+    print("\n\n\n\n\n")
+    factory.fabricate_all()
 
     while not application.window_should_close:
         renderer.clear()

@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Any
 
 """
 TODO:
@@ -42,12 +42,13 @@ TODO:
         -> Mit einem statischen seed, wird mit dem Abschluss eines Levels ein weiteres generiert.
 """
 
+
 class ECS_Context():
     def __init__(self):
         # ### ENTITIES AND COMPONENTS # ###
         self.entities: set[int] = set() # Collection of all id's
         # Mapping specific components mapped to entities to component types
-        self.components: dict[Type, dict[int, any]] = {}
+        self.components: dict[Type, dict[int, list[Any]]] = {}
         self.next_entity_id = 1
         self.number_of_registered_entities: int = 0
         # ### ENTITIES AND COMPONENTS # ###
@@ -64,7 +65,7 @@ class ECS_Context():
         self.number_of_registered_entities += 1
         return new_entity_id
 
-    def add_component(self, entity: int, component: any) -> None:
+    def add_component(self, entity: int, component: Any) -> None:
         """Mapps an instance of a component to an entity.
 
         Args:
@@ -77,9 +78,32 @@ class ECS_Context():
             # Creates a new dictionary for a missing component type
             self.components[component_type] = {}    # This!
 
-        self.components[component_type][entity] = component
+        if entity not in self.components[component_type]:
+            self.components[component_type][entity] = []
 
-    def get_components(self, entity: int) -> list[any]:
+        print(self.components[component_type][entity])
+        self.components[component_type][entity].append(component)
+
+    def add_components(self, entity: int, components: list[Any]) -> None:
+        """Mapps an instance of a component to an entity.
+
+        Args:
+            entity (int): The id of the entity
+            component (instance): An instance of an component class
+        """
+        for component in components:
+            component_type = type(component)
+
+            if component_type not in self.components:
+                # Creates a new dictionary for a missing component type
+                self.components[component_type] = {}    # This!
+            
+            if entity not in self.components[component_type]:
+                self.components[component_type][entity] = []
+
+            self.components[component_type][entity].append(component)
+
+    def get_components(self, entity: int) -> list[Any]:
         """Returns a list of components
 
         Args:
@@ -89,11 +113,11 @@ class ECS_Context():
             list[any]: A list of component classes. 
             Returns [] if there are none.
         """
-        components_of_entity = list()
+        components_of_entity = []
         for component_type in self.components:
             try:
-                component = self.components[component_type][entity]
-                components_of_entity.append(component)
+                components = self.components[component_type][entity]
+                components_of_entity.extend(components)
             except KeyError as e:
                 print(f"[ECS]ECS_Context.get_components: {e}")
                 print(f"[ECS]No entity found with component type: {component_type}!")

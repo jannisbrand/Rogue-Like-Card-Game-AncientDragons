@@ -45,11 +45,11 @@ TODO:
 class ECS_Context():
     def __init__(self):
         # ### ENTITIES AND COMPONENTS # ###
-        self.entities: set[int]  # Collection of all id's
+        self.entities: set[int] = set() # Collection of all id's
         # Mapping specific components mapped to entities to component types
-        self.components: dict[Type, dict[int, any]]
+        self.components: dict[Type, dict[int, any]] = {}
         self.next_entity_id = 1
-        self.number_of_registered_entities: int
+        self.number_of_registered_entities: int = 0
         # ### ENTITIES AND COMPONENTS # ###
 
     def add_entity(self) -> int:

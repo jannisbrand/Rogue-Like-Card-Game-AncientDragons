@@ -3,6 +3,8 @@ import pygame
 import pygame.display
 from Handlers.Event_Handler import Event_Handler
 from Renderer import Renderer
+from ESC_Context import ECS_Context
+from Factories.Card_Factory import CardFactory
 
 """
 Application # CONTEXT: Pygame / Window / Key mappings / Application state / etc.
@@ -71,6 +73,14 @@ if __name__ == "__main__":
     
     renderer = Renderer(application)
     renderer.initialise((100, 35, 55), 60)
+
+    context = ECS_Context()
+    print("[MAIN]Entity Count: " + str(context.number_of_registered_entities))
+
+    factory = CardFactory(context)
+    factory.build()
+    print("[MAIN]Entity Count: " + str(context.number_of_registered_entities))
+    print(context.get_components(1))
 
     while not application.window_should_close:
         renderer.clear()

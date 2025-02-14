@@ -1,6 +1,7 @@
 import os
 import pygame
 import pygame.display
+from Game.gm_endless import gmEndless
 from Handlers.Event_Handler import Event_Handler
 from Renderer import Renderer
 from ESC_Context import ECS_Context
@@ -74,16 +75,10 @@ if __name__ == "__main__":
     renderer = Renderer(application)
     renderer.initialise((100, 35, 55), 60)
 
-    context = ECS_Context()
-    print("[MAIN]Entity Count: " + str(context.number_of_registered_entities))
+    print("\n\n\n")
 
-    factory = CardFactory(context)
-    factory.build()
-    print("[MAIN]Entity Count: " + str(context.number_of_registered_entities))
-    print(context.get_components(1))
-
-    print("\n\n\n\n\n")
-    factory.fabricate_all()
+    gm = gmEndless(1, ["CHARACTERS", "LEVELS"])
+    gm.initialise(0b1)
 
     while not application.window_should_close:
         renderer.clear()

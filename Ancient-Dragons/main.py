@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     print("\n\n\n")
 
-    gm = gmEndless(1, ["CHARACTERS", "LEVELS"])
+    gm = gmEndless(1, ["CHARACTERS", "CARDS", "LEVELS"])
     gm.initialise(0b1)
 
     while not application.window_should_close:

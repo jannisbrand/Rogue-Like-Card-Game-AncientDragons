@@ -56,7 +56,7 @@ class ECSO_Context():
         # ### ENTITIES AND COMPONENTS # ###
 
         # ### OBJECTS ### #
-        self.objects: dict[str, dict[int, list[Any]]] = {}
+        self.objects: dict[str, list[Any]] = {}
         self.next_object_id = 1
         # ### OBJECTS ### #
 
@@ -133,9 +133,9 @@ class ECSO_Context():
     def add_object(self, type: str, object: Any) -> None:
         try:
             if type not in self.objects:
-                self.objects[type][self.next_object_id] = []
+                self.objects[type] = []
 
-            self.objects[type][self.next_object_id].append(object)
+            self.objects[type].append(object)
             self.next_object_id += 1
         except KeyError as e:
             print(f"[ECSOContext] Object could not be added: {e}")

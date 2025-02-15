@@ -146,3 +146,14 @@ class ECSO_Context():
                 self.add_object(type, object)  # Smart :)
         except KeyError as e:
             print(f"[ECSOContext] Objects could not be added: {e}")
+
+    def get_objects(self, type: str) -> list[Any]:
+        return self.objects[type]
+
+    def get_object(self, type: str, id: int) -> Any:
+        try:
+            for object in self.objects[type]:
+                if object.id == id:
+                    return object
+        except KeyError as e:
+            print(f"[ECSOContext] Object could not be gotten?: {e}")

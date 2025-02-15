@@ -68,7 +68,10 @@ class CardFactory():
             try:
                 if column_names[index] != "ID":
                     handler = self.fabrication_process[column_names[index]]
-                    created_components = handler(data) # Whacky solution | Could be a single object or a list of objects
+                    if column_names[index] == "Charakter_ID":
+                        created_components = handler(card_data[3], data)  # Only the handler-methond for the character id has two arguments
+                    else:
+                        created_components = handler(data) # Whacky solution | Could be a single object or a list of objects
                     if isinstance(created_components, list):  # Check if its a list of objects
                         if index == 6 or index == 1:  # Temp
                             self.ecso_context.add_components(card_entity, created_components)
@@ -93,9 +96,13 @@ class CardFactory():
         component = Components.C_CARD_TYPE()
         return component
 
-    def handle_character_affiliation(self, value: int) -> Any:
+    def handle_character_affiliation(self, character_id: int, value: int) -> Any:
         # TODO: Implementation of a character factory first..
-        component = Components.C_CHARACTER_AFFILIATION()
+        character = self.ecso_context.get_object("CHARACTERS", character_id)
+        if character != None:
+            component = Components.C_CHARACTER_AFFILIATION(character.id)
+        else:
+            component = Components.C_CHARACTER_AFFILIATION()
         return component
 
     def handle_cost(self, value: int) -> Any:

@@ -1,5 +1,6 @@
 from typing import Any
 from ECSO_Context import ECSO_Context
+from Factories.Character_Factory import CharacterFactory
 from Factories.Card_Factory import CardFactory
 
 
@@ -40,6 +41,8 @@ class gmEndless():
                 match actor_type:
                     case "CARDS":
                         self.actor_factories[actor_type] = CardFactory(self.ecso_context)
+                    case "CHARACTERS":
+                        self.actor_factories[actor_type] = CharacterFactory(self.ecso_context)
             except IndexError as e:
                 print(f"[GAMEMODE] Factory not found: {e}")
         # ### FACTORIES ### #
@@ -59,6 +62,7 @@ class gmEndless():
     def initialise(self, flags: int) -> bool:
         if flags & CARDS_ALL:
             # Bind all cards to the game mode
+            self.actor_factories["CHARACTERS"].fabricate_all()
             self.actor_factories["CARDS"].fabricate_all()
 
         self.is_started = True

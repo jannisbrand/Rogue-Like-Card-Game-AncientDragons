@@ -1,12 +1,12 @@
 import pygame
 
 
-class Character(pygame.sprite.Sprite):
+class Character():
     def __init__(self, id: int, name: str, image: pygame.Surface):
         self.id = id    # ID
         self.name = name    # Name of the character
         self.image = image
-        self.card_entities: set[int]    # Collection of usable cards
+        self.deck = ["Strike", "Defend", "Pummel"]
         self.health_points: int  # Currency for life
         self.mana_points: int   # Currency to play cards
         self.gold_points: int   # Currency to shop

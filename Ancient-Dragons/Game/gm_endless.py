@@ -1,5 +1,5 @@
 from typing import Any
-from ESC_Context import ECS_Context
+from ECSO_Context import ECSO_Context
 from Factories.Card_Factory import CardFactory
 
 
@@ -30,7 +30,7 @@ class gmEndless():
     def __init__(self, id: int, actor_types: list[str]):
         self.id = id
         self.name = "GAMEMODE-DEBUG"
-        self.ecs_context = ECS_Context()  # ECS_Context pro game mode
+        self.ecso_context = ECSO_Context()  # ECS_Context pro game mode
 
         # ### FACTORIES ### #
         self.actor_factories: dict[str, Any] = {}
@@ -39,7 +39,7 @@ class gmEndless():
                 # Initialises the keys. Maybe unecessary
                 match actor_type:
                     case "CARDS":
-                        self.actor_factories[actor_type] = CardFactory(self.ecs_context)
+                        self.actor_factories[actor_type] = CardFactory(self.ecso_context)
             except IndexError as e:
                 print(f"[GAMEMODE] Factory not found: {e}")
         # ### FACTORIES ### #

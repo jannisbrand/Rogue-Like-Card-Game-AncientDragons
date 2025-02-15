@@ -1,16 +1,16 @@
 import sqlite3
 from typing import Any
-from ESC_Context import ECS_Context
+from ECSO_Context import ECSO_Context
 from Components import Components
 
 
 class CardFactory():
-    def __init__(self, ecs_context: "ECS_Context", database_path: str = "Ancient-Dragons_Database.db"):
+    def __init__(self, ecso_context: "ECSO_Context", database_path: str = "Ancient-Dragons_Database.db"):
         # ### Database ### #
         self.database_connection = sqlite3.connect(database_path)
         # ### Database ### #
 
-        self.context = ecs_context
+        self.ecso_context = ecso_context
         
         # Card name: {}
         #   Component:
@@ -62,7 +62,7 @@ class CardFactory():
         Returns:
             bool: True if no error occured.
         """
-        card_entity = self.context.add_entity()  # Creates a new entity in the context
+        card_entity = self.ecso_context.add_entity()  # Creates a new entity in the context
         index = 0
         for data in card_data:
             try:
@@ -71,10 +71,10 @@ class CardFactory():
                     created_components = handler(data) # Whacky solution | Could be a single object or a list of objects
                     if isinstance(created_components, list):  # Check if its a list of objects
                         if index == 6 or index == 1:  # Temp
-                            self.context.add_components(card_entity, created_components)
+                            self.ecso_context.add_components(card_entity, created_components)
                     else:
                         if index == 6 or index == 1:  # Temp
-                            self.context.add_component(card_entity, created_components)
+                            self.ecso_context.add_component(card_entity, created_components)
                     print("[ECFactory] Created components: ", created_components)  # Names appear seperated bc strings are being casted to type list.. Temporaryly
             except KeyError as e:
                 print(f"[ECFactory] Key not found: {e}")
@@ -126,7 +126,7 @@ class CardFactory():
         return component
 
     def build(self):
-        entity = self.context.add_entity()
+        entity = self.ecso_context.add_entity()
         card_keys = self.temp_card_blueprint["TEST_CARD"].keys()
         for key in card_keys:
             match key:
@@ -138,4 +138,4 @@ class CardFactory():
                     component = Components.C_DEFENSE(value)
                 case _:
                     continue
-            self.context.add_component(entity, component)
+            self.ecso_context.add_component(entity, component)

@@ -1,5 +1,7 @@
 from typing import Type, Any
 
+from Characters import Base
+
 """
 TODO:
     - Für die Typen der Komponenten entscheiden.
@@ -43,7 +45,7 @@ TODO:
 """
 
 
-class ECS_Context():
+class ECSO_Context():
     def __init__(self):
         # ### ENTITIES AND COMPONENTS # ###
         self.entities: set[int] = set() # Collection of all id's
@@ -52,6 +54,11 @@ class ECS_Context():
         self.next_entity_id = 1
         self.number_of_registered_entities: int = 0
         # ### ENTITIES AND COMPONENTS # ###
+
+        # ### OBJECTS ### #
+        self.objects: dict[str, dict[int, list[Any]]] = {}
+        self.next_object_id = 1
+        # ### OBJECTS ### #
 
     def add_entity(self) -> int:
         """Creates a new entity in the context
@@ -119,7 +126,23 @@ class ECS_Context():
                 components = self.components[component_type][entity]
                 components_of_entity.extend(components)
             except KeyError as e:
-                print(f"[ECS]ECS_Context.get_components: {e}")
-                print(f"[ECS]No entity found with component type: {component_type}!")
+                print(f"[ECSOContext]No entity found with component type: {e}!")
                 continue
         return components_of_entity
+
+    def add_object(self, type: str, object: Any) -> None:
+        try:
+            if type not in self.objects:
+                self.objects[type][self.next_object_id] = []
+
+            self.objects[type][self.next_object_id].append(object)
+            self.next_object_id += 1
+        except KeyError as e:
+            print(f"[ECSOContext] Object could not be added: {e}")
+
+    def add_objects(self, type: str, objects: list[Any]) -> None:
+        try:
+            for object in objects:
+                self.add_object(type, object)  # Smart :)
+        except KeyError as e:
+            print(f"[ECSOContext] Objects could not be added: {e}")

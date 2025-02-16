@@ -50,7 +50,7 @@ class ECSO_Context():
         # ### ENTITIES AND COMPONENTS # ###
         self.entities: set[int] = set() # Collection of all id's
         # Mapping specific components mapped to entities to component types
-        self.components: dict[Type, dict[int, list[Any]]] = {}
+        self.components: dict[Type, dict[int, Any]] = {}
         self.next_entity_id = 1
         self.number_of_registered_entities: int = 0
         # ### ENTITIES AND COMPONENTS # ###
@@ -85,11 +85,7 @@ class ECSO_Context():
             # Creates a new dictionary for a missing component type
             self.components[component_type] = {}    # This!
 
-        if entity not in self.components[component_type]:
-            self.components[component_type][entity] = []
-
-        print(self.components[component_type][entity])
-        self.components[component_type][entity].append(component)
+        self.components[component_type][entity] = component
 
     def add_components(self, entity: int, components: list[Any]) -> None:
         """Mapps an instance of a component to an entity.
@@ -104,11 +100,8 @@ class ECSO_Context():
             if component_type not in self.components:
                 # Creates a new dictionary for a missing component type
                 self.components[component_type] = {}    # This!
-            
-            if entity not in self.components[component_type]:
-                self.components[component_type][entity] = []
 
-            self.components[component_type][entity].append(component)
+            self.components[component_type][entity] = component
 
     def get_components(self, entity: int) -> list[Any]:
         """Returns a list of components
@@ -123,12 +116,30 @@ class ECSO_Context():
         components_of_entity = []
         for component_type in self.components:
             try:
-                components = self.components[component_type][entity]
-                components_of_entity.extend(components)
+                component = self.components[component_type][entity]
+                components_of_entity.append(component)
+                print(component)
             except KeyError as e:
-                print(f"[ECSOContext]No entity found with component type: {e}!")
+                # Example: If an entity has only one component but there are 10 component types registered the exception will be risen 9 times. :)  
+                print(f"[ECSOContext] Entity {e} does not has component: {component_type}!")
                 continue
         return components_of_entity
+
+    def get_component(self, entity: int, component_type: Any) -> Any:
+        try:
+            return self.components[component_type][entity]
+        except KeyError as e:
+            print(f"[ECSOContext] Entity {e} does not has component: {component_type}!")
+            return None
+
+    def get_entity(self, component_type: Any, value: str) -> int:
+        for entity in self.entities:
+            try:
+                if self.components[component_type][entity].value == value:
+                    return entity
+            except KeyError as e:
+                print(f"[ECSOContext] Entity {e} does not have component: {component_type}")
+        return -1
 
     def add_object(self, type: str, object: Any) -> None:
         try:

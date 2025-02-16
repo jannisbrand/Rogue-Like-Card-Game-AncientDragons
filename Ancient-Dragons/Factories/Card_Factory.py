@@ -73,11 +73,11 @@ class CardFactory():
                     else:
                         created_components = handler(data) # Whacky solution | Could be a single object or a list of objects
                     if isinstance(created_components, list):  # Check if its a list of objects
-                        if index == 6 or index == 1:  # Temp
-                            self.ecso_context.add_components(card_entity, created_components)
+                        # if index == 6 or index == 1:  # Temp
+                        self.ecso_context.add_components(card_entity, created_components)
                     else:
-                        if index == 6 or index == 1:  # Temp
-                            self.ecso_context.add_component(card_entity, created_components)
+                        # if index == 6 or index == 1:  # Temp
+                        self.ecso_context.add_component(card_entity, created_components)
                     print("[ECFactory] Created components: ", created_components)  # Names appear seperated bc strings are being casted to type list.. Temporaryly
             except KeyError as e:
                 print(f"[ECFactory] Key not found: {e}")
@@ -131,6 +131,12 @@ class CardFactory():
     def handle_image_path(self, value: str) -> Any:
         component = Components.C_IMAGE_PATH()
         return component
+
+    def copy_entity(self, entity: int) -> int:
+        copy_of_components = list.copy(self.ecso_context.get_components(entity))
+        new_entity = self.ecso_context.add_entity()
+        self.ecso_context.add_components(new_entity, copy_of_components)
+        return new_entity
 
     def build(self):
         entity = self.ecso_context.add_entity()

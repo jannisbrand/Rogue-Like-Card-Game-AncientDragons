@@ -1,11 +1,15 @@
 from random import randint
 from re import S
 from typing import Any
+
+import pygame
 from Components import Components
 from Components.Components import C_DISPLAY_NAME
 from ECSO_Context import ECSO_Context
 from Factories.Character_Factory import CharacterFactory
 from Factories.Card_Factory import CardFactory
+from Factories.Level_Factory import LevelFactory
+from Renderer import Renderer
 
 
 # ### GLOBAL GAMERULES ### #
@@ -32,10 +36,11 @@ CHARACTERS_ONLY_WARRIOR = 0b10000
 
 
 class gmEndless():
-    def __init__(self, id: int, actor_types: list[str]):
+    def __init__(self, id: int, actor_types: list[str], renderer: "Renderer"):
         self.id = id
         self.name = "GAMEMODE-DEBUG"
         self.ecso_context = ECSO_Context()  # ECS_Context pro game mode
+        self.renderer = renderer
 
         # ### FACTORIES ### #
         self.actor_factories: dict[str, Any] = {}
@@ -47,6 +52,8 @@ class gmEndless():
                         self.actor_factories[actor_type] = CardFactory(self.ecso_context)
                     case "CHARACTERS":
                         self.actor_factories[actor_type] = CharacterFactory(self.ecso_context)
+                    case "LEVELS":
+                        self.actor_factories[actor_type] = LevelFactory(self.ecso_context)
             except IndexError as e:
                 print(f"[GAMEMODE] Factory not found: {e}")
         # ### FACTORIES ### #
@@ -69,13 +76,19 @@ class gmEndless():
         # ### GAME STATES ### #
 
     def initialise(self, selected_character: int, flags: int) -> bool:
+        # ### Generate all character classes and at selected
         self.actor_factories["CHARACTERS"].fabricate_all()
         self.characters.append(self.ecso_context.get_object("CHARACTERS", selected_character))
 
+        # ### Generate all card entities ### #
         self.actor_factories["CARDS"].fabricate_all()
 
-        # self.actor_factories["CARDS"].copy_entity(1)
+        # ### Generate stacks: Draw stack, Hand (stack) ### #
         self.__create_stacks()
+
+        # ### Generate a level to start the game with
+        self.actor_factories["LEVELS"].generate_level()
+        self.levels.append(self.ecso_context.get_object("LEVELS", 5))
 
         self.is_started = True
         return True
@@ -134,5 +147,11 @@ class gmEndless():
         # TODO: If method is necessary think about the implementation.
         pass
 
+    def get_sprites(self) -> pygame.sprite.Group:
+        return self.ecso_context.list_of_sprites
+
     def update(self) -> None:
-        pass
+        self.renderer.add_sprites(self.levels[0].get_sprites())  # Adds all sprites from the active level to the renderers sprite group
+
+        self.levels[0].environment["BACKGROUND1"][0].rect.x += 1  # Debug
+        self.levels[0].environment["BACKGROUND2"][0].rect.y += 1

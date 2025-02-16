@@ -66,7 +66,7 @@ class Application():
 
 
 if __name__ == "__main__":
-    application = Application(400, 400, 0, 50, pygame.RESIZABLE, "")
+    application = Application(1440, 900, (1440 - 720) - 450, 100, pygame.RESIZABLE, "")
     application.initialise()
     application.set_window_caption("Ancient Dragons - Ver: 0.001")
     
@@ -77,13 +77,14 @@ if __name__ == "__main__":
 
     print("\n\n\n")
 
-    gm = gmEndless(1, ["CHARACTERS", "CARDS", "LEVELS"])
+    gm = gmEndless(1, ["CHARACTERS", "CARDS", "LEVELS"], renderer)
     gm.initialise(0, 0b1)
 
     while not application.window_should_close:
         renderer.clear()
 
         event_handler.handle_events()
+        gm.update()
 
         # Do something with the event information
 

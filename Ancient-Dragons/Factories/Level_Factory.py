@@ -49,22 +49,41 @@ class LevelFactory():
         # seed = 69
         # random.seed(seed)
 
-        environment_categories = ["BACKGROUND1", "BACKGROUND2", "FOREGROUND"]
+        environment_categories = ["BACKGROUND1", "BACKGROUND2", "FOREGROUND1", "FOREGROUND2"]
         
         sprites: dict[str, list[Any]] = {}
         for category in environment_categories:
-            r = random.randint(0, 255)
-            g = random.randint(0, 255)
-            b = random.randint(0, 255)
-            color = pygame.Color(r, g, b)
-            sprite = Base.Sprite(color, 50, 50)
-            sprite.rect.x += random.randint(0, 100)
-            sprite.rect.y += random.randint(0, 100)
-
             if category not in sprites:
                 sprites[category] = []
 
-            sprites[category].append(sprite)
+            r = random.randint(0, 255)
+            g = random.randint(0, 255)
+            b = random.randint(0, 255)
+            color = pygame.Color(50, 50, 255)
+            match category:
+                case "BACKGROUND1":
+                    sprite = Base.Sprite("sky.color", color, 1440, 900)
+                    sprite.rect.x = 0
+                    sprite.rect.y = 0
+                    sprites[category].append(sprite)
+                case "BACKGROUND2":
+                    # Clouds
+                    for index in range(6):
+                        sprite = Base.Sprite("cloud.png", color, 50, 50, "Levels\Data\cloud.png")
+                        sprite.rect.x += 250 * index
+                        sprite.rect.y = 200
+                        sprites[category].append(sprite)
+                case "FOREGROUND1":
+                    for index in range(4):
+                        sprite = Base.Sprite("tree.png", color, 50, 50, "Levels\Data\gangsta_tree.png")
+                        sprite.rect.x = 350 * index + 100
+                        sprite.rect.y = 500
+                        sprites[category].append(sprite)
+                case "FOREGROUND2":
+                    sprite = Base.Sprite("ground.color", (125, 80, 50), 1440, 500)
+                    sprite.rect.x = 0
+                    sprite.rect.y = 700
+                    sprites[category].append(sprite)
 
         created_level = Level(self.ecso_context.next_object_id, sprites)
         print("[OFactory] Level generated with id: ", self.ecso_context.next_object_id)

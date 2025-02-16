@@ -151,7 +151,8 @@ class gmEndless():
         return self.ecso_context.list_of_sprites
 
     def update(self) -> None:
+        self.levels[0].update()
         self.renderer.add_sprites(self.levels[0].get_sprites())  # Adds all sprites from the active level to the renderers sprite group
 
-        self.levels[0].environment["BACKGROUND1"][0].rect.x += 1  # Debug
-        self.levels[0].environment["BACKGROUND2"][0].rect.y += 1
+        # self.levels[0].environment["BACKGROUND1"][0].rect.x += 1  # Debug
+        # self.levels[0].environment["BACKGROUND2"][0].rect.y += 1

@@ -1,8 +1,11 @@
 import os
 import pygame
 import pygame.display
+from Game.gm_endless import gmEndless
 from Handlers.Event_Handler import Event_Handler
 from Renderer import Renderer
+from ECSO_Context import ECSO_Context
+from Factories.Card_Factory import CardFactory
 
 """
 Application # CONTEXT: Pygame / Window / Key mappings / Application state / etc.
@@ -67,10 +70,15 @@ if __name__ == "__main__":
     application.initialise()
     application.set_window_caption("Ancient Dragons - Ver: 0.001")
     
-    event_handler = Event_Handler(application)    
+    event_handler = Event_Handler(application)
     
     renderer = Renderer(application)
     renderer.initialise((100, 35, 55), 60)
+
+    print("\n\n\n")
+
+    gm = gmEndless(1, ["CHARACTERS", "CARDS", "LEVELS"])
+    gm.initialise(0, 0b1)
 
     while not application.window_should_close:
         renderer.clear()

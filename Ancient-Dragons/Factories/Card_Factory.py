@@ -119,10 +119,216 @@ class CardFactory():
         list_of_effects = []
         seperated_string = value.split("|")
         for effect in seperated_string:
-            if "ATK_" in effect:
-                component = Components.C_ATTACK()
-            elif "DEF_" in effect:
-                component = Components.C_DEFENSE()
+            # Attack effects
+            if effect.startswith("ATK"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "ALL":
+                    component = Components.C_ATTACK_ALL()
+                elif seperated_effect[1] is "RANDOM":
+                    component = Components.C_ATTACK_RANDOM()
+                elif seperated_effect[1] is "NUM":
+                    component = Components.C_ATTACK_NUM(seperated_effect[2])
+                elif seperated_effect[0] is "ATK+":
+                    component = Components.C_ATTACK_+(seperated_effect[1], seperated_effect[3])
+                elif seperated_effect[0] is "ATKINCREASE":
+                    component = Components.C_ATTACK_INCREASE(seperated_effect[1])
+                elif seperated_effect[0] is "ATKMULT":
+                    component = Components.C_ATTACK_MULT(seperated_effect[1])
+                else:
+                    component = Components.C_ATTACK(seperated_effect[1])
+                    
+            # Defense effects
+            elif effect.startswith("DEF_"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "STAY":
+                    component = Components.C_DEFENSE_STAY()
+                else:
+                    component = Components.C_DEFENSE(seperated_effect[1])
+
+            # Exhaust effects
+            elif effect.startswith("EX"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "PLAYED":
+                    component = Components.C_EXHAUST_PLAYED(seperated_effect[2])
+                elif seperated_effect[1] is "TO":
+                    if seperated_effect[2] is "HAND_CHOSSE":
+                         component = Components.C_EXHAUST_TO_HAND_CHOOSE()
+                    else:
+                        component = Components.C_EXHAUST_TO_HAND()
+                elif seperated_effect[1] is "ATK":
+                    component = Components.C_EXHAUST_ATK(seperated_effect[2])
+                elif seperated_effect[1] is "DEF":
+                    component = Components.C_EXHAUST_DEF(seperated_effect[2])
+                elif seperated_effect[1] is "HAND":
+                    if seperated_effect[2] is "NOATTACK":
+                         component = Components.C_EXHAUST_HAND_NOATTACK()
+                    elif seperated_effect[2] is "ALL":
+                         component = Components.C_EXHAUST_HAND_ALL()
+                    elif seperated_effect[2] is "RANDOM":
+                         component = Components.C_EXHAUST_HAND_RANDOM()
+                    else:
+                        component = Components.C_EXHAUST_HAND()
+                else:
+                    component = Components.C_EXHAUST()
+
+            # other effects
+            elif effect.startswith("DAMAGE_"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "DEF":
+                    component = Components.C_DAMAGE_DEF()
+                else:
+                    component= Components.C_DAMAGE(seperated_effect[2])
+
+            elif effect.startswith("COPY_"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "SAME_DP":
+                    component = Components.C_COPY_SAME_DP()
+                elif seperated_effect[1] is "TO_HAND":
+                    component = Components.C_COPY_TO_HAND()
+
+            elif effect.startswith("DRAW_"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "RANDOM":
+                    component = Components.C_RANDOM_ATTACK(seperated_effect[3])
+                else:
+                    component = Components.C_DRAW(seperated_effect[2])
+
+            elif effect.startswith("GAIN"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "HP":
+                    component = Components.C_GAIN_HP(seperated_effect[2])
+                if seperated_effect[1] is "MANA":
+                    component = Components.C_GAIN_MANA(seperated_effect[2])
+
+            elif effect.startswith("LOSE"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "HP":
+                    component = Components.C_LOSE_HP(seperated_effect[2])
+                if seperated_effect[1] is "MANA":
+                    component = Components.C_LOSE_MANA(seperated_effect[2])
+
+            elif effect.startswith("ETHEREAL"):
+                component = Components.C_ETHEREAL()
+
+            elif effect.startswith("UNPLAYABLE"):
+                component = Components.C_UNPLAYABLE()
+
+            elif effect.startswith("INNATE"):
+                component = Components.C_INNATE()
+
+            elif effect.startswith("ROUND"):
+                component = Components.C_ROUND()
+
+            elif effect.startswith("END"):
+                component = Components.C_END_TURN()
+
+            elif effect.startswith("NO"):
+                component = Components.C_NO_DRAW()
+
+            elif effect.startswith("CARD"):
+                component = Components.C_CARD_LIMIT(seperated_effect[2])
+
+            elif effect.startswith("UPGRADE"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "COMBAT":
+                    component = Components.C_UPGARDE_COMBAT()
+                elif seperated_effect[1] is "NOLIMIT":
+                    component = Components.C_UPGARDE_NOLIMIT()
+                else:
+                    component = Components.C_UPGRADE()
+
+            elif effect.startswith("SKILL"):
+                component = Components.C_SKILL_FREE()
+
+            elif effect.startswith("NEXT"):
+                component = Components.C_NEXT_ATTACK_TWICE()
+
+            elif effect.startswith("DP"):
+                component = Components.C_DP_DWP(seperated_effect[2])
+
+            elif effect.startswith("ADD"):
+                component = Components.C_ADD_DWP(seperated_effect[1], seperated_effect[2])
+
+            elif effect.startswith("PLAY"):
+                component = Components.C_PLAY_DWP_EX(seperated_effect[1])
+
+            elif effect.startswith("COST"):
+                component = Components.C_COST_RED(seperated_effect[2])
+
+            elif effect.startswith("HANDCARD"):
+                component = Components.C_HANDCARD_NUMBER_DAMAGE(seperated_effect[3])
+
+            elif effect.startswith("KILL_GAIN"):
+                seperated_effect = value.split("_")
+                if seperated_effect[2] is "HP":
+                    component = Components.C_GAIN_HP(seperated_effect[3])
+                elif seperated_effect[2] is "MANA":
+                    component = Components.C_GAIN_MANA(seperated_effect[3])
+
+            elif effect.startswith("DB"):
+                seperated_effect = value.split("_")
+                if seperated_effect[0] is "DBALL":
+                    component = Components.C_DEBUFF_ALL(seperated_effect[1], seperated_effect[2])
+                else:
+                    component = Components.C_DEBUFF(seperated_effect[1], seperated_effect[2])
+
+            elif effect.startswith("B"):
+                seperated_effect = value.split("_")
+                component = Components.C_BUFF(seperated_effect[1], seperated_effect[2])
+
+            # conditions
+            elif effect.startswith("WHEN"):
+                seperated_effect = value.split("_")
+                if seperated_effect[1] is "CURSE":
+                    if seperated_effect[3] is "STATUS":
+                        component = Components.C_WHEN_CURSE_OR_STATUS()
+                    else:
+                        component = Components.C_WHEN_CURSE()
+                elif seperated_effect[1] is "STATUS":
+                    component = Components.C_WHEN_STATUS()
+
+                elif seperated_effect[1] is "EX":
+                    if seperated_effect[2] is "DRAW":
+                         component = Components.C_WHEN_EXHAUST_DRAW(seperated_effect[3])
+                    elif seperated_effect[2] is "CARD":
+                         component = Components.C_WHEN_EXHAUST_CARD()
+                    else:
+                        component = Components.C_WHEN_EXHAUST()
+
+                elif seperated_effect[1] is "B":
+                    component = Components.C_WHEN_BUFF(seperated_effect[2])
+                elif seperated_effect[1] is "DB":
+                    component = Components.C_WHEN_DEBUFF(seperated_effect[2])
+
+                elif seperated_effect[1] is "ONLY":
+                    component = Components.C_WHEN_ONLY(seperated_effect[2])
+
+                elif seperated_effect[1] is "ATTACKED":
+                    component = Components.C_WHEN_ATTACKED()
+
+                elif seperated_effect[1] is "NOT":
+                    component = Components.C_WHEN_NOT_PLAYED()
+
+                elif seperated_effect[1] is "DRAWN":
+                    component = Components.C_WHEN_DRAWN()
+
+                elif seperated_effect[1] is "OTHER":
+                    component = Components.C_WHEN_OTHER_CARDPLAYED()
+
+                elif seperated_effect[1] is "REMOVED":
+                    component = Components.C_WHEN_REMOVED()
+
+                elif seperated_effect[1] is "TYPE":
+                    component = Components.C_WHEN_TYPE(seperated_effect[2])
+
+                elif seperated_effect[1] is "INCOMING":
+                    component = Components.C_WHEN_INCOMING()
+
+                elif seperated_effect[1] is "LOSE":
+                    component = Components.C_WHEN_LOSE_HP_CARD()
+
+                elif seperated_effect[1] is "DEF":
+                    component = Components.C_WHEN_DEF()
             else:
                 component = ""
             list_of_effects.append(component)

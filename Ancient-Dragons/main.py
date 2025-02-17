@@ -1,6 +1,8 @@
 import os
 import pygame
 import pygame.display
+from GUI.Base import GUI
+from GUI.Interactibles.Button import Button
 from Game.gm_endless import gmEndless
 from Handlers.Event_Handler import Event_Handler
 from Renderer import Renderer
@@ -80,11 +82,26 @@ if __name__ == "__main__":
     gm = gmEndless(1, ["CHARACTERS", "CARDS", "LEVELS"], renderer)
     gm.initialise(0, 0b1)
 
+    color = pygame.Color(55, 32, 59, 20)
+    middle_x = 720 - 250
+    middle_y = 450 - 250
+    gui = GUI(0, color, "TEST", 500, 500, middle_x, middle_y)
+    gui.set_title("TEST TITLE")
+
+    normal_color = pygame.Color(83, 145, 43)
+    hightlight_color = pygame.Color(123, 185, 83)
+    button = Button(0, gui.get_rect(), normal_color, hightlight_color, "NAME", "CLICKME!", 11, 200, 50, 20, 400)
+    button.set_text("CLICK ME!", 8)
+    print(gui.get_rect())
+
     while not application.window_should_close:
         renderer.clear()
 
         event_handler.handle_events()
         gm.update()
+
+        button.update()
+        renderer.add_sprites([gui, button])
 
         # Do something with the event information
 

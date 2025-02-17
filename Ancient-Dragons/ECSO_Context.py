@@ -1,6 +1,9 @@
 from typing import Type, Any
 
+import pygame
+
 from Characters import Base
+from Sprites.Base import Sprite
 
 """
 TODO:

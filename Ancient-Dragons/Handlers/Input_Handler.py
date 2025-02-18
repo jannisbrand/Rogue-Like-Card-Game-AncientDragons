@@ -40,9 +40,15 @@ class InputHandler(Event_Handler):
                 case pygame.MOUSEBUTTONDOWN:  # DRAG
                     self.pressed_mouse_buttons_in_frame = pygame.mouse.get_pressed()
 
-    def handle_key_down(self, key: int) -> None:
+        self.handle_key_down()
+
+        self.pressed_keys_in_frame = []
+
+
+    def handle_key_down(self) -> None:
         for subscription in self.subscriptions:
-            print(subscription)
+            if subscription.get_type() == SubscriptionType.KEYS:
+                subscription.check_condition(self.current_cursor_position, self.pressed_keys_in_frame, self.pressed_mouse_buttons_in_frame)
 
     def handle_mouse_movement(self) -> None:
         for subscription in self.subscriptions:

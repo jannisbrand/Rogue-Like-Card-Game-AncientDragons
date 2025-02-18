@@ -47,5 +47,5 @@ class Button(pygame.sprite.Sprite):
             self.image.fill(self.normal_color)
         pass
 
-    def on_hover(self, cursor: tuple[int, int]):
+    def on_hover(self, keys: list):
         self.is_hovered_over = True

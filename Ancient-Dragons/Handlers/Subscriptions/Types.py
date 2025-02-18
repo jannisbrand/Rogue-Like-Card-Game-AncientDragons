@@ -1,4 +1,3 @@
-from cmath import rect
 from typing import Any
 from pygame import Rect
 from Handlers.Flags import SubscriptionType
@@ -11,7 +10,7 @@ class Subscription():
 
 
 class InputSubscribtion(Subscription):
-    def __init__(self, type: SubscriptionType, callback: Any, cursor: Rect, keys):
+    def __init__(self, type: SubscriptionType, callback: Any, cursor: Rect, keys: list[int]):
         super().__init__(type, callback)
         self.condition_cursor = cursor
         # Debug RECT!
@@ -21,11 +20,13 @@ class InputSubscribtion(Subscription):
         return self.type
 
     def check_condition(self, cursor: tuple[int, int], keys: list[int], mouse_buttons: tuple[bool, bool, bool]) -> None:
+        """
+        TODO: Implementation of the mouse buttons"""
         match self.type:
             case SubscriptionType.ALL:
                 print(f"[Subscription] ALL:\tCURSOR: {cursor}\tKEYS: {keys}")
                 in_rect = self.point_in_rect(cursor)
-                keys_pressed = self.condition_keys in keys
+                keys_pressed = self.check_key(keys)
                 if in_rect and keys_pressed:
                     self.callback(cursor, keys)
             case SubscriptionType.CURSOR:
@@ -34,7 +35,7 @@ class InputSubscribtion(Subscription):
                     self.callback(cursor)
             case SubscriptionType.KEYS:
                 print(f"[Subscription] KEYS: {keys}")
-                if self.condition_keys in keys:
+                if self.check_key(keys):
                     self.callback(keys)
             case _:
                 pass
@@ -54,3 +55,12 @@ class InputSubscribtion(Subscription):
             if y1 <= point_y and point_y <= y2:
                 return True
         return False
+
+    def check_key(self, keys: list[int]) -> bool:
+        check = len(keys) > 0
+        for key in keys:
+            if key in self.condition_keys:
+                pass
+            else:
+                check = False
+        return check

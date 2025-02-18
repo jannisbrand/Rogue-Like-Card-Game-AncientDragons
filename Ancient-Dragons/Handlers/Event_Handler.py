@@ -1,10 +1,15 @@
+from typing import Any
 import pygame
+
+from Handlers.Flags import SubscriptionType
 
 
 class Event_Handler():
     def __init__(self, application):
         self.__application_context = application
         self.player_controller: None
+
+        self.subscriptions: list
 
     def handle_events(self):
         for event in pygame.event.get():

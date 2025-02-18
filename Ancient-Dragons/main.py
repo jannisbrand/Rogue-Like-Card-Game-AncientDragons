@@ -4,7 +4,10 @@ import pygame.display
 from GUI.Base import GUI
 from GUI.Interactibles.Button import Button
 from Game.gm_endless import gmEndless
+from Handlers.Flags import SubscriptionType
+from Handlers.Input_Handler import InputHandler
 from Handlers.Event_Handler import Event_Handler
+from Handlers.Subscriptions.Types import InputSubscribtion
 from Renderer import Renderer
 from ECSO_Context import ECSO_Context
 from Factories.Card_Factory import CardFactory
@@ -73,6 +76,7 @@ if __name__ == "__main__":
     application.set_window_caption("Ancient Dragons - Ver: 0.001")
     
     event_handler = Event_Handler(application)
+    input_handler = InputHandler(application)
     
     renderer = Renderer(application)
     renderer.initialise((100, 35, 55), 60)
@@ -94,10 +98,14 @@ if __name__ == "__main__":
     button.set_text("CLICK ME!", 8)
     print(gui.get_rect())
 
+    sub = InputSubscribtion(SubscriptionType.CURSOR, button.on_hover, button.get_rect(), (82, 82))
+    input_handler.subscribe_to_event(sub)
+
     while not application.window_should_close:
         renderer.clear()
 
-        event_handler.handle_events()
+        # event_handler.handle_events()
+        input_handler.update(pygame.event.get())
         gm.update()
 
         button.update()

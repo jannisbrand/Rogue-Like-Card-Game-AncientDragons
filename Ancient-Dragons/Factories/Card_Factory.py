@@ -129,7 +129,7 @@ class CardFactory():
                 elif seperated_effect[1] is "NUM":
                     component = Components.C_ATTACK_NUM(seperated_effect[2])
                 elif seperated_effect[0] is "ATK+":
-                    component = Components.C_ATTACK_+(seperated_effect[1], seperated_effect[3])
+                    component = Components.C_ATTACK_PLUS(seperated_effect[1], seperated_effect[3])
                 elif seperated_effect[0] is "ATKINCREASE":
                     component = Components.C_ATTACK_INCREASE(seperated_effect[1])
                 elif seperated_effect[0] is "ATKMULT":
@@ -189,7 +189,7 @@ class CardFactory():
             elif effect.startswith("DRAW_"):
                 seperated_effect = value.split("_")
                 if seperated_effect[1] is "RANDOM":
-                    component = Components.C_RANDOM_ATTACK(seperated_effect[3])
+                    component = Components.C_DRAW_RANDOM_ATTACK(seperated_effect[3])
                 else:
                     component = Components.C_DRAW(seperated_effect[2])
 

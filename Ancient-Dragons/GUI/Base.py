@@ -66,6 +66,8 @@ class GUI(pygame.sprite.Sprite):
         # self.background.blit(surface)
 
     def add_interactible(self, interactible: pygame.sprite.Sprite) -> None:
+        """Just to keep the reference. If surface get blit to the GUI on_hover dow not work in this setup
+        """
         self.interactibles.append(interactible)
 
     def update(self) -> None:

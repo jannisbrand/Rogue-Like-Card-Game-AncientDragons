@@ -42,12 +42,23 @@ class C_IMAGE_PATH():
     value: str = ""
 
 # Card effect components
+"""value as main effect.
+round for number of rounds.
+name for specific names.
+"""
+
 @dataclass
 class C_ATTACK():
     """If assigned damage is applied to a selected opponent
     """
     value: int = 0
     
+
+@dataclass
+class C_ATTACK_ALL():
+    """attack hits all enemies
+    """
+
 @dataclass
 class C_ATTACK_RANDOM():
     """attack hits random opponent
@@ -64,7 +75,7 @@ class C_ATTACK_PLUS():
     """damage is raised for very card with a specific name in the deck
     """
     value: int = 0
-    value: str = ""
+    name: str = ""
 
 @dataclass
 class C_ATTACK_INCREASE():
@@ -91,7 +102,7 @@ class C_DEFENSE_STAY():
     """
     
 @dataclass
-class C_EXHAUST_PLAYER():
+class C_EXHAUST_PLAYED():
     """Exhaust every card played from the given typ
     """
     value: str = ""
@@ -274,7 +285,7 @@ class C_ADD_DWP():
     """add a number of specific status cards to the draw pile
     """
     value: int = 0
-    value: str = ""
+    name: str = ""
     
 @dataclass
 class C_PLAY_DWP_EX():
@@ -300,21 +311,21 @@ class C_DEBUFF_ALL():
     """Debuff/Buff all enemies with the effect for a number of rounds
     """
     value: str = ""
-    value: int = 0
+    round: int = 0
     
 @dataclass
 class C_DEBUFF():
     """Debuff/Buff one enemy with the effect for a number of rounds
     """
     value: str = ""
-    value: int = 0
+    round: int = 0
     
 @dataclass
 class C_BUFF():
     """Buff/Debuff the player with the effect for a number of rounds
     """
     value: str = ""
-    value: int = 0
+    round: int = 0
 
 @dataclass
 class C_WHEN_CURSE_OR_STATUS():
@@ -325,12 +336,10 @@ class C_WHEN_CURSE_OR_STATUS():
 class C_WHEN_CURSE():
     """when the drawn card is a curse card
     """
-    
 @dataclass
 class C_WHEN_STATUS():
     """when the drawn card is a status card
     """
-    
 @dataclass
 class C_WHEN_EXHAUST_DRAW():
     """when an exhausted card gets drawn. Draw a number of cards

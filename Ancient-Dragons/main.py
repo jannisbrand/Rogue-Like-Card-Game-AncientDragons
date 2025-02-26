@@ -3,15 +3,14 @@ import pygame
 import pygame.display
 from GUI.Base import GUI
 from GUI.Interactibles.Button import Button
-from Game.gm_endless import gmEndless
+from Game.Gamemode_Handler import GamemodeHandler
+from Game.Endless import Endless
+from Game.Main_Menu import MainMenu
 from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Event_Handler import Event_Handler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Renderer import Renderer
-from ECSO_Context import ECSO_Context
-from Factories.Card_Factory import CardFactory
-
 """
 Application # CONTEXT: Pygame / Window / Key mappings / Application state / etc.
     GameMode # STATEMACHINE: Game rules / Game state
@@ -83,34 +82,21 @@ if __name__ == "__main__":
 
     print("\n\n\n")
 
-    gm = gmEndless(1, ["CHARACTERS", "CARDS", "LEVELS"], renderer)
-    gm.initialise(0, 0b1)
+    gm_handler = GamemodeHandler()
+    gm_handler.initialise()
 
-    color = pygame.Color(55, 32, 59, 20)
-    middle_x = 720 - 250
-    middle_y = 450 - 250
-    gui = GUI(0, color, "TEST", 500, 500, middle_x, middle_y)
-    gui.set_title("TEST TITLE")
+    gm_menu = MainMenu(0, "START", input_handler, renderer)
+    gm_menu.initialise()
+    gm_handler.add_gamemode(gm_menu)
 
-    normal_color = pygame.Color(83, 145, 43)
-    hightlight_color = pygame.Color(123, 185, 83)
-    button = Button(0, gui.get_rect(), normal_color, hightlight_color, "NAME", "CLICKME!", 11, 200, 50, 20, 400)
-    button.set_text("CLICK ME!", 8)
-    print(gui.get_rect())
-
-    sub = InputSubscribtion(SubscriptionType.CURSOR, button.on_hover, button.get_rect(), (82, 82))
-    input_handler.subscribe_to_event(sub)
+    gm_endless = Endless(1, "ENDLESS", input_handler, renderer)
+    gm_handler.add_gamemode(gm_endless)
 
     while not application.window_should_close:
-        renderer.clear()
-
         # event_handler.handle_events()
         input_handler.update(pygame.event.get())
-        gm.update()
-
-        button.update()
-        renderer.add_sprites([gui, button])
 
         # Do something with the event information
+        gm_handler.update()
 
         renderer.render()

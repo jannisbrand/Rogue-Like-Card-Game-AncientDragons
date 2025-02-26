@@ -2,16 +2,19 @@ from tkinter import font
 from typing import Any
 import pygame
 
+from Sprites.Base import Sprite
+
 
 class GUI(pygame.sprite.Sprite):
     """
     NOTE: If a text or title gets added it gets blit to the Surface() of the background.
     That means the text stays at the same position relative to the gui's position. 
     """
-    def __init__(self, id: int, color: pygame.Color, name: str = "DEFAULT_NAME", width: int = 50, height: int = 50, pos_x: int = 0, pos_y: int = 0):
+    def __init__(self, color: pygame.Color, name: str = "DEFAULT_NAME", width: int = 50, height: int = 50, pos_x: int = 0, pos_y: int = 0):
         super().__init__()
-        self.id = id
         self.name = name
+        self.width = width
+        self.height = height
         self.image = pygame.Surface((width, height))
         self.image.fill(color)
         self.image.get_rect().width = width
@@ -24,7 +27,7 @@ class GUI(pygame.sprite.Sprite):
         self.__font_text = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", 11)
         self.titel: str
         self.text: str
-        self.is_active = False
+        self.is_active = True
 
         self.interactibles: list[pygame.sprite.Sprite] = [] # Collection of all interactible buttons, etc.
 
@@ -52,16 +55,15 @@ class GUI(pygame.sprite.Sprite):
     
     def set_image(self, image: pygame.Surface) -> None:
         self.image = image
-        self.image.get_rect().width = self.width
-        self.image.get_rect().height = self.height
+        self.image = pygame.transform.scale(self.image, (self.width, self.height))
 
     def __correct_text_pos(self, type: str, surface: pygame.Surface) -> None:
         gui_middle_x = self.image.get_rect().x + (self.image.get_rect().width / 2)
         if type == "TITLE":
-            surface.get_rect().x = gui_middle_x - int((surface.get_rect().width / 2))
+            surface.get_rect().x = int(gui_middle_x - (surface.get_rect().width / 2))
             surface.get_rect().y = self.image.get_rect().y + 20
         elif type == "TEXT":
-            surface.get_rect().x = gui_middle_x - int((surface.get_rect().width / 2))
+            surface.get_rect().x = int(gui_middle_x - (surface.get_rect().width / 2))
             surface.get_rect().y = self.image.get_rect().y + 80
         # self.background.blit(surface)
 
@@ -70,6 +72,18 @@ class GUI(pygame.sprite.Sprite):
         """
         self.interactibles.append(interactible)
 
+    def remove_interactibles(self) -> None:
+        for interactible in self.interactibles:
+            interactible.kill()
+        self.interactibles = []
+
+    def get_interactibles(self) -> list[pygame.sprite.Sprite]:
+        list_of_sprites = []
+        for interactible in self.interactibles:
+            list_of_sprites.append(interactible)
+        return list_of_sprites
+
     def update(self) -> None:
         # self.__correct_text_pos()  # Only needed if the text change during objects life time
-        pass
+        for interactible in self.interactibles:
+            interactible.update()

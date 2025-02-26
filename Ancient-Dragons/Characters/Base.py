@@ -6,11 +6,14 @@ class Character():
         self.id = id    # ID
         self.name = name    # Name of the character
         self.image = image
-        self.stack_composition = ["Strike", 15, "Defend", 9, "Pummel", 6]  # Names of cards the draw stack should be made of
+        self.stack_composition = ["Strike", 15, "Defend", 9, "Pummel", 6]  # TODO: ...Names of cards the draw stack should be made of
         self.card_hand: list[int] = []  # Ids of cards in the card stack
         self.health_points: int  # Currency for life
         self.mana_points: int   # Currency to play cards
         self.gold_points: int   # Currency to shop
+
+    def get_name(self) -> str:
+        return self.name
 
     def get_image(self) -> pygame.Surface:
         return self.image

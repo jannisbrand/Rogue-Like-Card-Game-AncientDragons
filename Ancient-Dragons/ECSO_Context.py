@@ -60,7 +60,7 @@ class ECSO_Context():
 
         # ### OBJECTS ### #
         self.objects: dict[str, list[Any]] = {}
-        self.next_object_id = 1
+        self.next_object_id = 1  # TODO: DOES NOT REPRESENT THE RIGHT AMOUNT OF OBJECTS PER TYPE!
         # ### OBJECTS ### #
 
     def add_entity(self) -> int:
@@ -126,6 +126,7 @@ class ECSO_Context():
                 # Example: If an entity has only one component but there are 10 component types registered the exception will be risen 9 times. :)  
                 print(f"[ECSOContext] Entity {e} does not has component: {component_type}!")
                 continue
+            
         return components_of_entity
 
     def get_component(self, entity: int, component_type: Any) -> Any:
@@ -144,15 +145,17 @@ class ECSO_Context():
                 print(f"[ECSOContext] Entity {e} does not have component: {component_type}")
         return -1
 
-    def add_object(self, type: str, object: Any) -> None:
+    def add_object(self, type: str, object: Any) -> int:
         try:
             if type not in self.objects:
                 self.objects[type] = []
 
             self.objects[type].append(object)
             self.next_object_id += 1
+            return len(self.objects[type]) - 1
         except KeyError as e:
             print(f"[ECSOContext] Object could not be added: {e}")
+            return -1
 
     def add_objects(self, type: str, objects: list[Any]) -> None:
         try:
@@ -171,3 +174,12 @@ class ECSO_Context():
                     return object
         except KeyError as e:
             print(f"[ECSOContext] Object could not be gotten?: {e}")
+
+    def remove_object_by_id(self, type: str, id) -> None:
+        try:
+            index = 0
+            for object in self.objects[type]:
+                if object.id == id:
+                    self.objects[type].pop(index)
+        except KeyError as e:
+            print("", e)

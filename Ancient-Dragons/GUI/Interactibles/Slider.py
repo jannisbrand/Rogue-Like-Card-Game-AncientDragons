@@ -14,7 +14,7 @@ class ProgressBar(Sprite):
         self.fragment_width = int(self.total_range / 10)
         self.value_color = value_color
 
-        self.base_font = pygame.font.Font("C:/Users/wm00964/AppData/Local/Microsoft/Windows/Fonts/412-font.otf", height - 2)
+        self.base_font = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", height - 2)
 
         self.offset_x = int((self.min_value + self.max_value) / 10)
 

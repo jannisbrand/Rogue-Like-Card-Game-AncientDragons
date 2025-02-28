@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 from ECSO_Context import ECSO_Context
 from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
@@ -31,7 +31,12 @@ class Gamemode():
         
         self.current_stage = 0
         self.active_level: int  # Id of the level in the context
-        self.active_character: int  # Id of the character in the context
+        self.active_player_character: int  # Id of the character in the context
+        self.active_enemy_character: int
+        self.selected_type: str
+
+        self.on_round_start = None
+        self.on_round_end = None
         # ### GAMEMODE RELATED ### #
 
         self.create_factories()

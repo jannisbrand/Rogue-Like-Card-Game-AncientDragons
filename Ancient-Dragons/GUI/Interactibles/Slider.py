@@ -41,7 +41,7 @@ class ProgressBar(Sprite):
         if self.current_value + amount <= self.max_value:
             self.current_value += amount
 
-    def set_current(self, value: int) -> None:
+    def set_value(self, value: int) -> None:
         if value <= self.max_value and value >= self.min_value:
             self.current_value = value
 

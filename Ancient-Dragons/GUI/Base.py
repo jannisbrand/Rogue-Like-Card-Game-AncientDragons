@@ -30,6 +30,7 @@ class GUI(pygame.sprite.Sprite):
         self.is_active = True
 
         self.interactibles: list[pygame.sprite.Sprite] = [] # Collection of all interactible buttons, etc.
+        self.refactored_interactibles: dict[str, Sprite] = {}
 
     def get_surface(self) -> pygame.Surface:
         return self.image

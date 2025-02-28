@@ -45,9 +45,9 @@ class LevelFactory():
                 continue
 
             created_character = Character(character_data[0], character_data[1], None)
-            created_character.health_points = 100
-            created_character.mana_points = 100
-            created_character.gold_points = 100
+            created_character.health = 100
+            created_character.mana = 100
+            created_character.gold = 100
             self.ecso_context.add_object("CHARACTERS", created_character)
             print("[OFactory] Created character: " + str(created_character))
 

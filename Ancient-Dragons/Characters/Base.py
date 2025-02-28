@@ -1,45 +1,73 @@
+from typing import Callable
 import pygame
+
+from Sprites.Base import Sprite
 
 
 class Character():
-    def __init__(self, id: int, name: str, image: pygame.Surface):
+    def __init__(self, id: int, name: str):
         self.id = id    # ID
         self.name = name    # Name of the character
-        self.image = image
-        self.stack_composition = ["Strike", 15, "Defend", 9, "Pummel", 6]  # TODO: ...Names of cards the draw stack should be made of
-        self.card_hand: list[int] = []  # Ids of cards in the card stack
-        self.health_points: int  # Currency for life
-        self.mana_points: int   # Currency to play cards
-        self.gold_points: int   # Currency to shop
+        self.health: int  # Currency for life
+
+        self.is_alive = True
+        self.sprite = Sprite
+        self.active_effects = {}
+
+        self.on_health_changed = Callable[[int], None]
+        self.on_effect_added = Callable
+        self.on_effect_removed = Callable
+
+    def set_sprite(self, sprite: Sprite) -> bool:
+        try:
+            self.sprite = sprite
+            print("Added sprite:", type(sprite))
+            return True
+        except AttributeError as e:
+            print("Could not at a Sprite object:", e)
+            return False
+    
+    def get_sprite(self) -> Sprite:
+        try:
+            return self.sprite
+        except AttributeError as e:
+            print("[CHARACTER][DATA]", e)
+            return None
+        except ValueError as e:
+            print("[CHARACTER][DATA]", e)
+            return None
 
     def get_name(self) -> str:
         return self.name
 
-    def get_image(self) -> pygame.Surface:
-        return self.image
+    def get_health(self) -> int:
+        return self.health
 
-    def get_health_points(self) -> int:
-        return self.health_points
+    def set_health(self, value):
+        try:
+            self.health = value
+            self.on_health_changed(value)
+        except AttributeError as e:
+            print("[CHARACTER][DATA]", e)
+        except ValueError as e:
+            print("[CHARACTER][DATA]", e)
+        except TypeError as e:
+            print("[CHARACTER][DATA]", e)
 
-    def get_mana_points(self) -> int:
-        return self.mana_points
+    def add_effect(self, effect: int, value: int):
+        try:
+            if effect not in self.active_effects:
+                self.active_effects[effect]
 
-    def get_gold_points(self) -> int:
-        return self.gold_points
+            self.active_effects[effect] = value
 
-    def get_stack_composition(self) -> list:
-        return self.stack_composition
+            self.on_effect_added(effect, value)
+        except ValueError as e:
+            print("[CHARACTER][DATA]", e)
 
-    def add_card_to_hand(self, entity: int):
-        self.card_hand.append(entity)
-        print("[CHARACTER] Card drawn: ", entity)
-
-    def get_hand(self) -> list:
-        return self.card_hand
-
-    def update(self) -> None:
-        # E.G.:
-        # Moving image
-        # Accessing Cards via ECS context
-        # 
-        pass
+    def get_effects(self) -> dict:
+        try:
+            return self.active_effects
+        except AttributeError as e:
+            print("[CHARACTER][DATA]", e)
+            return []

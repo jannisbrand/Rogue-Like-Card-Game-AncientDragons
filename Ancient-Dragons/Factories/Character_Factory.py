@@ -1,8 +1,11 @@
+import os
 import sqlite3
 from typing import Any
 
 import pygame
 from Characters.Base import Character
+from Characters.Player_Character import PlayerCharacter
+from Characters.Standard_Enemy import StandardEnemy
 from ECSO_Context import ECSO_Context
 from Components import Components
 
@@ -23,7 +26,7 @@ class CharacterFactory():
             column_names.append(column_name)
         return column_names
 
-    def fabricate_all(self):
+    def fabricate_player_characters(self):
         character_collection = self.database_connection.cursor().execute("SELECT * FROM Charakters")
         column_names = self.get_database_column_names("Charakters")
         for character_data in character_collection.fetchall():
@@ -33,9 +36,23 @@ class CharacterFactory():
                 print("[OFactory] Character data and Colum names do not match!")
                 continue
 
-            created_character = Character(character_data[0], character_data[1], None)
-            created_character.health_points = 100
-            created_character.mana_points = 100
-            created_character.gold_points = 100
-            self.ecso_context.add_object("CHARACTERS", created_character)
+            created_character = PlayerCharacter(self.ecso_context.next_object_id, character_data[1])
+            created_character.set_health(1000)
+            created_character.set_mana(10)
+            created_character.set_gold(1000)
+            self.ecso_context.add_object("PLAYER_CHARACTERS", created_character)
             print("[OFactory] Created character: " + str(created_character))
+
+    def fabricate_enemy(self) -> int:
+        ENEMY_BASE_ATTACK = 137
+        ENEMY_BASE_IDK = 0
+     
+        try:
+            temp_id = len(self.ecso_context.objects["ENEMY_CHARACTERS"])
+        except KeyError:
+            temp_id = 0
+
+        created_enemy = StandardEnemy(temp_id, "LUGENE CRABS")
+        created_enemy.set_health(1000)
+        created_enemy.set_attack_damage(ENEMY_BASE_ATTACK)
+        return self.ecso_context.add_object("ENEMY_CHARACTERS", created_enemy)

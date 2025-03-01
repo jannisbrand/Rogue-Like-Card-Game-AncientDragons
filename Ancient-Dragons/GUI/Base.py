@@ -1,67 +1,53 @@
-from tkinter import font
-from typing import Any
+from typing import Any, Callable
 import pygame
 
-from Sprites.Base import Sprite
 
-
-class GUI(Sprite):
-    """
-    NOTE: If a text or title gets added it gets blit to the Surface() of the background.
-    That means the text stays at the same position relative to the gui's position.
-    """
+class GUISprite(pygame.sprite.Sprite):
     def __init__(self, context_id, type_id, reference_rect, name, color, width, height, image_path=""):
-        super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
+        super().__init__()
+        self.context_id = context_id  # Represents object or entity id
+        self.type_id = type_id
         self.name = name
+        self.color = color
+        self.reference_rect = reference_rect
 
-        self.rect.x = self.reference_rect.x
-        self.rect.y = self.reference_rect.y
+        if image_path != "":
+            self.image = pygame.image.load(image_path)
+            self.image = pygame.transform.scale(self.image, (width, height))
+        else:
+            self.image = pygame.Surface((width, height))
+            self.image.fill(self.color)
 
-        self.__font_title = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", 16)
-        self.__font_text = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", 11)
-        self.titel: str
-        self.text: str
-        self.is_active = True
+        self.rect = self.image.get_rect()
 
-        self.interactibles: list[int] = []  # Collection of all interactible buttons, etc. as their context id's
+        self.is_hovered_over = False
 
-    def set_title(self, title: str = "") -> None:
-        surface = self.__font_title.render(title, True, (255, 255, 255))
-        self.__correct_text_pos("TITLE", surface)
-        self.image.blit(surface, (surface.get_rect().x, surface.get_rect().y))
-    
-    def set_image(self, image: pygame.Surface) -> None:
-        self.image = image
-        self.image = pygame.transform.scale(self.image, (self.rect.width, self.rect.height))
+        self.subscribtion_on_click: int
+        self.subscribtion_on_hover: int
+        self.callback_on_hover = None  # Callbacks for input handling
+        self.callback_on_click = None
+        self.callback_on_drag_on = None
 
-    def __correct_text_pos(self, type: str, surface: pygame.Surface) -> None:
-        gui_middle_x = self.rect.x + (self.rect.width / 2)
-        if type == "TITLE":
-            surface.get_rect().x = int(gui_middle_x - (surface.get_rect().width / 2))
-            surface.get_rect().y = self.rect.y + 20
-        elif type == "TEXT":
-            surface.get_rect().x = int(gui_middle_x - (surface.get_rect().width / 2))
-            surface.get_rect().y = self.rect.y + 80
-        # self.background.blit(surface)
+        self.is_visible = True
+        self.destroy = False
+        # pygame.draw.rect(self.image, color, pygame.Rect(0, 0, width, height))
 
-    def add_interactible(self, interactible: int) -> None:
-        """Just to keep the reference. If surface get blit to the GUI on_hover dow not work in this setup
-        """
-        self.interactibles.append(interactible)
-
-    def remove_interactible(self, interactible: int):
+    def get_context_id(self) -> int:
         try:
-            self.interactibles.remove(interactible)
-        except ValueError as e:
-            print("[GUI] Interactible context-id could not be removed:", e)
-
-    def get_interactibles(self) -> list[int]:
-        try:
-            return self.interactibles
+            return self.context_id
         except AttributeError as e:
-            print("[GUI] Could not retrieve list of interactibles:", e)
+            print("[SPRITE] Context id could not be found:", e)
 
-    def update(self) -> None:
-        # Only cares about it's own thing! Interactibles are stored just to keep a the references!
-        # self.__correct_text_pos()  # Only needed if the text change during objects life time
-        pass
+    def get_type_id(self) -> str:
+        try:
+            return self.type_id
+        except AttributeError as e:
+            print("[SPRITE] Type id could not be found:", e)
+
+    def get_name(self) -> str:
+        try:
+            return self.name
+        except AttributeError as e:
+            print("[SPRITE] Name could not be found:", e)
+
+    

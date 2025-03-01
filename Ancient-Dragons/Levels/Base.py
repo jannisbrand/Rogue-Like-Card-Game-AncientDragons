@@ -2,7 +2,7 @@ from math import sin
 import pygame
 from typing import Any, cast
 
-from GUI.Base import GUI
+from GUI.GUI import GUI
 from Sprites.Base import Sprite
 
 
@@ -20,18 +20,20 @@ class Level(pygame.sprite.Sprite):
         self.name = name
         self.color = color
         self.reference_rect = reference_rect
-
+        self.image = pygame.Surface((width, height))
+        self.image.fill(self.color)
         if image_path != "":
             self.image = pygame.image.load(image_path)
             self.image = pygame.transform.scale(self.image, (width, height))
-        else:
-            self.image = pygame.Surface((width, height))
-            self.image.fill(self.color)
 
         self.rect = self.image.get_rect()
 
         self.environment: dict[str, list[Sprite]] = {}  # A list of "any" renderable data sorted to categories
         self.guis = []  # Collection of guis as their context id's
+
+        self.is_active = True
+        self.is_visible = True
+        self.destroy = False
 
         # ### STATIC ENVIRONMENT ### #
         # ### BACKGROUND1 ### #
@@ -119,6 +121,13 @@ class Level(pygame.sprite.Sprite):
                 sprite = cast(Sprite, sprite)
                 self.image.blit(sprite, (sprite.rect.x, sprite.rect.y))
 
+    def deactivate(self) -> None:
+        self.is_active = False
+
+    def activate(self):
+        self.is_active = True
+
     def update(self) -> None:
-        self.animation_state()
-        self.draw_level()
+        if len(self.environment.keys()) > 0:
+            self.animation_state()
+        # self.draw_level()

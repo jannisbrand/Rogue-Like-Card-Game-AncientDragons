@@ -1,4 +1,4 @@
-from typing import Type, Any
+from typing import Type, Any, cast
 
 import pygame
 
@@ -175,15 +175,53 @@ class ECSO_Context():
 
         return list_of_game_objects
 
-    def get_game_object(self, entity: int, game_object_type: Any) -> Any:
+    def get_game_object(self, entity: int, game_object_type: Any = None) -> Any:
         try:
-            return self.game_objects[game_object_type][entity]
-        except KeyError as e:
-            print("[ECSOContext] Game object does not exist:", e)
+            if entity in self.game_objects[game_object_type]:
+                return self.game_objects[game_object_type][entity]
+            else:
+                return None
+        except AttributeError as e:
+            print("[ECSOContext] Attribute not initialised:", e)
             return None
 
-    def remove_game_object(self, entity: int, game_object_type: Any) -> None:
+    def is_game_object_enity_existent(self, entity: int) -> bool:
+        for game_object_type, game_objects in self.game_objects.items():
+            if entity in self.game_objects[game_object_type]:
+                return True
+        return False
+ 
+    def get_game_object_types(self) -> list[Any]:
         try:
-            self.game_objects[game_object_type].pop(entity)  # Does remove the entity and its assigned object from specified type.
+            list_of_game_object_types = []
+            for game_object_types, _ in self.game_objects.items():
+                list_of_game_object_types.append(game_object_types)
+
+            return list_of_game_object_types
+        except AttributeError as e:
+            print("[ECSOContext] Attribute not initialised:", e)
+            return None
+        
+    def get_game_object_entities(self) -> list[int]:
+        try:
+            game_object_entities = []
+            for game_object_type, _ in self.game_objects.items():
+                for entity in self.entities:
+                    if entity in self.game_objects[game_object_type]:
+                        game_object_entities.append(entity)
+            return game_object_entities
+        except AttributeError as e:
+            print("[ECSOContext] An attribute is not initialised:", e)
+            return []
+
+
+    def remove_game_object(self, entity: int) -> None:
+        try:
+            for game_object_type, game_objects in self.game_objects.items():
+                try: 
+                    game_objects.pop(entity)
+                    self.entities.remove(entity)  # TEST
+                except KeyError:
+                    continue
         except KeyError as e:
             print("[ECSOContext] Game object does not exist:", e)

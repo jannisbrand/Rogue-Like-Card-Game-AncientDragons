@@ -4,13 +4,14 @@ from sre_constants import ANY
 from typing import Any
 import pygame
 
+from GUI.Interactibles.Base import InteractibleSprite
 from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Sprites.Base import Sprite
 
 
-class Button(Sprite):
+class Button(InteractibleSprite):
     def __init__(self, context_id: int, type_id: str, reference_rect: pygame.Rect, normal_color: pygame.Color, highlight_color: pygame.Color, name: str, text: str, width: int, height: int, image_path=""):
         super().__init__(context_id, type_id, reference_rect, name, normal_color, width, height, image_path)
         self.name = name

@@ -1,7 +1,7 @@
 from typing import Any
 import pygame
 from ECSO_Context import ECSO_Context
-from GUI.Base import GUI
+from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from Handlers import Input_Handler
 from Handlers.Flags import SubscriptionType

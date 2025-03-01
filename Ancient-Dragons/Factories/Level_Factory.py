@@ -6,11 +6,11 @@ import pygame
 from Characters.Base import Character
 from ECSO_Context import ECSO_Context
 from Components import Components
-from GUI.Base import GUI
+from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from Handlers.Flags import SubscriptionType
 from Handlers.Subscriptions.Types import InputSubscribtion
-from Levels.Static.Menu import MenuLevel
+from Levels.Menu import MenuLevel
 from Handlers import Input_Handler
 from Levels.Base import Level
 from Sprites import Base

@@ -1,5 +1,5 @@
 import pygame
-from GUI.Base import GUI
+from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from Levels.Base import Level
 from Sprites.Base import Sprite
@@ -14,9 +14,3 @@ class MenuLevel(Level):
     #     height = self.base_surface.get_rect().height
     #     self.base_surface = image
     #     self.base_surface = pygame.transform.scale(self.base_surface, (width, height))
-    
-    def deactivate(self) -> None:
-        self.active = False
-
-    def update(self) -> None:
-        pass

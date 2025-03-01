@@ -1,9 +1,10 @@
 from pygame import Color, Surface
 import pygame
+from GUI.Interactibles.Base import InteractibleSprite
 from Sprites.Base import Sprite
 
 
-class ProgressBar(Sprite):
+class ProgressBar(InteractibleSprite):
     def __init__(self, context_id, type_id, reference_rect, name, color, value_color: Color, width, height, max_value: int, min_value: int, image_path=""):
         super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
         self.max_value = max_value

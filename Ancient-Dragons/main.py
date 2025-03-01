@@ -1,7 +1,7 @@
 import os
 import pygame
 import pygame.display
-from GUI.Base import GUI
+from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from Game.Gamemode_Handler import GamemodeHandler
 from Game.Endless import Endless

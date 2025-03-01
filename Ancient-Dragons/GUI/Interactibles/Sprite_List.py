@@ -1,9 +1,10 @@
 from typing import cast
 from pygame import Surface
+from GUI.Interactibles.Base import InteractibleSprite
 from Sprites.Base import Sprite
 
 
-class SpriteList(Sprite):
+class SpriteList(InteractibleSprite):
     def __init__(self, context_id, type_id, reference_rect, name, color, width, height, image_path = ""):
         super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
         self.rect.x = self.reference_rect.x

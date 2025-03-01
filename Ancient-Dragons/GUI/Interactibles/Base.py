@@ -1,8 +1,8 @@
-from typing import Any, Callable
+from typing import Any
 import pygame
 
 
-class Sprite(pygame.sprite.Sprite):
+class InteractibleSprite(pygame.sprite.Sprite):
     def __init__(self, context_id, type_id, reference_rect, name, color, width, height, image_path=""):
         super().__init__()
         self.context_id = context_id  # Represents object or entity id

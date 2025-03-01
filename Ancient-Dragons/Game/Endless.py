@@ -13,7 +13,7 @@ from ECSO_Context import ECSO_Context
 from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
 from Factories.Level_Factory import LevelFactory
-from GUI.Base import GUI
+from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
 from GUI.Interactibles.Character import InteractibleCharacter
@@ -24,7 +24,7 @@ from Handlers import Input_Handler
 from Handlers.Flags import SubscriptionType
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
-from Levels.Static.Menu import MenuLevel
+from Levels.Menu import MenuLevel
 from Renderer import Renderer
 from Sprites.Base import Sprite
 

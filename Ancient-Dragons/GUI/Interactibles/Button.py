@@ -7,25 +7,26 @@ import pygame
 from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
+from Sprites.Base import Sprite
 
 
-class Button(pygame.sprite.Sprite):
-    def __init__(self, gui_rect: Any, normal_color: pygame.Color, highlight_color: pygame.Color = None, name: str = "DEFAULT_BUTTON", text: str = "DEFAULT_BUTTON", font_size: int = 11, width: int = 10, height: int = 10, pos_x: int = 0, pos_y: int = 0):
-        super().__init__()
+class Button(Sprite):
+    def __init__(self, context_id: int, type_id: int, gui_rect: pygame.Rect, normal_color: pygame.Color, highlight_color: pygame.Color, name: str, text: str, width: int, height: int, image_path=""):
+        super().__init__(context_id, type_id, name, normal_color, width, height, image_path)
         self.name = name
         self.normal_color = normal_color
         self.hightlight_color = highlight_color
 
         self.image = pygame.Surface((width, height))
-        #self.image.fill(normal_color)
         self.rect = self.image.get_rect()
 
         self.parent_rect = gui_rect
 
-        # ### RELATIVE POSITIONING ### #
-        self.rect.x = gui_rect.x + pos_x
-        self.rect.y = gui_rect.y + pos_y
+        # ### INITIAL RELATIVE POSITIONING ### #
+        self.rect.x = gui_rect.x
+        self.rect.y = gui_rect.y
 
+        font_size = int(self.rect.height * 0.5)  # Initial font size (Half of it's own height)
         self.font_text = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", font_size)
         self.set_text(text, font_size)
         # ### RELATIVE POSITIONING ### #
@@ -35,17 +36,16 @@ class Button(pygame.sprite.Sprite):
         self.callback_on_click = None
         self.callback_on_hover = None
 
-        self.subscription_on_click = InputSubscribtion(SubscriptionType.MOUSEBUTTON, self, self.callback_on_click, self.rect, mouse_buttons=(True, False, False))
+        self.subscription_on_click = InputSubscribtion(SubscriptionType.MOUSEBUTTON, self, self.on_click, self.rect, mouse_buttons=(True, False, False))
         self.subscription_on_hover = InputSubscribtion(SubscriptionType.CURSOR, self, self.on_hover, self.rect)
+        # TODO: Add standard subscribtions to the event handler. (But how is the question? :think:)
+
         self.text = text
         self.enabled = True
         self.is_hovered_over = False
 
     def get_name(self) -> str:
         return self.name
-
-    def get_rect(self) -> pygame.Rect:
-        return self.rect
     
     def set_text(self, text: str = "DEFAULT_BUTTON", font_size: int = 8) -> None:
         self.text = text

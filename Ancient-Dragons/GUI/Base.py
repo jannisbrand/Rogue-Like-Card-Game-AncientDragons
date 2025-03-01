@@ -8,7 +8,7 @@ from Sprites.Base import Sprite
 class GUI(pygame.sprite.Sprite):
     """
     NOTE: If a text or title gets added it gets blit to the Surface() of the background.
-    That means the text stays at the same position relative to the gui's position. 
+    That means the text stays at the same position relative to the gui's position.
     """
     def __init__(self, color: pygame.Color, name: str = "DEFAULT_NAME", width: int = 50, height: int = 50, pos_x: int = 0, pos_y: int = 0):
         super().__init__()
@@ -29,8 +29,7 @@ class GUI(pygame.sprite.Sprite):
         self.text: str
         self.is_active = True
 
-        self.interactibles: list[pygame.sprite.Sprite] = [] # Collection of all interactible buttons, etc.
-        self.refactored_interactibles: dict[str, Sprite] = {}
+        self.interactibles: list[int] = []  # Collection of all interactible buttons, etc. as their context id's
 
     def get_surface(self) -> pygame.Surface:
         return self.image
@@ -68,23 +67,24 @@ class GUI(pygame.sprite.Sprite):
             surface.get_rect().y = self.image.get_rect().y + 80
         # self.background.blit(surface)
 
-    def add_interactible(self, interactible: pygame.sprite.Sprite) -> None:
+    def add_interactible(self, interactible: int) -> None:
         """Just to keep the reference. If surface get blit to the GUI on_hover dow not work in this setup
         """
         self.interactibles.append(interactible)
 
-    def remove_interactibles(self) -> None:
-        for interactible in self.interactibles:
-            interactible.kill()
-        self.interactibles = []
+    def remove_interactible(self, interactible: int):
+        try:
+            self.interactibles.remove(interactible)
+        except ValueError as e:
+            print("[GUI] Interactible context-id could not be removed:", e)
 
-    def get_interactibles(self) -> list[pygame.sprite.Sprite]:
-        list_of_sprites = []
-        for interactible in self.interactibles:
-            list_of_sprites.append(interactible)
-        return list_of_sprites
+    def get_interactibles(self) -> list[int]:
+        try:
+            return self.interactibles
+        except AttributeError as e:
+            print("[GUI] Could not retrieve list of interactibles:", e)
 
     def update(self) -> None:
+        # Only cares about it's own thing! Interactibles are stored just to keep a the references!
         # self.__correct_text_pos()  # Only needed if the text change during objects life time
-        for interactible in self.interactibles:
-            interactible.update()
+        pass

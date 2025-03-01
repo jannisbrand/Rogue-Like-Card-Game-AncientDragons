@@ -319,21 +319,21 @@ class Endless(Gamemode):
         # ### MAIN ENEMY SPRITE ### #
 
     def __stage_select_targets(self, source: Sprite, mouse_buttons: tuple[bool]) -> None:
-        print("Target ID:", source.id)
-        print("Target TYPE:", source.type)
+        print("Target ID:", source.context_id)
+        print("Target TYPE:", source.type_id)
         print("Target NAME:", source.name)
         try:
-            match source.type:
+            match source.type_id:
                 case "CARD":
-                    self.selected_card = source.id  # Saves the entity id of selected card
+                    self.selected_card = source.context_id  # Saves the entity id of selected card
                 case "PLAYER_CHARACTER_SPRITE":
                     if self.selected_card != -1:
-                        self.selected_target = source.id  # Saves object id of selected character
-                        self.selected_type = source.type
+                        self.selected_target = source.context_id  # Saves object id of selected character
+                        self.selected_type = source.type_id
                 case "ENEMY_CHARACTER_SPRITE":
                     if self.selected_card != -1:
-                        self.selected_target = source.id
-                        self.selected_type = source.type
+                        self.selected_target = source.context_id
+                        self.selected_type = source.type_id
         except AttributeError as e:
             print("[GAMEMODE][SELECTION] ", e)
 

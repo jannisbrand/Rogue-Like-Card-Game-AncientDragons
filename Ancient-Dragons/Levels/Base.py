@@ -17,7 +17,7 @@ class Level():
         self.id = id
         # BACKGROUND1; BACKGROUND2; FOREGROUND; XXXX
         self.environment: dict[str, list[Sprite]] = {}  # A list of "any" renderable data sorted to categories
-        self.guis = []
+        self.guis = []  # Collection of guis as their context id's
 
         # ### STATIC ENVIRONMENT ### #
         # ### BACKGROUND1 ### #
@@ -52,29 +52,29 @@ class Level():
             self.animation_key_positions["FOREGROUND1"] = [2, 0, -2]
             self.foreground1_last_key = 0
 
-    def add_gui(self, gui: GUI) -> None:
-        self.guis.append(gui)
-
-    def get_gui(self, name: str) -> GUI:
+    def add_gui(self, gui: int) -> None:
         try:
-            for gui in self.guis:
-                if gui.name == name:
-                    return gui
-            return None
-        except KeyError as e:
-            print("No gui found! ", e)
-            return None
+            self.guis.append(gui)
+        except AttributeError as e:
+            print("[LEVEL] GUI sequence could not be found:", e)
+        except ValueError as e:
+            print("[LEVEL] Context id could not be added:", e)
+
+    def get_guis(self) -> list[int]:
+        try:
+            return self.guis
+        except AttributeError as e:
+            print("[LEVEL] GUI seqence could not be found:", e)
+            return []
 
     def get_sprites(self) -> list:
-        list_of_sprites = []
-        for category in self.environment:
-            sprites = self.environment[category]
-            list_of_sprites.extend(sprites)
-
-        for gui in self.guis:
-            list_of_sprites.append(gui)
-            list_of_sprites.extend(gui.get_interactibles())
-        return list_of_sprites
+        try:
+            list_of_sprites = []
+            for _, value in self.environment.items():
+                list_of_sprites.extend(value)
+            return list_of_sprites
+        except Exception as e:
+            print("[LEVEL] Something:", e)
 
     def animation_state(self) -> None:
 
@@ -97,6 +97,3 @@ class Level():
 
     def update(self) -> None:
         self.animation_state()
-
-        for gui in self.guis:
-            gui.update()

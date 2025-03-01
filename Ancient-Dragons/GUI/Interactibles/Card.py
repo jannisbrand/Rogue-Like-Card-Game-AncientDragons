@@ -5,8 +5,8 @@ from Sprites.Base import Sprite
 
 
 class Card(Sprite):
-    def __init__(self, id, type: str, name: str, color: pygame.Color, width: int, height: int, image_path: str = ""):
-        super().__init__(id, type, name, color, width, height, image_path)
+    def __init__(self, context_id, type_id: str, name: str, color: pygame.Color, width: int, height: int, image_path=""):
+        super().__init__(context_id, type_id, name, color, width, height, image_path)
         self.cost_area = None
         self.title = None
         self.picture = None

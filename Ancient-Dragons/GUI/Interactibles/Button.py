@@ -20,11 +20,9 @@ class Button(Sprite):
         self.image = pygame.Surface((width, height))
         self.rect = self.image.get_rect()
 
-        self.parent_rect = gui_rect
-
         # ### INITIAL RELATIVE POSITIONING ### #
-        self.rect.x = gui_rect.x
-        self.rect.y = gui_rect.y
+        self.rect.x = reference_rect.x
+        self.rect.y = reference_rect.y
 
         font_size = int(self.rect.height * 0.5)  # Initial font size (Half of it's own height)
         self.font_text = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", font_size)

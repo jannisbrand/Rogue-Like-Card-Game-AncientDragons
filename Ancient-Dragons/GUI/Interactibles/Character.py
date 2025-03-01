@@ -9,6 +9,9 @@ from Sprites.Base import Sprite
 class InteractibleCharacter(Sprite):
     def __init__(self, context_id: int, type_id: str, reference_rect, name: str, color: pygame.Color, width: int, height: int, image_path=""):
         super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
+        self.rect.x = self.reference_rect.x
+        self.rect.y = self.reference_rect.y
+
         self.display_name = name
         self.show_name = False
 

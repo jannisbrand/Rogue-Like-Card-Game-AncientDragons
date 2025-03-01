@@ -22,6 +22,7 @@ class Renderer():
         self.queue.append(surface)
 
     def add_sprites(self, sprites: list[Sprite]):
+        print("[RENDERER] RECIEVED SPRITES:", sprites)
         for sprite in sprites:
             self.sprite_list.add(sprite)
 

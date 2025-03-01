@@ -22,6 +22,8 @@ class Sprite(pygame.sprite.Sprite):
 
         self.is_hovered_over = False
 
+        self.subscribtion_on_click: int
+        self.subscribtion_on_hover: int
         self.callback_on_hover = None  # Callbacks for input handling
         self.callback_on_click = None
         self.callback_on_drag_on = None

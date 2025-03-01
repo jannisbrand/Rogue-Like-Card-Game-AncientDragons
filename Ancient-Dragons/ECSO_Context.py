@@ -151,7 +151,7 @@ class ECSO_Context():
             if instance_type not in self.game_objects:
                 self.game_objects[instance_type] = {}
 
-            self.game_objects[type][entity] = game_object
+            self.game_objects[instance_type][entity] = game_object
         except KeyError as e:
             print(f"[ECSOContext] Object could not be added: {e}")
             return -1

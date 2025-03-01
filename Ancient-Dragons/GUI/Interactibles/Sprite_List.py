@@ -6,6 +6,9 @@ from Sprites.Base import Sprite
 class SpriteList(Sprite):
     def __init__(self, context_id, type_id, reference_rect, name, color, width, height, image_path = ""):
         super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
+        self.rect.x = self.reference_rect.x
+        self.rect.y = self.reference_rect.y
+
         self.sprites: list[Sprite] = []
 
     def add_sprite(self, sprite: Sprite):

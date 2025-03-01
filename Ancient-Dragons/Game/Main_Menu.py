@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 import pygame
 from ECSO_Context import ECSO_Context
 from GUI.Base import GUI
@@ -10,6 +10,7 @@ from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
 from Levels.Static.Menu import MenuLevel
 from Renderer import Renderer
+from Sprites.Base import Sprite
 
 
 class MainMenu(Gamemode):
@@ -28,18 +29,47 @@ class MainMenu(Gamemode):
         self.input_handler.reset()
 
         # ### (Manual) MAIN MENU ### #
-        level = MenuLevel(0, "MAIN_MENU")
-        level.set_image(pygame.image.load("Levels/Data/cloud.png"))
-        self.active_level = self.ecso_context.add_object("LEVELS", level)
-        main_gui = GUI(pygame.Color(25, 25, 25, 180), "MAIN_GUI", 500, 700, 470, 100)
-        button = Button(main_gui.get_rect(), pygame.Color(35, 35, 80), pygame.Color(45, 45, 90), "btn_start_ENDLESS", "ENDLESS 8==D", 16, 200, 50, 50, 50)
-        subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.get_rect())
-        self.input_handler.subscribe_to_event(subscription)
-        subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, button, self.stop_game_mode, button.get_rect(), mouse_buttons=(True, False, False))
-        self.input_handler.subscribe_to_event(subscription)
-        main_gui.add_interactible(button)
+        # LEVEL
+        environment = {}
+        entity = self.ecso_context.add_entity()
+        sprite = Sprite(entity, "LEVEL_BACKGROUND_1", pygame.Rect, "", (0, 0, 0), 1440, 900, "Levels/Data/cloud.png")
+        environment["BACKGROUND1"] = [sprite]
+        self.ecso_context.add_game_object(entity, sprite)
 
-        level.add_gui(main_gui)
+        entity = self.ecso_context.add_entity()
+        level = MenuLevel(entity, "MAIN_MENU", pygame.Rect, "", (13, 50, 89), 1440, 900, environment)
+        self.active_level = entity
+        self.ecso_context.add_game_object(entity, level)
+
+        # GUI
+        entity = self.ecso_context.add_entity()
+        main_gui = GUI(entity, "GUI_MAIN_MENU", level.rect, "", pygame.Color(25, 25, 25), 500, 700)
+        main_gui.rect.x = 470
+        main_gui.rect.y = 100
+        main_gui.image.set_alpha(180)
+        level.add_gui(entity)
+        self.ecso_context.add_game_object(entity, main_gui)
+
+        # BUTTON
+        entity = self.ecso_context.add_entity()
+        button = Button(entity, f"btn_main_menu_{entity}", main_gui.rect, pygame.Color(35, 35, 80), pygame.Color(45, 45, 90), "", "ENDLESS", 200, 50)
+        button.rect.x += 50
+        button.rect.y += 50
+        main_gui.add_interactible(entity)
+        self.ecso_context.add_game_object(entity, button)
+
+        entity = self.ecso_context.add_entity()
+        subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.rect)
+        button.subscribtion_on_hover = entity
+        self.input_handler.subscribe_to_event(subscription)
+        self.ecso_context.add_game_object(entity, subscription)
+
+        entity = self.ecso_context.add_entity()
+        subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, button, button.on_click, button.rect, mouse_buttons=(True, False, False))
+        button.callback_on_click = self.stop_game_mode
+        button.subscribtion_on_click = entity
+        self.input_handler.subscribe_to_event(subscription)
+        self.ecso_context.add_game_object(entity, subscription)
         # ### (Manual) MAIN MENU ### #
 
     def stop_game_mode(self, source: Button, mouse_buttons: tuple[bool]) -> None:
@@ -48,6 +78,32 @@ class MainMenu(Gamemode):
         self.input_handler.set_wait(0.25)
 
     def update(self) -> None:
-        level = self.ecso_context.get_object("LEVELS", self.active_level)
-        level.update()
-        self.renderer.add_sprites(level.get_sprites())
+        # level = self.ecso_context.get_object("LEVELS", self.active_level)
+        self.test = []
+        for game_object_type, entity_game_objects in self.ecso_context.game_objects.items():
+            print(game_object_type)
+            print(entity_game_objects)
+            self.handle_entity_update(game_object_type, entity_game_objects)
+
+        cast(Renderer, self.renderer).add_sprites(self.test)
+        # self.renderer.add_sprites(level.get_sprites())
+
+    def handle_entity_update(self, game_object_type: Any, entity_game_objects: dict[int, Any]):
+        for entity, game_object in entity_game_objects.items():
+            print(entity, game_object)
+            if game_object_type is InputSubscribtion:
+                continue
+            if game_object_type is Sprite:
+                self.test.append(game_object)
+                continue
+            if game_object_type is GUI:
+                game_object.update()
+                self.test.append(game_object)
+                continue
+            if game_object_type is Button:
+                game_object.update()
+                self.test.append(game_object)
+                continue
+            
+            self.test.extend(game_object.get_sprites())
+            game_object.update()

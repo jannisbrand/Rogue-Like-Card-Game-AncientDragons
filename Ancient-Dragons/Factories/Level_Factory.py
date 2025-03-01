@@ -33,24 +33,6 @@ class LevelFactory():
             column_names.append(column_name)
         return column_names
 
-    def fabricate_all(self):
-        """NOT IMPLEMENTED"""
-        character_collection = self.database_connection.cursor().execute("SELECT * FROM Charakters")
-        column_names = self.get_database_column_names("Charakters")
-        for character_data in character_collection.fetchall():
-            # PATTERN
-            # CHARACTER ID; CHARACTER NAME;
-            if len(character_data) != len(column_names):
-                print("[OFactory] Character data and Colum names do not match!")
-                continue
-
-            created_character = Character(character_data[0], character_data[1], None)
-            created_character.health = 100
-            created_character.mana = 100
-            created_character.gold = 100
-            self.ecso_context.add_object("CHARACTERS", created_character)
-            print("[OFactory] Created character: " + str(created_character))
-
     def generate_level(self) -> Any:
         # seed = 69
         # random.seed(seed)
@@ -91,7 +73,8 @@ class LevelFactory():
                     sprite.rect.y = 700
                     sprites[category].append(sprite)
 
-        id = len(self.ecso_context.objects["LEVELS"])
-        created_level = Level(id, sprites)
-        print("[OFactory] Level generated with id: ", id)
-        return created_level
+        entity = self.ecso_context.add_entity()
+        created_level = Level(entity, sprites)
+        self.ecso_context.add_game_object(entity, created_level)
+        print("[OFactory] Level generated with id: ", entity)
+        return entity

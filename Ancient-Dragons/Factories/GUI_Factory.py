@@ -16,15 +16,14 @@ class GUIFactory():
         self.input_handler = event_handler
 
     def generate_menu(self, pos_x: int, pos_y: int, button_pos_start: tuple[int, int], buttons: list[tuple[str, int, int, Any]]) -> int:
-        id = self.ecso_context.next_object_id
-        gui = GUI(id, pygame.Color(0, 0, 0), "MENU", 500, 700, pos_x, pos_y)
-        id += 1
+        gui_entity = self.ecso_context.add_entity()
+        gui = GUI(gui_entity, pygame.Color(0, 0, 0), "MENU", 500, 700, pos_x, pos_y)
 
         button_index = 0
         for button in buttons:
-            new_button = Button(id, gui.get_rect(), pygame.Color(10, 10, 10), pygame.Color(40, 40, 40), "btn_menu", button[0], 11, button[1], button[2], button_pos_start[0], (button_pos_start[1] + 50 * button_index))
+            button_entity = self.ecso_context.add_entity()
+            new_button = Button(button_entity, f"btn_menu_{button_entity}", gui.get_rect(), pygame.Color(10, 10, 10), pygame.Color(40, 40, 40), "", button[0], 11, button[1], button[2], button_pos_start[0], (button_pos_start[1] + 50 * button_index))
             subscription = InputSubscribtion(SubscriptionType.CURSOR, new_button.on_hover, new_button.get_rect(), [])
             self.input_handler.subscribe_to_event(subscription)
             gui.add_interactible(new_button)
-            id += 1
-        return self.ecso_context.add_object("GUI", gui)
+        return gui_entity

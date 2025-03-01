@@ -36,23 +36,20 @@ class CharacterFactory():
                 print("[OFactory] Character data and Colum names do not match!")
                 continue
 
-            created_character = PlayerCharacter(self.ecso_context.next_object_id, character_data[1])
+            entity = self.ecso_context.add_entity()
+            created_character = PlayerCharacter(entity, character_data[1])
             created_character.set_health(1000)
             created_character.set_mana(10)
             created_character.set_gold(1000)
-            self.ecso_context.add_object("PLAYER_CHARACTERS", created_character)
+            self.ecso_context.add_game_object(entity, created_character)
             print("[OFactory] Created character: " + str(created_character))
 
     def fabricate_enemy(self) -> int:
         ENEMY_BASE_ATTACK = 137
         ENEMY_BASE_IDK = 0
-     
-        try:
-            temp_id = len(self.ecso_context.objects["ENEMY_CHARACTERS"])
-        except KeyError:
-            temp_id = 0
-
-        created_enemy = StandardEnemy(temp_id, "LUGENE CRABS")
+    
+        entity = self.ecso_context.add_entity()
+        created_enemy = StandardEnemy(entity, "LUGENE CRABS")
         created_enemy.set_health(1000)
         created_enemy.set_attack_damage(ENEMY_BASE_ATTACK)
-        return self.ecso_context.add_object("ENEMY_CHARACTERS", created_enemy)
+        return entity

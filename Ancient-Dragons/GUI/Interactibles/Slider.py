@@ -4,8 +4,8 @@ from Sprites.Base import Sprite
 
 
 class ProgressBar(Sprite):
-    def __init__(self, context_id, type_id, name, color, value_color: Color, width, height, max_value: int, min_value: int, image_path=""):
-        super().__init__(context_id, type_id, name, color, width, height, image_path)
+    def __init__(self, context_id, type_id, reference_rect, name, color, value_color: Color, width, height, max_value: int, min_value: int, image_path=""):
+        super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
         self.max_value = max_value
         self.min_value = min_value
         self.total_range = min_value + max_value

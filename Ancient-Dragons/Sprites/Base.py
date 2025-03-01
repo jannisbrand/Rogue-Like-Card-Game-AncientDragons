@@ -3,12 +3,13 @@ import pygame
 
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, context_id, type_id, name, color, width, height, image_path=""):
+    def __init__(self, context_id, type_id, reference_rect, name, color, width, height, image_path=""):
         super().__init__()
         self.context_id = context_id  # Represents object or entity id
         self.type_id = type_id
         self.name = name
         self.color = color
+        self.reference_rect = reference_rect
 
         if image_path != "":
             self.image = pygame.image.load(image_path)

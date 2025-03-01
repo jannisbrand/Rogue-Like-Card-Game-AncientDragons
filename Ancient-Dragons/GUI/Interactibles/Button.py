@@ -11,8 +11,8 @@ from Sprites.Base import Sprite
 
 
 class Button(Sprite):
-    def __init__(self, context_id: int, type_id: str, gui_rect: pygame.Rect, normal_color: pygame.Color, highlight_color: pygame.Color, name: str, text: str, width: int, height: int, image_path=""):
-        super().__init__(context_id, type_id, name, normal_color, width, height, image_path)
+    def __init__(self, context_id: int, type_id: str, reference_rect: pygame.Rect, normal_color: pygame.Color, highlight_color: pygame.Color, name: str, text: str, width: int, height: int, image_path=""):
+        super().__init__(context_id, type_id, reference_rect, name, normal_color, width, height, image_path)
         self.name = name
         self.normal_color = normal_color
         self.hightlight_color = highlight_color

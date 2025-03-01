@@ -59,8 +59,8 @@ class ECSO_Context():
         # ### ENTITIES AND COMPONENTS # ###
 
         # ### OBJECTS ### #
-        self.objects: dict[str, list[Any]] = {}
-        self.next_object_id = 1  # TODO: DOES NOT REPRESENT THE RIGHT AMOUNT OF OBJECTS PER TYPE!
+        self.game_objects: dict[Type, dict[int, Any]] = {}
+        # self.next_object_id = 1  # TODO: DOES NOT REPRESENT THE RIGHT AMOUNT OF OBJECTS PER TYPE!
         # ### OBJECTS ### #
 
     def add_entity(self) -> int:
@@ -145,41 +145,45 @@ class ECSO_Context():
                 print(f"[ECSOContext] Entity {e} does not have component: {component_type}")
         return -1
 
-    def add_object(self, type: str, object: Any) -> int:
+    def add_game_object(self, entity: int, game_object: Any) -> int:
         try:
-            if type not in self.objects:
-                self.objects[type] = []
+            instance_type = type(game_object)
+            if instance_type not in self.game_objects:
+                self.game_objects[instance_type] = {}
 
-            self.objects[type].append(object)
-            self.next_object_id += 1
-            return len(self.objects[type]) - 1
+            self.game_objects[type][entity] = game_object
         except KeyError as e:
             print(f"[ECSOContext] Object could not be added: {e}")
             return -1
 
-    def add_objects(self, type: str, objects: list[Any]) -> None:
+    def add_game_objects(self, entity: int, game_objects: list[Any]) -> None:
         try:
-            for object in objects:
-                self.add_object(type, object)  # Smart :)
+            for game_object in game_objects:
+                self.add_game_object(entity, game_object)  # Smart :)
         except KeyError as e:
             print(f"[ECSOContext] Objects could not be added: {e}")
 
-    def get_objects(self, type: str) -> list[Any]:
-        return self.objects[type]
+    def get_game_objects(self, entity: int) -> list[Any]:
+        list_of_game_objects = []
+        for game_object_type in self.game_objects:
+            try:
+                game_object = self.game_objects[game_object_type][entity]
+                list_of_game_objects.append(game_object)
+            except KeyError as e:
+                print(f"[ECSOContext] Entity {e} does not has game_object of type: {game_object}!")
+                continue
 
-    def get_object(self, type: str, id: int) -> Any:
-        try:
-            for object in self.objects[type]:
-                if object.id == id:
-                    return object
-        except KeyError as e:
-            print(f"[ECSOContext] Object could not be gotten?: {e}")
+        return list_of_game_objects
 
-    def remove_object_by_id(self, type: str, id) -> None:
+    def get_game_object(self, entity: int, game_object_type: Any) -> Any:
         try:
-            index = 0
-            for object in self.objects[type]:
-                if object.id == id:
-                    self.objects[type].pop(index)
+            return self.game_objects[game_object_type][entity]
         except KeyError as e:
-            print("", e)
+            print("[ECSOContext] Game object does not exist:", e)
+            return None
+
+    def remove_game_object(self, entity: int, game_object_type: Any) -> None:
+        try:
+            self.game_objects[game_object_type].pop(entity)  # Does remove the entity and its assigned object from specified type.
+        except KeyError as e:
+            print("[ECSOContext] Game object does not exist:", e)

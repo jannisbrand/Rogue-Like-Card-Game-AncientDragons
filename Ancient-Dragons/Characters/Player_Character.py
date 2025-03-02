@@ -15,10 +15,10 @@ class PlayerCharacter(Character):
         self.sprite = Sprite
         self.active_effects = [int]
 
-        self.on_mana_changed = Callable
-        self.on_gold_changed = Callable
-        self.on_card_added = Callable
-        self.on_card_removed = Callable
+        self.on_mana_changed = None
+        self.on_gold_changed = None
+        self.on_card_added = None
+        self.on_card_removed = None
 
     def get_mana(self) -> int:
         return self.mana

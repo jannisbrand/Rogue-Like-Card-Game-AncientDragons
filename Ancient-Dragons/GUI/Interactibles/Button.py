@@ -25,9 +25,9 @@ class Button(InteractibleSprite):
         self.rect.x = reference_rect.x
         self.rect.y = reference_rect.y
 
-        font_size = int(self.rect.height * 0.5)  # Initial font size (Half of it's own height)
-        self.font_text = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", font_size)
-        self.set_text(text, font_size)
+        self.font_size = int(self.rect.height * 0.5)  # Initial font size (Half of it's own height)
+        self.font_text = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", self.font_size)
+        self.set_text(text)
         # ### RELATIVE POSITIONING ### #
 
         # ### CALLBACKS ### #
@@ -46,8 +46,9 @@ class Button(InteractibleSprite):
     def get_name(self) -> str:
         return self.name
     
-    def set_text(self, text: str = "DEFAULT_BUTTON", font_size: int = 8) -> None:
-        self.text = text
+    def set_text(self, text: str = "DEFAULT_BUTTON") -> None:
+        self.font_text = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", self.font_size)
+        self.text = text  # Updates saved text
         surface_text = self.font_text.render(text, True, (255, 255, 255))
         rect_text = surface_text.get_rect()
         text_x = (self.image.get_width() - surface_text.get_width()) // 2
@@ -62,6 +63,7 @@ class Button(InteractibleSprite):
             else:
                 self.image.fill(self.normal_color)
             
+            self.relative_positioning()
             self.set_text(self.text)
         except AttributeError as e:
             print(f"[BUTTON] No attribute: {e}")

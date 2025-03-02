@@ -37,3 +37,4 @@ class InteractibleCharacter(InteractibleSprite):
 
     def update(self) -> None:
         self.is_hovered_over = False
+        self.relative_positioning()

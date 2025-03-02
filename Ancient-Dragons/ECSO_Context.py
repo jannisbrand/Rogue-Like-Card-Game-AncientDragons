@@ -167,13 +167,21 @@ class ECSO_Context():
         list_of_game_objects = []
         for game_object_type in self.game_objects:
             try:
-                game_object = self.game_objects[game_object_type][entity]
-                list_of_game_objects.append(game_object)
+                if entity in self.game_objects[game_object_type]:
+                    game_object = self.game_objects[game_object_type][entity]
+                    list_of_game_objects.append(game_object)
             except KeyError as e:
                 print(f"[ECSOContext] Entity {e} does not has game_object of type: {game_object}!")
                 continue
 
         return list_of_game_objects
+    
+    def get_game_objects_of_type(self, game_object_type: Any) -> set[int, Any]:
+        try:
+            return self.game_objects[game_object_type].items()
+        except AttributeError as e:
+            print("[ECSOContext] Attribute not initialised:", e)
+            return ()
 
     def get_game_object(self, entity: int, game_object_type: Any = None) -> Any:
         try:
@@ -184,6 +192,10 @@ class ECSO_Context():
         except AttributeError as e:
             print("[ECSOContext] Attribute not initialised:", e)
             return None
+        except KeyError:
+            return None
+        except Exception as e:
+            print(e)
 
     def is_game_object_enity_existent(self, entity: int) -> bool:
         for game_object_type, game_objects in self.game_objects.items():

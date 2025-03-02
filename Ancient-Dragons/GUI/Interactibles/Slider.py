@@ -15,9 +15,6 @@ class ProgressBar(InteractibleSprite):
         self.fragment_width = int(self.total_range / 10)
         self.value_color = value_color
 
-        self.rect.x = self.reference_rect.x
-        self.rect.y = self.reference_rect.y
-
         self.base_font = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", height - 2)
 
         self.offset_x = int((self.min_value + self.max_value) / 10)
@@ -57,4 +54,5 @@ class ProgressBar(InteractibleSprite):
     def update(self) -> None:
         self.image.fill(Color(0, 0, 0))
         self.generate_slider()
+        self.relative_positioning()
         

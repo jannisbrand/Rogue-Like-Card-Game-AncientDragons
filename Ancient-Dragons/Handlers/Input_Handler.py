@@ -16,6 +16,7 @@ class InputHandler(Event_Handler):
 
         # ### TEST ### #
         self.wait_time = 0
+        self.standard_click_delay = 1
 
     def subscribe_to_event(self, subscription: Subscription) -> None:
         self.subscriptions.append(subscription)

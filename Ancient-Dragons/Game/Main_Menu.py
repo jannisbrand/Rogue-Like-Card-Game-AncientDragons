@@ -27,6 +27,7 @@ class MainMenu(Gamemode):
         pass
 
     def initialise(self) -> None:
+        self.active_level = -1
         # buttons = [
         #     ("Endless", 200, 50, self.stop_game_mode)
         # ]
@@ -48,6 +49,7 @@ class MainMenu(Gamemode):
         level = MenuLevel(entity, "MAIN_MENU", rect, "", (13, 50, 89), 1440, 900, environment, "Levels/Data/cloud.png")
         self.active_level = entity
         self.ecso_context.add_game_object(entity, level)
+        self.active_level = entity
 
         # GUI
         entity = self.ecso_context.add_entity()
@@ -61,8 +63,8 @@ class MainMenu(Gamemode):
         # BUTTON
         entity = self.ecso_context.add_entity()
         button = Button(entity, f"btn_main_menu_{entity}", main_gui.rect, pygame.Color(35, 35, 80), pygame.Color(45, 45, 90), "", "ENDLESS", 200, 50)
-        button.rect.x += 50
-        button.rect.y += 50
+        button.relative_x = 50
+        button.relative_y = 50
         main_gui.add_interactible(entity)
         self.ecso_context.add_game_object(entity, button)
 
@@ -84,6 +86,11 @@ class MainMenu(Gamemode):
         self.is_finished = True
         self.next_gamemode = "ENDLESS"
         self.input_handler.set_wait(0.25)
+
+        try:
+            cast(MenuLevel, self.ecso_context.get_game_object(self.active_level, MenuLevel)).destroy = True
+        except AttributeError as e:
+            print("[GAMEMODE][MENU] No active level could be found:", e)
 
     def update(self) -> None:
         # self.entity_update()

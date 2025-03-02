@@ -23,7 +23,7 @@ class Card(InteractibleSprite):
         self.animation_increment_y = 10
         self.animation_range_max_y = 50
         self.animation_range_min_y = 50
-        self.animation_initial_y = 0
+        self.animation_initial_y = self.relative_y
 
 
     def set_cost(self, value: int, resource: pygame.Surface) -> None:
@@ -87,6 +87,7 @@ class Card(InteractibleSprite):
 
     def update(self) -> None:
         self.animation()
+        self.relative_positioning()
 
         self.should_animate = False
 

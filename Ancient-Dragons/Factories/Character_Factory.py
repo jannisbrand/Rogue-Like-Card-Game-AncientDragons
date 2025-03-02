@@ -52,4 +52,5 @@ class CharacterFactory():
         created_enemy = StandardEnemy(entity, "LUGENE CRABS")
         created_enemy.set_health(1000)
         created_enemy.set_attack_damage(ENEMY_BASE_ATTACK)
+        self.ecso_context.add_game_object(entity, created_enemy)
         return entity

@@ -11,22 +11,22 @@ class Character():
         self.health: int  # Currency for life
 
         self.is_alive = True
-        self.sprite = Sprite
+        self.sprite = int
         self.active_effects = {}
 
         self.on_health_changed = Callable[[int], None]
         self.on_effect_added = Callable
         self.on_effect_removed = Callable
 
-    def set_sprite(self, sprite: Sprite) -> bool:
+    def set_sprite(self, sprite_context_id: int) -> bool:
         try:
-            self.sprite = sprite
-            print("Added sprite:", type(sprite))
+            self.sprite = sprite_context_id
+            print("Added sprite:", sprite_context_id)
             return True
         except AttributeError as e:
             print("Could not at a Sprite object:", e)
             return False
-    
+
     def get_sprite(self) -> Sprite:
         try:
             return self.sprite

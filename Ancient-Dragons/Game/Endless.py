@@ -70,84 +70,83 @@ class Endless(Gamemode):
         self.current_stage = 0
         self.active_level = -1  # No level active
         self.selected_type = ""
+        self.selected_target = -1
+        self.selected_card = -1
         self.active_player_character = -1
         self.active_enemy_character = -1
 
+        self.is_creating_gui = False
+        self.is_generating_level = False
+        self.is_generating_stacks = False
+
+        self.is_initialised = True
+
         # ### Generate all character classes and at selected
         cast(CharacterFactory, self.factories["CHARACTERS"]).fabricate_player_characters()
-        # TODO: self.active_character = selected_character
 
         # ### Generate all card entities ### #
         cast(CardFactory, self.factories["CARDS"]).fabricate_all()
-
-        # ### Generate a level to start the game with
-        # TODO:
-        # self.factories["LEVELS"].generate_level()
-        #self.active_level = self.ecso_context.get_object("LEVELS", 0)
-   
-        # self.__show_main_menu()
-
-        # self.input_handler.clear_subscriptions()
-
-        # # ### CHARACTER SELECTION MENU ### #
-        # character_selection = MenuLevel(self.ecso_context.next_object_id)
-
-        # ### STAGES ### #
-        # PLAYER MOVE #
-        self.selected_target = -1
-        self.selected_card = -1
-        # ### STAGES ### #
-        
-        self.is_initialised = True
-
-        self.test = None
         return True
-    
+
     def __show_main_menu(self) -> None:
-        self.input_handler.reset()
+        self.input_handler.reset()  # TODO: NEEDS TO STAY! Application context has to be referenced first. (To get access to App clock)
 
         # ### CHARACTER SELECTION MENU ### #
-        character_selection = MenuLevel(0, "CHARACTER_SELECTION")
+        entity = self.ecso_context.add_entity()
+        rect = pygame.Rect(0, 0, 0, 0)
+        character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {})
+        self.ecso_context.add_game_object(entity, character_selection)
+        self.active_level = entity
 
-        selection_menu = GUI(pygame.Color(25, 25, 25, 180), "CHARACTER_SELECTION", 500, 700, 470, 100)
+        entity = self.ecso_context.add_entity()
+        selection_menu = GUI(entity, "GUI_MAIN_MENU", character_selection.rect, "", (25, 25, 25), 500, 700)
+        selection_menu.rect.x = 470
+        selection_menu.rect.y = 100
+        selection_menu.image.set_alpha(180)
+        self.ecso_context.add_game_object(entity, selection_menu)
+        character_selection.add_gui(entity)  # Adds context id of the gui to the parent level
+
         index = 0
         button_offset_y = 50
-        for character in self.ecso_context.get_objects("PLAYER_CHARACTERS"):
-            button = Button(selection_menu.get_rect(), pygame.Color(35, 35, 80), pygame.Color(45, 45, 90), f"btn_select_character_{character.get_name()}", character.get_name(), 16, 200, 50, 50, 50 + (button_offset_y * index))
-            subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.get_rect())
+        for _, character in self.ecso_context.get_game_objects_of_type(PlayerCharacter):
+            character = cast(PlayerCharacter, character)
+
+            entity = self.ecso_context.add_entity()
+            button = Button(entity, "SELECTION_BUTTON", selection_menu.rect, pygame.Color(35, 35, 80), pygame.Color(45, 45, 90), f"btn_select_character_{character.id}", character.get_name(), 200, 50)
+            button.relative_x = 50
+            button.relative_y = 50 + button_offset_y * index
+            self.ecso_context.add_game_object(entity, button)
+            selection_menu.add_interactible(entity)
+
+            entity = self.ecso_context.add_entity()
+            subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.rect)
+            button.subscribtion_on_hover = entity
+            self.ecso_context.add_game_object(entity, subscription)
             self.input_handler.subscribe_to_event(subscription)
+            
+            entity = self.ecso_context.add_entity()
             button.callback_on_click = self.select_character
-            subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, button, button.on_click, button.get_rect(), mouse_buttons=(True, False, False))
+            subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, button, button.on_click, button.rect, mouse_buttons=(True, False, False))
+            button.subscribtion_on_click = entity
+            self.ecso_context.add_game_object(entity, subscription)
             self.input_handler.subscribe_to_event(subscription)
-            selection_menu.add_interactible(button)
             index += 1
 
-        character_selection.add_gui(selection_menu)
-        self.active_level = self.ecso_context.add_object("LEVELS", character_selection)
-    
     def select_character(self, source: Any, mouse_buttons: tuple[bool, bool, bool]) -> None:
-        characters = self.ecso_context.get_objects("PLAYER_CHARACTERS")
-        selected_name = source.get_name().split("_")[3]
+        selected_character = int(source.get_name().split("_")[3])
 
-        index = 0
-        for character in characters:
-            if character.get_name() == selected_name:
-                self.active_player_character = index
+        for _, character in self.ecso_context.get_game_objects_of_type(PlayerCharacter):
+            character = cast(PlayerCharacter, character)
+            if character.id == selected_character:
+                self.active_player_character = selected_character
                 break
-            else:
-                self.active_player_character = -1
-            index += 1
-        
-        # Remove Level
-        # self.ecso_context.remove_object_by_id("LEVLES", self.active_level)
-        self.ecso_context.get_object("LEVELS", self.active_level).deactivate()
-        self.input_handler.reset()  # TODO: Remove just menu subs
-        
+        # TODO: TEST IF SUBSCRIPTIONS GET DELETED self.input_handler.reset()
+
     def __create_stacks(self) -> None:
         # ### DRAW STACK ### #
         # Stack where cards are drawn from after each round
         # TIER-0 IMPLEMENTATION: Stack composition with cards only listed in chararcter object
-        player_character_data = cast(PlayerCharacter, self.ecso_context.get_object("PLAYER_CHARACTERS", self.active_player_character))
+        player_character_data = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
 
         stack_name = "DRAW"
         if stack_name not in self.card_stacks:
@@ -159,7 +158,7 @@ class Endless(Gamemode):
             if temporary_index % 2 == 0:  # Skips the card amount (As long as the "stack_composition" stays like this)
                 for _ in range(stack_composition[temporary_index + 1]):
                     entity_id = self.ecso_context.get_entity(C_DISPLAY_NAME, card)
-                    copied_card = self.factories["CARDS"].copy_entity(entity_id)
+                    copied_card = cast(CardFactory, self.factories["CARDS"]).copy_entity(entity_id)
                     self.card_stacks["DRAW"].append(copied_card)
                     print("[GAMEMODE] Stack composition with id: ", entity_id)
 
@@ -195,58 +194,83 @@ class Endless(Gamemode):
         return stack
 
     def __create_card_gui(self) -> None:
-        level = cast(Level, self.ecso_context.get_object("LEVELS", self.active_level))
-        background_color = pygame.Color(10, 10, 10)
-        gui_hand = GUI(background_color, "CARD_HAND", 1040, 200, 100, 700)
-        gui_hand.image.set_alpha(50)
-        level = self.ecso_context.get_object("LEVELS", self.active_level)
-        level.add_gui(gui_hand)
+        level = cast(Level, self.ecso_context.get_game_object(self.active_level, Level))
 
-        player_character_data = cast(Character, self.ecso_context.get_object("PLAYER_CHARACTERS", self.active_player_character))
+        color = pygame.Color(10, 10, 10)
+        gui_entity = self.ecso_context.add_entity()
+        gui_cards = GUI(gui_entity, "GUI_CARDS", level.rect, "", color, 1040, 200)
+        gui_cards.image.set_alpha(50)
+        gui_cards.relative_x = (level.rect.x + level.rect.width / 2) - int(gui_cards.rect.width / 2)
+        gui_cards.relative_y = (level.rect.x + level.rect.height) - gui_cards.rect.height
+        self.ecso_context.add_game_object(gui_entity, gui_cards)
+        level.add_gui(gui_entity)
 
-        x_offset = 150
+        player_character_data = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
+
+        x_offset = 175
         index = 0
         for entity in player_character_data.get_cards_on_hand():
-            base_color = pygame.Color(80, 20, 60)
-            name = self.ecso_context.get_component(entity, C_DISPLAY_NAME)
-            card = Card(entity, "CARD", name, base_color, 200, 300, "")
-            cost_resource = pygame.image.load("Levels/Data/gangsta_tree.png")
-            card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity, C_CARD_COSTS)).value, cost_resource)
-            card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity, C_DISPLAY_NAME)).value)
-            
-            card.rect.x = (gui_hand.rect.x + 200) + (x_offset * index)
-            card.rect.y = gui_hand.rect.y + 20
-            card.animation_initial_y = card.rect.y  # TODO: Not a good  solution
+            card_entity = self.ecso_context.add_entity()
+            color = pygame.Color(80, 20, 60)
+            card = Card(card_entity, "INTERACTIBLE_CARD_SPRITE", gui_cards.rect, "", color, 200, 300)  # It's possible to use an image as a base background!
+            cost_resource = pygame.image.load("Levels/Data/gangsta_tree.png")  # Background of the card costs area (Mana)
+            try:
+                # CARD TITLE
+                card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity, C_DISPLAY_NAME)).value)
+                # CARD COSTS
+                card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity, C_CARD_COSTS)).value, cost_resource)
+            except Exception:
+                print("FUCK!?")
+            card.relative_x = 200 + (x_offset * index)
+            card.relative_y = 20
+            # card.animation_initial_y = card.rect.y  # TODO: Not a good  solution
             card.callback_on_click = self.__stage_select_targets
-            subscription = InputSubscribtion(SubscriptionType.CURSOR, card, card.on_hover, card.rect)
-            self.input_handler.subscribe_to_event(subscription)
+            self.ecso_context.add_game_object(card_entity, card)
+            gui_cards.add_interactible(card_entity)
+
+            subscribtion_entity = self.ecso_context.add_entity()
+            subscribtion = InputSubscribtion(SubscriptionType.CURSOR, card, card.on_hover, card.rect)
+            self.ecso_context.add_game_object(subscribtion_entity, subscribtion)
+            self.input_handler.subscribe_to_event(subscribtion)
+
+            subscribtion_entity = self.ecso_context.add_entity()
             subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, card, card.on_click, card.rect, [], mouse_buttons=(True, False, False))
+            self.ecso_context.add_game_object(subscribtion_entity, subscribtion)
             self.input_handler.subscribe_to_event(subscription)
-            gui_hand.add_interactible(card)
             index += 1
 
-        # ### CARD STACK ### #
-        color = pygame.Color(0, 0, 255)
-        stack_icon = Button(gui_hand.rect, color, None, "STACK_ICON", "", 16, 100, 100, 20, 20)
-        stack_icon.set_text("STACK", 26)
-        gui_hand.add_interactible(stack_icon)
+        # ### CARD PULL STACK ### #
+        color = pygame.Color(0, 0, 245)
+        highlight = pygame.Color(0, 0, 255)
+        entity = self.ecso_context.add_entity()
+        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 100, 100)
+        pull_stack.relative_x = 50
+        pull_stack.relative_y = 50
+        pull_stack.set_text("STACK")
+        pull_stack.font_size = 32
+        self.ecso_context.add_game_object(entity, pull_stack)
+        gui_cards.add_interactible(entity)
 
         # ### END TURN BUTTON ### #
         # TODO: Implement Button wich calls a methond wich sets "self.move_running to false"
 
     def __create_character_gui(self) -> None:
-        level = cast(Level, self.ecso_context.get_object("LEVELS", self.active_level))
-        ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y
+        level = cast(Level, self.ecso_context.get_game_object(self.active_level, Level))
+        ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y  # ...
         
-        background_color = pygame.Color(0, 0, 0, 100)
-        gui_characters = GUI(background_color, "CHARACTERS", 1440, 400, 0, ground_level - 400)
-        gui_characters.image.set_alpha(0)
-        level.add_gui(gui_characters)
+        color = pygame.Color(0, 0, 0)
+        entity = self.ecso_context.add_entity()
+        gui_characters = GUI(entity, "GUI_CHARACTERS", level.rect, "", color, 1440, 400)
+        gui_characters.image.set_alpha(50)
+        gui_characters.relative_x = 0
+        gui_characters.relative_y = ground_level - gui_characters.rect.height
+        self.ecso_context.add_game_object(entity, gui_characters)
+        level.add_gui(entity)
 
-        player_character_data = cast(Character, self.ecso_context.get_object("PLAYER_CHARACTERS", self.active_player_character))
+        player_character_data = cast(Character, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
         
         self.active_enemy_character = cast(CharacterFactory, self.factories["CHARACTERS"]).fabricate_enemy()
-        enemy_character_data = cast(StandardEnemy, self.ecso_context.get_object("ENEMY_CHARACTERS", self.active_enemy_character))
+        enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
 
         # ### MAIN CHARACTER SPRITE ### #
         # BASE
@@ -256,66 +280,84 @@ class Endless(Gamemode):
         for image_name in list_of_images:
             if image_name.split(".")[0] == player_character_data.get_name().lower():
                 resource = image_name
-        player_character_sprite = InteractibleCharacter(self.active_player_character, "PLAYER_CHARACTER_SPRITE", player_character_data.get_name(), base_color, 300, 300, f"Levels/Data/Charakters/{resource}")
+        player_character_sprite_entity = self.ecso_context.add_entity()
+        player_character_sprite = InteractibleCharacter(entity, "INTERACTIBLE_PLAYER_CHARACTER_SPRITE", gui_characters.rect, "", base_color, 300, 300, f"Levels/Data/Charakters/{resource}")
+        player_character_sprite.relative_x = 50
+        player_character_sprite.relative_y = gui_characters.rect.height - player_character_sprite.rect.height
         player_character_sprite.callback_on_click = self.__stage_select_targets
+
+        subscription_entity = self.ecso_context.add_entity()
         subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, player_character_sprite, player_character_sprite.on_click, player_character_sprite.rect, [], (True, False, False))
+        self.ecso_context.add_game_object(subscription_entity, subscription)
         self.input_handler.subscribe_to_event(subscription)
-        player_character_sprite.rect.x = 50
-        player_character_sprite.rect.y = ground_level - player_character_sprite.rect.height
-        gui_characters.add_interactible(player_character_sprite)
-        player_character_data.set_sprite(player_character_sprite)
+
+        self.ecso_context.add_game_object(player_character_sprite_entity, player_character_sprite)
+        gui_characters.add_interactible(player_character_sprite_entity)
+        player_character_data.set_sprite(player_character_sprite_entity)
         # ## SURROUNDING INDICATORS
         # PROGRESS BAR AS HEALTH TODO: 26.02.2025: Add everything to the dict and try categories of interactibles :)
         base_color = pygame.Color(50, 120, 90)
         value_color = pygame.Color(255, 0, 0)
-        progressbar = ProgressBar(len(gui_characters.interactibles) - 1, "PLAYER_HEALTH", "PROGRESSBAR", base_color, value_color, player_character_sprite.rect.width, 20, player_character_data.get_health(), 0, "")
-        progressbar.rect.x = player_character_sprite.rect.x
-        progressbar.rect.y = player_character_sprite.rect.y - progressbar.rect.height - 20
+        progressbar_entity = self.ecso_context.add_entity()
+        progressbar = ProgressBar(progressbar_entity, "INTERACTIBLE_PLAYER_PROGRESSBAR_SPRITE", player_character_sprite.rect, "", base_color, value_color, player_character_sprite.rect.width, 20, player_character_data.get_health(), 0, "")
+        progressbar.relative_x = 0
+        progressbar.relative_y = -40
         player_character_data.on_health_changed = progressbar.set_value
-        gui_characters.add_interactible(progressbar)
+
+        self.ecso_context.add_game_object(progressbar_entity, progressbar)
+        gui_characters.add_interactible(progressbar_entity)
         # SPRITE LIST AS EFFECT LIST
-        base_color = pygame.Color(50, 120, 90)
-        sprite_list = SpriteList(len(gui_characters.interactibles) - 1, "PLAYER_EFFECTS", "SPRITELIST", base_color, player_character_sprite.rect.width, 50)
-        sprite_list.rect.x = player_character_sprite.rect.x
-        sprite_list.rect.y = player_character_sprite.rect.y - player_character_sprite.rect.height - 70
-        player_character_data.on_effect_added = sprite_list.add_sprite
-        gui_characters.add_interactible(sprite_list)
+        # base_color = pygame.Color(50, 120, 90)
+        # sprite_list = SpriteList(len(gui_characters.interactibles) - 1, "PLAYER_EFFECTS", "SPRITELIST", base_color, player_character_sprite.rect.width, 50)
+        # sprite_list.rect.x = player_character_sprite.rect.x
+        # sprite_list.rect.y = player_character_sprite.rect.y - player_character_sprite.rect.height - 70
+        # player_character_data.on_effect_added = sprite_list.add_sprite
+        # gui_characters.add_interactible(sprite_list)
         # ### MAIN PLAYER SPRITE ### #
 
         # ### MAIN ENEMY SPRITE ### #
         base_color = pygame.Color(255, 255, 255)
         list_of_enemy_images = os.listdir("Levels/Data/Enemies")
         resource = list_of_enemy_images[randint(0, len(list_of_enemy_images) - 1)]
-        enemy_character_sprite = InteractibleCharacter(self.active_enemy_character, "ENEMY_CHARACTER_SPRITE", enemy_character_data.get_name(), base_color, 300, 300, f"Levels/Data/Enemies/{resource}")
+        enemy_character_sprite_entity = self.ecso_context.add_entity()
+        enemy_character_sprite = InteractibleCharacter(enemy_character_sprite_entity, "INTERACTIBLE_ENEMY_CHARACTER_SPRITE", gui_characters.rect, "", base_color, 300, 300, f"Levels/Data/Enemies/{resource}")
         enemy_character_sprite.callback_on_click = self.__stage_select_targets
+        enemy_character_sprite.relative_x = 1000
+        enemy_character_sprite.relative_y = gui_characters.rect.height - enemy_character_sprite.rect.height
+
+        subscription_entity = self.ecso_context.add_entity()
         subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, enemy_character_sprite, enemy_character_sprite.on_click, enemy_character_sprite.rect, [], (True, False, False))
+        self.ecso_context.add_game_object(subscription_entity, subscription)
         self.input_handler.subscribe_to_event(subscription)
-        enemy_character_sprite.rect.x = 1100
-        enemy_character_sprite.rect.y = ground_level - enemy_character_sprite.rect.height
-        gui_characters.add_interactible(enemy_character_sprite)
-        enemy_character_data.set_sprite(enemy_character_sprite)
+
+        self.ecso_context.add_game_object(enemy_character_sprite_entity, enemy_character_sprite)
+        gui_characters.add_interactible(enemy_character_sprite_entity)
+        enemy_character_data.set_sprite(enemy_character_sprite_entity)
         # ## SURROUNDING INDICATORS
         # PROGRESS BAR AS HEALTH TODO: 26.02.2025: Add everything to the dict and try categories of interactibles :)
         base_color = pygame.Color(50, 120, 90)
         value_color = pygame.Color(255, 0, 0)
-        progressbar = ProgressBar(len(gui_characters.interactibles) - 1, "ENEMY_HEALTH", "PROGRESSBAR", base_color, value_color, enemy_character_sprite.rect.width, 20, enemy_character_data.get_health(), 0, "")
-        progressbar.rect.x = enemy_character_sprite.rect.x
-        progressbar.rect.y = enemy_character_sprite.rect.y - progressbar.rect.height - 20
+        progressbar_entity = self.ecso_context.add_entity()
+        progressbar = ProgressBar(progressbar_entity, "INTERACTIBLE_ENEMY_PROGRESSBAR_SPRITE", enemy_character_sprite.rect, "", base_color, value_color, enemy_character_sprite.rect.width, 20, enemy_character_data.get_health(), 0)
+        progressbar.relative_x = 0
+        progressbar.relative_y = -40
         enemy_character_sprite.on_health_changed = progressbar.set_value
+
+        self.ecso_context.add_game_object(progressbar_entity, progressbar)
         gui_characters.add_interactible(progressbar)
         # SPRITE LIST AS EFFECT LIST
-        base_color = pygame.Color(50, 120, 90)
-        sprite_list = SpriteList(len(gui_characters.interactibles) - 1, "ENEMY_EFFECTS", "SPRITELIST", base_color, enemy_character_sprite.rect.width, 50)
-        sprite_list.rect.x = enemy_character_sprite.rect.x
-        sprite_list.rect.y = enemy_character_sprite.rect.y - enemy_character_sprite.rect.height - 70
-        enemy_character_data.on_effect_added = sprite_list.add_sprite
-        gui_characters.add_interactible(sprite_list)
+        # base_color = pygame.Color(50, 120, 90)
+        # sprite_list = SpriteList(len(gui_characters.interactibles) - 1, "ENEMY_EFFECTS", "SPRITELIST", base_color, enemy_character_sprite.rect.width, 50)
+        # sprite_list.rect.x = enemy_character_sprite.rect.x
+        # sprite_list.rect.y = enemy_character_sprite.rect.y - enemy_character_sprite.rect.height - 70
+        # enemy_character_data.on_effect_added = sprite_list.add_sprite
+        # gui_characters.add_interactible(sprite_list)
 
-        # test
-        for image in os.listdir("Levels/Data/Charakters"):
-            sprite = Sprite(0, "EFFECT_SPRITE", "", (0, 0, 0), 20, 20)
-            sprite.image = pygame.image.load(f"Levels/Data/Charakters/{image}")
-            sprite_list.add_sprite(sprite)
+        # # SPRITE LIST TEST
+        # for image in os.listdir("Levels/Data/Charakters"):
+        #     sprite = Sprite(0, "EFFECT_SPRITE", "", (0, 0, 0), 20, 20)
+        #     sprite.image = pygame.image.load(f"Levels/Data/Charakters/{image}")
+        #     sprite_list.add_sprite(sprite)
         # ### MAIN ENEMY SPRITE ### #
 
     def __stage_select_targets(self, source: Sprite, mouse_buttons: tuple[bool]) -> None:
@@ -324,13 +366,13 @@ class Endless(Gamemode):
         print("Target NAME:", source.name)
         try:
             match source.type_id:
-                case "CARD":
+                case "INTERACTIBLE_CARD_SPRITE":
                     self.selected_card = source.context_id  # Saves the entity id of selected card
-                case "PLAYER_CHARACTER_SPRITE":
+                case "INTERACTIBLE_PLAYER_CHARACTER_SPRITE":
                     if self.selected_card != -1:
                         self.selected_target = source.context_id  # Saves object id of selected character
                         self.selected_type = source.type_id
-                case "ENEMY_CHARACTER_SPRITE":
+                case "INTERACTIBLE_ENEMY_CHARACTER_SPRITE":
                     if self.selected_card != -1:
                         self.selected_target = source.context_id
                         self.selected_type = source.type_id
@@ -352,15 +394,23 @@ class Endless(Gamemode):
             self.selected_card = -1
             self.selected_target = -1
             self.selected_type = ""
-        except KeyError as e:
-            print("[GAMEMODE][MOVE_HANDLING] Context returned no components: ", e)
+        except AttributeError as e:
+            print("[GAMEMODE][MOVEHANDLING] Cardsystem not defined:", e)
+            # Necessary reset
+            self.selected_card = -1
+            self.selected_target = -1
+            self.selected_type = ""
 
 
     def update(self) -> None:
         try:
-            level = cast(Level, self.ecso_context.get_object("LEVELS", self.active_level))
-            player_character_data = cast(Character, self.ecso_context.get_object("PLAYER_CHARACTERS", self.active_player_character))
-            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_object("ENEMY_CHARACTERS", self.active_enemy_character))
+            if self.current_stage == 0:
+                level = cast(MenuLevel, self.ecso_context.get_game_object(self.active_level, MenuLevel))
+            else:
+                level = cast(Level, self.ecso_context.get_game_object(self.active_level, Level))
+
+            player_character_data = cast(Character, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
+            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
 
             match self.current_stage:
                 case 0:
@@ -369,6 +419,10 @@ class Endless(Gamemode):
                         self.__show_main_menu()
 
                     if self.active_player_character != -1:
+                        try:
+                            cast(MenuLevel, self.ecso_context.get_game_object(self.active_level, MenuLevel)).destroy = True
+                        except AttributeError as e:
+                            print("[GAMEMODE][ENDLESS] Menu level class not found:", e)
                         self.current_stage = 1
                 case 1:
                     # STACK AND HAND
@@ -380,35 +434,44 @@ class Endless(Gamemode):
                     self.shuffle_stack(self.card_stacks["DRAW"], AMOUNT_STACK_SHUFFLE)
                     self.current_stage = 3
                 case 3:
-                    self.is_generating_level = True
-                    new_level = cast(LevelFactory, self.factories["LEVELS"]).generate_level()
-                    id = self.ecso_context.add_object("LEVELS", new_level)
-                    self.active_level = id
-                    self.is_generating_level = False
+                    if level is None:
+                        generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level()
+                        generated_level = cast(Level, self.ecso_context.get_game_object(generated_entity, Level))
+                        self.ecso_context.add_game_object(generated_entity, generated_level)
+                        self.active_level = generated_entity
+                        self.is_generating_level = False
                     self.current_stage = 4
                 case 4:
-                    gui = level.get_gui("CHARACTERS")  # The player & enemy characters are assingned to the same gui
-                    if gui is None:
+                    # The player & enemy characters are assingned to the same gui
+                    if not self.is_creating_gui:
                         self.is_creating_gui = True
                         self.__create_character_gui()
-                    if gui.is_active:
-                        self.is_creating_gui = False
-                        self.current_stage = 5
+
+                    gui_entities = level.get_guis()
+                    for gui_entity in gui_entities:
+                        gui_object = cast(GUI, self.ecso_context.get_game_object(gui_entity, GUI))
+                        if gui_object.type_id == "GUI_CHARACTERS":
+                            self.is_creating_gui = False
+                            self.current_stage = 5
                 case 5:
-                    gui = level.get_gui("CARD_HAND")
-                    if gui is None:
+                    if not self.is_creating_gui:
                         self.is_creating_gui = True
                         self.__create_card_gui()
-                    if gui.is_active:
-                        self.is_creating_gui = False
-                        self.current_stage = 10  # Enters the "Game logic loop"
+
+                    gui_entities = level.get_guis()
+                    for gui_entity in gui_entities:
+                        gui_object = cast(GUI, self.ecso_context.get_game_object(gui_entity, GUI))
+                        if gui_object.type_id == "GUI_CARDS":
+                            self.is_creating_gui = False
+                            self.current_stage = 10
                 case 10:
                     """GAME LOGIC"""
                     """ TARGET - ACTION SELECTION """
                     try:
-                        self.on_round_start()
+                        if self.on_round_start is not None:
+                            self.on_round_start()
                     except TypeError as e:
-                        print("[GAMEMODE][ENDLESS]", e)
+                        print("[GAMEMODE][ENDLESS] Callback 'on_round_start' is not callable:", e)
 
                     # Pre move selection
                     if self.selected_card != -1 and self.selected_target != -1:
@@ -430,9 +493,10 @@ class Endless(Gamemode):
                     
                     # ### RESTART LOOP ### #
                     try:
-                        self.on_round_end()
+                        if self.on_round_end is not None:
+                            self.on_round_end()
                     except TypeError as e:
-                        print("[GAMEMODE][ENDLESS]", e)
+                        print("[GAMEMODE][ENDLESS] Callback 'on_round_end' is not callable:", e)
                     self.current_stage = 10
                 case 13:
                     # Unnecessary?
@@ -446,18 +510,21 @@ class Endless(Gamemode):
                     self.next_gamemode = "START"
 
             # ### ### #
-            level.update()
+            # level.update()
             if self.active_player_character != -1:
                 self.__sync_character(player_character_data.get_sprite(), player_character_data)
             if self.active_enemy_character != -1:
                 self.__sync_character(enemy_character_data.get_sprite(), enemy_character_data)
-            self.renderer.add_sprites(level.get_sprites())  # Adds all sprites from the active level to the renderers sprite group
+            # self.renderer.add_sprites(level.get_sprites())  # Adds all sprites from the active level to the renderers sprite group
         except ValueError as e:
             print("Flupp", e)
         except AttributeError as e:
             print(f"[GAMEMODE] No level found: {e}")
 
     def __sync_character(self, sprite, data: Character):
-        sprite.set_display_name(data.get_name())
+        # sprite.set_display_name(data.get_name())
         # sprite.set_health(data.get_health())
         # Maybe update image?
+        # TODO: Do we even need that?? The systems update the character class and card entities.
+        #       The character classes update elements like the health bar on a change.. :think:
+        pass

@@ -1,5 +1,6 @@
 from typing import Any
 from pygame import Rect
+import pygame
 from Handlers.Flags import SubscriptionType
 
 
@@ -31,6 +32,8 @@ class InputSubscribtion(Subscription):
         self.condition_keys = keys
         self.condition_mouse_buttons = mouse_buttons
 
+        self.last_pressed = 0
+
     def check_condition(self, cursor: tuple[int, int], keys: list[int], mouse_buttons: tuple[bool, bool, bool]) -> None:
         """
         TODO: Implementation of the mouse buttons"""
@@ -55,6 +58,7 @@ class InputSubscribtion(Subscription):
                 if in_rect and keys_pressed:
                     print(f"[Subscription] MOUSEBUTTON: {mouse_buttons}")
                     self.callback(self.source, mouse_buttons)
+                    self.last_pressed = pygame.time.Clock().get_rawtime()
             case _:
                 pass
 

@@ -66,4 +66,5 @@ class GUI(GUISprite):
     def update(self) -> None:
         # Only cares about it's own thing! Interactibles are stored just to keep a the references!
         # self.__correct_text_pos()  # Only needed if the text change during objects life time
+        self.relative_positioning()
         pass

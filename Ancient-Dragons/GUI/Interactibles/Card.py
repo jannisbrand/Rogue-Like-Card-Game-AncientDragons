@@ -1,12 +1,16 @@
 from email.mime import image
 from typing import Any
 import pygame
+from GUI.Interactibles.Base import InteractibleSprite
 from Sprites.Base import Sprite
 
 
-class Card(Sprite):
-    def __init__(self, id, type: str, name: str, color: pygame.Color, width: int, height: int, image_path: str = ""):
-        super().__init__(id, type, name, color, width, height, image_path)
+class Card(InteractibleSprite):
+    def __init__(self, context_id, type_id: str, reference_rect, name: str, color: pygame.Color, width: int, height: int, image_path=""):
+        super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
+        self.rect.x = self.reference_rect.x
+        self.rect.y = self.reference_rect.y
+        
         self.cost_area = None
         self.title = None
         self.picture = None
@@ -19,7 +23,7 @@ class Card(Sprite):
         self.animation_increment_y = 10
         self.animation_range_max_y = 50
         self.animation_range_min_y = 50
-        self.animation_initial_y = 0
+        self.animation_initial_y = self.relative_y
 
 
     def set_cost(self, value: int, resource: pygame.Surface) -> None:
@@ -83,6 +87,7 @@ class Card(Sprite):
 
     def update(self) -> None:
         self.animation()
+        self.relative_positioning()
 
         self.should_animate = False
 

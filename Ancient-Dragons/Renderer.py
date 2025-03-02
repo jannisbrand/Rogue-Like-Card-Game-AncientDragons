@@ -21,7 +21,15 @@ class Renderer():
     def add_surface(self, surface: pygame.Surface):
         self.queue.append(surface)
 
+    def add_sprite(self, sprite):
+        print("[RENDERER] RECIEVED SPRITE:", sprite)
+        self.sprite_list.add(sprite)
+
     def add_sprites(self, sprites: list[Sprite]):
+        if len(sprites) < 1:
+            return
+
+        print("[RENDERER] RECIEVED SPRITES:", sprites)
         for sprite in sprites:
             self.sprite_list.add(sprite)
 

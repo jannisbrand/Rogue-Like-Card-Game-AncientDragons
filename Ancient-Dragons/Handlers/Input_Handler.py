@@ -3,7 +3,7 @@
 import pygame
 from Handlers.Event_Handler import Event_Handler
 from Handlers.Flags import SubscriptionType
-from Handlers.Subscriptions.Types import Subscription
+from Handlers.Subscriptions.Types import InputSubscribtion, Subscription
 
 
 class InputHandler(Event_Handler):
@@ -16,6 +16,7 @@ class InputHandler(Event_Handler):
 
         # ### TEST ### #
         self.wait_time = 0
+        self.standard_click_delay = 1
 
     def subscribe_to_event(self, subscription: Subscription) -> None:
         self.subscriptions.append(subscription)
@@ -88,3 +89,9 @@ class InputHandler(Event_Handler):
 
     def set_wait(self, time) -> None:
         self.wait_time = (time * 60)  # * delta_time
+
+    def remove_subscribtion(self, subscribtion: InputSubscribtion):
+        try:
+            self.subscriptions.remove(subscribtion)
+        except ValueError as e:
+            print("[INPUTHANDLER] Subscribtion does not exist:", e)

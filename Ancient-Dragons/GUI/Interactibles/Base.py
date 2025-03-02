@@ -1,8 +1,8 @@
-from typing import Any, Callable
+from typing import Any
 import pygame
 
 
-class Sprite(pygame.sprite.Sprite):
+class InteractibleSprite(pygame.sprite.Sprite):
     def __init__(self, context_id, type_id, reference_rect, name, color, width, height, image_path=""):
         super().__init__()
         self.context_id = context_id  # Represents object or entity id
@@ -18,7 +18,11 @@ class Sprite(pygame.sprite.Sprite):
             self.image = pygame.Surface((width, height))
             self.image.fill(self.color)
 
+        self.relative_x = 0
+        self.relative_y = 0
         self.rect = self.image.get_rect()
+        self.rect.x = self.relative_x
+        self.rect.y = self.relative_y
 
         self.is_hovered_over = False
 
@@ -50,4 +54,7 @@ class Sprite(pygame.sprite.Sprite):
         except AttributeError as e:
             print("[SPRITE] Name could not be found:", e)
 
-    
+    def relative_positioning(self):
+        # ### INITIAL RELATIVE POSITIONING ### #
+        self.rect.x = self.reference_rect.x + self.relative_x
+        self.rect.y = self.reference_rect.y + self.relative_y

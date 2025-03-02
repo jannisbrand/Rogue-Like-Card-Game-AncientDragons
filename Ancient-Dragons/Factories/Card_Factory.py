@@ -1,5 +1,7 @@
 import sqlite3
 from typing import Any
+from Characters.Base import Character
+from Characters.Player_Character import PlayerCharacter
 from ECSO_Context import ECSO_Context
 from Components import Components
 
@@ -70,8 +72,12 @@ class CardFactory():
                     handler = self.fabrication_process[column_names[index]]
                     if column_names[index] == "Charakter_ID":
                         created_components = handler(card_data[3], data)  # Only the handler-methond for the character id has two arguments
+                        if created_components is None:
+                            index += 1
+                            continue
                     else:
-                        created_components = handler(data) # Whacky solution | Could be a single object or a list of objects
+                        created_components = handler(data)  # Whacky solution | Could be a single object or a list of objects
+
                     if isinstance(created_components, list):  # Check if its a list of objects
                         # if index == 6 or index == 1:  # Temp
                         self.ecso_context.add_components(card_entity, created_components)
@@ -98,12 +104,14 @@ class CardFactory():
 
     def handle_character_affiliation(self, character_id: int, value: int) -> Any:
         # TODO: Implementation of a character factory first..
-        character = self.ecso_context.get_object("CHARACTERS", character_id)
-        if character != None:
-            component = Components.C_CHARACTER_AFFILIATION(character.id)
+        if character_id is not None:
+            character_name = self.database_connection.cursor().execute(f"SELECT Name FROM Charakters WHERE ID = {character_id}").fetchall()[0][0]
+            character_objects = self.ecso_context.get_game_objects_of_type(PlayerCharacter)
+            for entity, game_object in character_objects:
+                if game_object.name == character_name:
+                    return Components.C_CHARACTER_AFFILIATION(entity) # ID here
         else:
-            component = Components.C_CHARACTER_AFFILIATION()
-        return component
+            return None
 
     def handle_cost(self, value: int) -> Any:
         component = Components.C_CARD_COSTS(value)

@@ -1,8 +1,8 @@
 from math import sin
 import pygame
-from typing import Any
+from typing import Any, cast
 
-from GUI.Base import GUI
+from GUI.GUI import GUI
 from Sprites.Base import Sprite
 
 
@@ -12,69 +12,88 @@ from Sprites.Base import Sprite
 """
 
 
-class Level():
-    def __init__(self, id: int, sprites: dict[str, list[Any]] = {}):
-        self.id = id
-        # BACKGROUND1; BACKGROUND2; FOREGROUND; XXXX
+class Level(pygame.sprite.Sprite):
+    def __init__(self, context_id, type_id, reference_rect, name, color, width, height, sprites={}, image_path=""):
+        super().__init__()
+        self.context_id = context_id  # Represents object or entity id
+        self.type_id = type_id
+        self.name = name
+        self.color = color
+        self.reference_rect = reference_rect
+        self.image = pygame.Surface((width, height))
+        self.image.fill(self.color)
+        if image_path != "":
+            self.image = pygame.image.load(image_path)
+            self.image = pygame.transform.scale(self.image, (width, height))
+
+        self.rect = self.image.get_rect()
+
         self.environment: dict[str, list[Sprite]] = {}  # A list of "any" renderable data sorted to categories
-        self.guis = []
+        self.guis = []  # Collection of guis as their context id's
+
+        self.is_active = True
+        self.is_visible = True
+        self.destroy = False
 
         # ### STATIC ENVIRONMENT ### #
         # ### BACKGROUND1 ### #
-        if len(sprites.keys()) > 0:
-            self.environment["BACKGROUND1"] = []
-            self.environment["BACKGROUND1"].extend(sprites["BACKGROUND1"])
-
-            # ### BACKGROUND2 ### #
-            # Like clouds etc..
-            self.environment["BACKGROUND2"] = []
-            self.environment["BACKGROUND2"].extend(sprites["BACKGROUND2"])
-
-            # ### FOREGROUND1 ### #
-            # Like trees, buildings, etc..
-            self.environment["FOREGROUND1"] = []
-            self.environment["FOREGROUND1"].extend(sprites["FOREGROUND1"])
-
-            # ### FOREGROUND2 ### #
-            # Like ground etc..
-            self.environment["FOREGROUND2"] = []
-            self.environment["FOREGROUND2"].extend(sprites["FOREGROUND2"])
-        # ### STATIC ENVIRONMENT ### #
-
-            self.animation_key_positions: dict[str, list[int]] = {}
-
-        # ### STATIC ANIMATION KEY POSITIONS ### #
-            self.animation_frame = 1
-
-            self.animation_key_positions["BACKGROUND2"] = [5, 0, -5]
-            self.background2_last_key = 0
-
-            self.animation_key_positions["FOREGROUND1"] = [2, 0, -2]
-            self.foreground1_last_key = 0
-
-    def add_gui(self, gui: GUI) -> None:
-        self.guis.append(gui)
-
-    def get_gui(self, name: str) -> GUI:
         try:
-            for gui in self.guis:
-                if gui.name == name:
-                    return gui
-            return None
+            if len(sprites.keys()) > 0:
+                self.environment["BACKGROUND1"] = []
+                self.environment["BACKGROUND1"].extend(sprites["BACKGROUND1"])
+
+                # ### BACKGROUND2 ### #
+                # Like clouds etc..
+                self.environment["BACKGROUND2"] = []
+                self.environment["BACKGROUND2"].extend(sprites["BACKGROUND2"])
+
+                # ### FOREGROUND1 ### #
+                # Like trees, buildings, etc..
+                self.environment["FOREGROUND1"] = []
+                self.environment["FOREGROUND1"].extend(sprites["FOREGROUND1"])
+
+                # ### FOREGROUND2 ### #
+                # Like ground etc..
+                self.environment["FOREGROUND2"] = []
+                self.environment["FOREGROUND2"].extend(sprites["FOREGROUND2"])
+            # ### STATIC ENVIRONMENT ### #
+
+                self.animation_key_positions: dict[str, list[int]] = {}
+
+            # ### STATIC ANIMATION KEY POSITIONS ### #
+                self.animation_frame = 1
+
+                self.animation_key_positions["BACKGROUND2"] = [5, 0, -5]
+                self.background2_last_key = 0
+
+                self.animation_key_positions["FOREGROUND1"] = [2, 0, -2]
+                self.foreground1_last_key = 0
         except KeyError as e:
-            print("No gui found! ", e)
-            return None
+            print("[LEVEL] No category:", e)
+
+    def add_gui(self, gui: int) -> None:
+        try:
+            self.guis.append(gui)
+        except AttributeError as e:
+            print("[LEVEL] GUI sequence could not be found:", e)
+        except ValueError as e:
+            print("[LEVEL] Context id could not be added:", e)
+
+    def get_guis(self) -> list[int]:
+        try:
+            return self.guis
+        except AttributeError as e:
+            print("[LEVEL] GUI seqence could not be found:", e)
+            return []
 
     def get_sprites(self) -> list:
-        list_of_sprites = []
-        for category in self.environment:
-            sprites = self.environment[category]
-            list_of_sprites.extend(sprites)
-
-        for gui in self.guis:
-            list_of_sprites.append(gui)
-            list_of_sprites.extend(gui.get_interactibles())
-        return list_of_sprites
+        try:
+            list_of_sprites = []
+            for _, value in self.environment.items():
+                list_of_sprites.extend(value)
+            return list_of_sprites
+        except Exception as e:
+            print("[LEVEL] Something:", e)
 
     def animation_state(self) -> None:
 
@@ -94,9 +113,21 @@ class Level():
 
     def get_environment_type(self, type: str) -> list[Sprite]:
         return self.environment[type]
+    
+    def draw_level(self):
+        self.image.fill(0, 0, 0)
+        for _, sprite_list in self.environment.items():
+            for sprite in sprite_list:
+                sprite = cast(Sprite, sprite)
+                self.image.blit(sprite, (sprite.rect.x, sprite.rect.y))
+
+    def deactivate(self) -> None:
+        self.is_active = False
+
+    def activate(self):
+        self.is_active = True
 
     def update(self) -> None:
-        self.animation_state()
-
-        for gui in self.guis:
-            gui.update()
+        if len(self.environment.keys()) > 0:
+            self.animation_state()
+        # self.draw_level()

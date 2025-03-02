@@ -3,14 +3,16 @@
 from typing import Any
 
 import pygame
+from GUI.Interactibles.Base import InteractibleSprite
 from Sprites.Base import Sprite
 
 
-class InteractibleCharacter(Sprite):
-    def __init__(self, id: int, type: str, name: str, color: pygame.Color, width: int, height: int, image_path = ""):
-        super().__init__(id, type, name, color, width, height, image_path)
-        self.health = 0  # TODO: Make a slider interactible
-        # TODO: MOVE TO ONW: self.active_effects: list[Sprite] = []  # Icons representing the effects/buffs/debuffs with its value in a corner
+class InteractibleCharacter(InteractibleSprite):
+    def __init__(self, context_id: int, type_id: str, reference_rect, name: str, color: pygame.Color, width: int, height: int, image_path=""):
+        super().__init__(context_id, type_id, reference_rect, name, color, width, height, image_path)
+        self.rect.x = self.reference_rect.x
+        self.rect.y = self.reference_rect.y
+
         self.display_name = name
         self.show_name = False
 
@@ -19,17 +21,20 @@ class InteractibleCharacter(Sprite):
 
     def on_hover(self, source: Any, cursor: tuple[int]) -> None:
         try:
-            # Does noting with it self atm
-            self.callback_on_hover(source, cursor)
+            self.is_hovered_over = True
+            if self.callback_on_hover is not None:
+                self.callback_on_hover(source, cursor)
         except AttributeError as e:
             print("Callback not callable or not registered: ", e)
 
     def on_click(self, source: Any, mouse_buttons: tuple[bool]) -> None:
         try:
             # Does noting with it self atm
-            self.callback_on_click(source, mouse_buttons)
+            if self.callback_on_click is not None:
+                self.callback_on_click(source, mouse_buttons)
         except AttributeError as e:
             print("Callback not callable or not registered: ", e)
 
     def update(self) -> None:
-        pass
+        self.is_hovered_over = False
+        self.relative_positioning()

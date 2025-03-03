@@ -78,18 +78,17 @@ class Card(InteractibleSprite):
 
     def animation(self) -> None:
         if self.should_animate:
-            if self.rect.y > self.animation_initial_y - self.animation_range_max_y:
-                self.rect.y -= self.animation_increment_y
+            if self.relative_y > self.animation_initial_y - self.animation_range_max_y:
+                self.relative_y -= self.animation_increment_y
         else:
             # print(self.rect.y + self.animation_increment_y)
-            if self.rect.y < self.animation_initial_y:
-                self.rect.y += self.animation_increment_y
+            if self.relative_y < self.animation_initial_y:
+                self.relative_y += self.animation_increment_y
 
     def update(self) -> None:
         self.animation()
-        self.relative_positioning()
-
         self.should_animate = False
+        self.relative_positioning()
 
     def on_hover(self, source: Any, cursor: tuple[int]) -> None:
         try:

@@ -59,7 +59,7 @@ class Application():
 
     def _change_window(
             self,
-            flags: int) -> bool:       
+            flags: int) -> bool:
         os.environ["SDL_VIDEO_WINDOW_POS"] = "%d,%d" % (self.pos_x, self.pos_y)
         self.__window = pygame.display.set_mode((self.width, self.height), flags, 0, 0, 1)
 

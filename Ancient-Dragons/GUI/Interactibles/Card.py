@@ -17,6 +17,8 @@ class Card(InteractibleSprite):
         self.description = None
 
         self.base_font = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", 18)
+        self.cost_font = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", 26)
+        self.describtion_font = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", 18)
 
         # ### Animation ### #
         self.should_animate = False
@@ -25,56 +27,91 @@ class Card(InteractibleSprite):
         self.animation_range_min_y = 50
         self.animation_initial_y = self.relative_y
 
-
-    def set_cost(self, value: int, resource: pygame.Surface) -> None:
+    def set_cost(self, value: int, picture: pygame.Surface) -> None:
         square_measure = self.rect.width * 0.25
-        if resource is None:
-            background = pygame.Surface((square_measure, square_measure))  # ~25% smaller than the card
+        background = pygame.Surface((square_measure, square_measure))  # ~25% smaller than the card
+        if picture is None:
             background.fill((int(self.color.r * 0.80), int(self.color.g * 0.80), int(self.color.b * 0.80)))
         else:
-            background = pygame.transform.scale(resource, (square_measure, square_measure))
+            background = pygame.transform.scale(picture, (square_measure, square_measure))
+
         if value <= 0:
             text = "00"
         else:
             text = str(value)
-        text_color = pygame.Color(180, 180, 180)
-        cost_text = self.base_font.render(text, True, text_color)
-        background.blit(cost_text, (0, 0))  # Placed centered
+
+        text_color = pygame.Color(255, 255, 0)
+        cost_text = self.cost_font.render(text, True, text_color)
+
+        middle_x = background.get_rect().width / 2 - cost_text.get_rect().width / 2
+        middle_y = background.get_rect().height / 2 - cost_text.get_rect().height / 2
+
+        background.blit(cost_text, (middle_x, middle_y))  # Placed centered
         self.cost_area = background
         self.image.blit(background, (0, 0))
 
     def set_title(self, value: str) -> None:
         background = pygame.Surface((self.rect.width * 0.90, self.rect.height * 0.10))
-        background.fill((int(self.color.r * 0.80), int(self.color.g * 0.80), int(self.color.b * 0.80)))
+        background.fill((100, 240, 250))
+
         if value == "":
             text = "(O_o)"
         else:
             text = value
-        text_color = pygame.Color(180, 180, 180)
+
+        text_color = pygame.Color(50, 50, 50)
         title_text = self.base_font.render(text, True, text_color)
-        background.blit(title_text, (0, 0))
+        middle_x = background.get_rect().width / 2 - title_text.get_rect().width / 2
+        middle_y = background.get_rect().height / 2 - title_text.get_rect().height / 2
+        background.blit(title_text, (middle_x, middle_y))
+
         self.title = background
-        self.image.blit(background, (self.rect.width / 2 - background.get_rect().width / 2, self.rect.y + self.rect.height * 0.50))
+        self.image.blit(background, (self.rect.width / 2 - background.get_rect().width / 2, self.rect.y + self.rect.height / 10))
 
     def set_picture(self, picture: pygame.Surface) -> None:
         background = pygame.Surface((self.rect.width * 0.35, self.rect.height * 0.35))
         background.fill((int(self.color.r * 0.80), int(self.color.g * 0.80), int(self.color.b * 0.80)))
         background.blit(picture, (0, 0))
         self.picture = background
-        self.image.blit(background)
+
+        picture = pygame.transform.scale(picture, (self.rect.width * 0.75, self.rect.width * 0.75))
+        middle_x = self.rect.width / 2 - picture.get_rect().width / 2
+        pos_y = int(self.rect.height / 12)
+
+        self.picture = picture
+        self.image.blit(picture, (middle_x, pos_y))
 
     def set_description(self, value: str) -> None:
         background = pygame.Surface((self.rect.width * 0.25, self.rect.height * 0.25))  # ~25% smaller than the card
         background.fill((int(self.color.r * 0.80), int(self.color.g * 0.80), int(self.color.b * 0.80)))
-        if value <= 0:
+        if value == "":
             text = "- - -"
         else:
             text = str(value)
-        text_color = pygame.Color(10, 10, 10)
-        cost_text = self.base_font.render(text, True, text_color)
-        background.blit(cost_text, (0, 0))  # Placed centered
-        self.description = background
-        self.image.blit(background, (0, 0))
+
+        text_color = pygame.Color(220, 220, 220)
+        text = text.split(" ")
+
+        font_size = 18
+        word_spacing = 5
+        line_spacing = 5
+        line_pos_y = (self.rect.width / 1.0016)
+        card_middle_x = self.rect.width / 2
+        line_width_max = 150
+        line_width = 0
+        chars_in_line = 0
+        lines = 0
+        for word in text:
+            chars_in_line += len(word)
+            if chars_in_line >= 20:
+                chars_in_line = 0
+                line_pos_y += font_size + line_spacing
+                line_width = 0
+                lines += 1
+            surface_word = self.describtion_font.render(word, True, text_color)
+            pos_x = (card_middle_x - line_width_max / 2) + line_width
+            self.image.blit(surface_word, (pos_x, line_pos_y))
+            line_width += surface_word.get_rect().width + word_spacing
 
     def animation(self) -> None:
         if self.should_animate:

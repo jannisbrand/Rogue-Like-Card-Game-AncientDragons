@@ -9,6 +9,7 @@ from GUI.Interactibles.Base import InteractibleSprite
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
 from GUI.Interactibles.Character import InteractibleCharacter
+from GUI.Interactibles.Environmental import InteractibleEnvironmental
 from GUI.Interactibles.Slider import ProgressBar
 from GUI.Interactibles.Sprite_List import SpriteList
 from Game.Gamemode import Gamemode
@@ -46,25 +47,41 @@ class MainMenu(Gamemode):
         rect.y = 0
 
         entity = self.ecso_context.add_entity()
-        level = MenuLevel(entity, "MAIN_MENU", rect, "", (13, 50, 89), 1440, 900, environment, "Levels/Data/cloud.png")
+        level = MenuLevel(entity, "MAIN_MENU", rect, "", (13, 50, 89), 1440, 900, environment, "Levels/Data/main-menu_background.png")
         self.active_level = entity
         self.ecso_context.add_game_object(entity, level)
         self.active_level = entity
 
         # GUI
         entity = self.ecso_context.add_entity()
-        main_gui = GUI(entity, "GUI_MAIN_MENU", level.rect, "", pygame.Color(25, 25, 25), 500, 700)
-        main_gui.rect.x = 470
-        main_gui.rect.y = 100
-        main_gui.image.set_alpha(180)
+        main_gui = GUI(entity, "GUI_MAIN_MENU", level.rect, "", pygame.Color(25, 25, 25), 300, 900)
+        main_gui.relative_x = 0
+        main_gui.relative_y = 0
+        main_gui.image.set_alpha(100)
         level.add_gui(entity)
         self.ecso_context.add_game_object(entity, main_gui)
 
+        # LOGO
+        entity = self.ecso_context.add_entity()
+        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 300, 300, "Levels/Data/main-menu_logo_test.png")
+        logo.relative_x = 0
+        logo.rect.y = 50
+        self.ecso_context.add_game_object(entity, logo)
+        main_gui.add_interactible(logo)
+
+        # TITLE
+        entity = self.ecso_context.add_entity()
+        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 1140, 120, "Levels/Data/main-menu_title_test.png")
+        logo.rect.x = (level.rect.width / 2 + main_gui.rect.width / 2) - logo.rect.width / 2
+        logo.rect.y = level.rect.height / 2 - logo.rect.height / 2
+        self.ecso_context.add_game_object(entity, logo)
+        main_gui.add_interactible(logo)
+
         # BUTTON
         entity = self.ecso_context.add_entity()
-        button = Button(entity, f"btn_main_menu_{entity}", main_gui.rect, pygame.Color(35, 35, 80), pygame.Color(45, 45, 90), "", "ENDLESS", 200, 50)
-        button.relative_x = 50
-        button.relative_y = 50
+        button = Button(entity, f"btn_main_menu_{entity}", main_gui.rect, pygame.Color(200, 0, 0), pygame.Color(240, 10, 10), "", "ENDLESS", 300, 50)
+        button.relative_x = 0
+        button.relative_y = 500
         main_gui.add_interactible(entity)
         self.ecso_context.add_game_object(entity, button)
 

@@ -8,7 +8,7 @@ from typing import Any, cast
 from Characters.Base import Character
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
-from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME
+from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME, C_DISPLAY_TEXT
 from ECSO_Context import ECSO_Context
 from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
@@ -88,31 +88,31 @@ class Endless(Gamemode):
         cast(CardFactory, self.factories["CARDS"]).fabricate_all()
         return True
 
-    def __show_main_menu(self) -> None:
+    def __show_selection_menu(self) -> None:
         self.input_handler.reset()  # TODO: NEEDS TO STAY! Application context has to be referenced first. (To get access to App clock)
 
         # ### CHARACTER SELECTION MENU ### #
         entity = self.ecso_context.add_entity()
         rect = pygame.Rect(0, 0, 0, 0)
-        character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {})
+        character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {}, "Levels/Data/selection-menu_background_test.png")
         self.ecso_context.add_game_object(entity, character_selection)
         self.active_level = entity
 
         entity = self.ecso_context.add_entity()
-        selection_menu = GUI(entity, "GUI_MAIN_MENU", character_selection.rect, "", (25, 25, 25), 500, 700)
-        selection_menu.rect.x = 470
-        selection_menu.rect.y = 100
-        selection_menu.image.set_alpha(180)
+        selection_menu = GUI(entity, "GUI_MAIN_MENU", character_selection.rect, "", (25, 25, 25), 300, 900)
+        selection_menu.relative_x = 0
+        selection_menu.relative_y = 0
+        selection_menu.image.set_alpha(100)
         self.ecso_context.add_game_object(entity, selection_menu)
         character_selection.add_gui(entity)  # Adds context id of the gui to the parent level
 
         index = 0
-        button_offset_y = 50
+        button_offset_y = 75
         for _, character in self.ecso_context.get_game_objects_of_type(PlayerCharacter):
             character = cast(PlayerCharacter, character)
 
             entity = self.ecso_context.add_entity()
-            button = Button(entity, "SELECTION_BUTTON", selection_menu.rect, pygame.Color(35, 35, 80), pygame.Color(45, 45, 90), f"btn_select_character_{character.id}", character.get_name(), 200, 50)
+            button = Button(entity, "SELECTION_BUTTON", selection_menu.rect, pygame.Color(200, 0, 0), pygame.Color(240, 10, 10), f"btn_select_character_{character.id}", character.get_name(), 200, 50)
             button.relative_x = 50
             button.relative_y = 50 + button_offset_y * index
             self.ecso_context.add_game_object(entity, button)
@@ -198,7 +198,7 @@ class Endless(Gamemode):
 
         color = pygame.Color(10, 10, 10)
         gui_entity = self.ecso_context.add_entity()
-        gui_cards = GUI(gui_entity, "GUI_CARDS", level.rect, "", color, 1040, 200)
+        gui_cards = GUI(gui_entity, "GUI_CARDS", level.rect, "", color, 1240, 300)
         gui_cards.image.set_alpha(50)
         gui_cards.relative_x = (level.rect.x + level.rect.width / 2) - int(gui_cards.rect.width / 2)
         gui_cards.relative_y = (level.rect.x + level.rect.height) - gui_cards.rect.height
@@ -207,21 +207,25 @@ class Endless(Gamemode):
 
         player_character_data = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
 
-        x_offset = 175
+        x_offset = 215
         index = 0
         for entity in player_character_data.get_cards_on_hand():
             card_entity = self.ecso_context.add_entity()
             color = pygame.Color(80, 20, 60)
-            card = Card(card_entity, "INTERACTIBLE_CARD_SPRITE", gui_cards.rect, "", color, 200, 300)  # It's possible to use an image as a base background!
-            cost_resource = pygame.image.load("Levels/Data/gangsta_tree.png")  # Background of the card costs area (Mana)
+            card = Card(card_entity, "INTERACTIBLE_CARD_SPRITE", gui_cards.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
+            cost_resource = pygame.image.load("Levels/Data/card_cost_background.png")  # Background of the card costs area (Mana)
             try:
+                # CARD PICTURE
+                card.set_picture(pygame.image.load("Levels/Data/gangsta_tree.png"))
                 # CARD TITLE
                 card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity, C_DISPLAY_NAME)).value)
                 # CARD COSTS
                 card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity, C_CARD_COSTS)).value, cost_resource)
-            except Exception:
-                print("FUCK!?")
-            card.relative_x = 200 + (x_offset * index)
+                # CARD DESCRIBTION
+                card.set_description(cast(C_DISPLAY_TEXT, self.ecso_context.get_component(entity, C_DISPLAY_TEXT)).value)
+            except Exception as e:
+                print("FUCK!?", e)
+            card.relative_x = 100 + (x_offset * index)
             card.relative_y = 20
             # card.animation_initial_y = card.rect.y  # TODO: Not a good  solution
             card.callback_on_click = self.__stage_select_targets
@@ -243,9 +247,9 @@ class Endless(Gamemode):
         color = pygame.Color(0, 0, 245)
         highlight = pygame.Color(0, 0, 255)
         entity = self.ecso_context.add_entity()
-        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 100, 100)
-        pull_stack.relative_x = 50
-        pull_stack.relative_y = 50
+        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 50, 50, "Levels/Data/pull_stack.png")
+        pull_stack.relative_x = 25
+        pull_stack.relative_y = (gui_cards.rect.height - pull_stack.rect.height) - 25
         pull_stack.set_text("STACK")
         pull_stack.font_size = 32
         self.ecso_context.add_game_object(entity, pull_stack)
@@ -256,14 +260,14 @@ class Endless(Gamemode):
 
     def __create_character_gui(self) -> None:
         level = cast(Level, self.ecso_context.get_game_object(self.active_level, Level))
-        ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y  # ...
+        # ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y  # ...
         
         color = pygame.Color(0, 0, 0)
         entity = self.ecso_context.add_entity()
         gui_characters = GUI(entity, "GUI_CHARACTERS", level.rect, "", color, 1440, 400)
         gui_characters.image.set_alpha(50)
         gui_characters.relative_x = 0
-        gui_characters.relative_y = ground_level - gui_characters.rect.height
+        gui_characters.relative_y = gui_characters.rect.height - 200
         self.ecso_context.add_game_object(entity, gui_characters)
         level.add_gui(entity)
 
@@ -322,7 +326,7 @@ class Endless(Gamemode):
         enemy_character_sprite_entity = self.ecso_context.add_entity()
         enemy_character_sprite = InteractibleCharacter(enemy_character_sprite_entity, "INTERACTIBLE_ENEMY_CHARACTER_SPRITE", gui_characters.rect, "", base_color, 300, 300, f"Levels/Data/Enemies/{resource}")
         enemy_character_sprite.callback_on_click = self.__stage_select_targets
-        enemy_character_sprite.relative_x = 1000
+        enemy_character_sprite.relative_x = 1100
         enemy_character_sprite.relative_y = gui_characters.rect.height - enemy_character_sprite.rect.height
 
         subscription_entity = self.ecso_context.add_entity()
@@ -416,7 +420,7 @@ class Endless(Gamemode):
                 case 0:
                     # Character selection menu
                     if self.active_level == -1:
-                        self.__show_main_menu()
+                        self.__show_selection_menu()
 
                     if self.active_player_character != -1:
                         try:
@@ -437,7 +441,7 @@ class Endless(Gamemode):
                     if level is None:
                         generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level()
                         generated_level = cast(Level, self.ecso_context.get_game_object(generated_entity, Level))
-                        self.ecso_context.add_game_object(generated_entity, generated_level)
+                        self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
                         self.active_level = generated_entity
                         self.is_generating_level = False
                     self.current_stage = 4

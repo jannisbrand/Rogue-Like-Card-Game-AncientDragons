@@ -391,13 +391,18 @@ class Gamemode():
         if game_object.destroy:
             is_ok = False
             # Removes input subscribtions from being checked
-            self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(game_object.subscribtion_on_hover, InputSubscribtion))
-            self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(game_object.subscribtion_on_click, InputSubscribtion))
+            subscribtion_entity = self.ecso_context.get_game_object(game_object.get_subscribtion_on_hover())
+            if subscribtion_entity == -1:
+                self.input_handler.remove_subscribtion(subscribtion_entity, InputSubscribtion)
+                staged_deletions.append(subscribtion_entity)
+            
+            subscribtion_entity = self.ecso_context.get_game_object(game_object.get_subscribtion_on_hover())
+            if subscribtion_entity == -1:
+                self.input_handler.remove_subscribtion(subscribtion_entity, InputSubscribtion)
+                staged_deletions.append(subscribtion_entity)
+            
             game_object.kill()  # Removes the sprite from all groups
-            # self.ecso_context.remove_game_object(entity)  # Removes that entity from existence
             staged_deletions.append(game_object.context_id)
-            staged_deletions.append(game_object.subscribtion_on_hover)
-            staged_deletions.append(game_object.subscribtion_on_click)
         elif not game_object.is_visible:
             game_object.kill()  # Removes the sprite from all groups
 

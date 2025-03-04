@@ -14,9 +14,9 @@ class Character():
         self.sprite = int
         self.active_effects = {}
 
-        self.on_health_changed = Callable[[int], None]
-        self.on_effect_added = Callable
-        self.on_effect_removed = Callable
+        self.health_changed = False
+        self.effects_changed = False
+        self.mana_changed = False
 
     def set_sprite(self, sprite_context_id: int) -> bool:
         try:
@@ -46,7 +46,10 @@ class Character():
     def set_health(self, value):
         try:
             self.health = value
-            self.on_health_changed(value)
+            if self.health <= 0:
+                self.health = 0
+                self.is_alive = False
+            self.health_changed = True
         except AttributeError as e:
             print("[CHARACTER][DATA]", e)
         except ValueError as e:
@@ -60,8 +63,7 @@ class Character():
                 self.active_effects[effect]
 
             self.active_effects[effect] = value
-
-            self.on_effect_added(effect, value)
+            self.effects_changed = True
         except ValueError as e:
             print("[CHARACTER][DATA]", e)
 
@@ -71,3 +73,10 @@ class Character():
         except AttributeError as e:
             print("[CHARACTER][DATA]", e)
             return []
+
+    def get_effect(self, effect: int) -> int:
+        try:
+            return self.active_effects[effect]
+        except KeyError as e:
+            print(e)
+            return 0

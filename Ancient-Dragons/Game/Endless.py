@@ -209,20 +209,20 @@ class Endless(Gamemode):
 
         x_offset = 215
         index = 0
-        for entity in player_character_data.get_cards_on_hand():
+        for entity_on_hand in player_character_data.get_cards_on_hand():
             card_entity = self.ecso_context.add_entity()
             color = pygame.Color(80, 20, 60)
-            card = Card(card_entity, "INTERACTIBLE_CARD_SPRITE", gui_cards.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
+            card = Card(card_entity, entity_on_hand, "INTERACTIBLE_CARD_SPRITE", gui_cards.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
             cost_resource = pygame.image.load("Levels/Data/card_cost_background.png")  # Background of the card costs area (Mana)
             try:
                 # CARD PICTURE
                 card.set_picture(pygame.image.load("Levels/Data/gangsta_tree.png"))
                 # CARD TITLE
-                card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity, C_DISPLAY_NAME)).value)
+                card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity_on_hand, C_DISPLAY_NAME)).value)
                 # CARD COSTS
-                card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity, C_CARD_COSTS)).value, cost_resource)
+                card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity_on_hand, C_CARD_COSTS)).value, cost_resource)
                 # CARD DESCRIBTION
-                card.set_description(cast(C_DISPLAY_TEXT, self.ecso_context.get_component(entity, C_DISPLAY_TEXT)).value)
+                card.set_description(cast(C_DISPLAY_TEXT, self.ecso_context.get_component(entity_on_hand, C_DISPLAY_TEXT)).value)
             except Exception as e:
                 print("FUCK!?", e)
             card.relative_x = 100 + (x_offset * index)
@@ -285,7 +285,7 @@ class Endless(Gamemode):
             if image_name.split(".")[0] == player_character_data.get_name().lower():
                 resource = image_name
         player_character_sprite_entity = self.ecso_context.add_entity()
-        player_character_sprite = InteractibleCharacter(entity, "INTERACTIBLE_PLAYER_CHARACTER_SPRITE", gui_characters.rect, "", base_color, 300, 300, f"Levels/Data/Charakters/{resource}")
+        player_character_sprite = InteractibleCharacter(player_character_sprite_entity, self.active_player_character, "INTERACTIBLE_PLAYER_CHARACTER_SPRITE", gui_characters.rect, "", base_color, 300, 300, f"Levels/Data/Charakters/{resource}")
         player_character_sprite.relative_x = 50
         player_character_sprite.relative_y = gui_characters.rect.height - player_character_sprite.rect.height
         player_character_sprite.callback_on_click = self.__stage_select_targets
@@ -306,7 +306,6 @@ class Endless(Gamemode):
         progressbar = ProgressBar(progressbar_entity, "INTERACTIBLE_PLAYER_PROGRESSBAR_SPRITE", player_character_sprite.rect, "", base_color, value_color, player_character_sprite.rect.width, 20, player_character_data.get_health(), 0, "")
         progressbar.relative_x = 0
         progressbar.relative_y = -40
-        player_character_data.on_health_changed = progressbar.set_value
 
         self.ecso_context.add_game_object(progressbar_entity, progressbar)
         gui_characters.add_interactible(progressbar_entity)
@@ -324,7 +323,7 @@ class Endless(Gamemode):
         list_of_enemy_images = os.listdir("Levels/Data/Enemies")
         resource = list_of_enemy_images[randint(0, len(list_of_enemy_images) - 1)]
         enemy_character_sprite_entity = self.ecso_context.add_entity()
-        enemy_character_sprite = InteractibleCharacter(enemy_character_sprite_entity, "INTERACTIBLE_ENEMY_CHARACTER_SPRITE", gui_characters.rect, "", base_color, 300, 300, f"Levels/Data/Enemies/{resource}")
+        enemy_character_sprite = InteractibleCharacter(enemy_character_sprite_entity, self.active_enemy_character, "INTERACTIBLE_ENEMY_CHARACTER_SPRITE", gui_characters.rect, "", base_color, 300, 300, f"Levels/Data/Enemies/{resource}")
         enemy_character_sprite.callback_on_click = self.__stage_select_targets
         enemy_character_sprite.relative_x = 1100
         enemy_character_sprite.relative_y = gui_characters.rect.height - enemy_character_sprite.rect.height
@@ -345,7 +344,6 @@ class Endless(Gamemode):
         progressbar = ProgressBar(progressbar_entity, "INTERACTIBLE_ENEMY_PROGRESSBAR_SPRITE", enemy_character_sprite.rect, "", base_color, value_color, enemy_character_sprite.rect.width, 20, enemy_character_data.get_health(), 0)
         progressbar.relative_x = 0
         progressbar.relative_y = -40
-        enemy_character_sprite.on_health_changed = progressbar.set_value
 
         self.ecso_context.add_game_object(progressbar_entity, progressbar)
         gui_characters.add_interactible(progressbar)
@@ -371,15 +369,15 @@ class Endless(Gamemode):
         try:
             match source.type_id:
                 case "INTERACTIBLE_CARD_SPRITE":
-                    self.selected_card = source.context_id  # Saves the entity id of selected card
+                    self.selected_card = source.card_context_id  # Saves the entity id of selected card
                 case "INTERACTIBLE_PLAYER_CHARACTER_SPRITE":
                     if self.selected_card != -1:
-                        self.selected_target = source.context_id  # Saves object id of selected character
-                        self.selected_type = source.type_id
+                        self.selected_target = source.character_context_id  # Saves object id of selected character
+                        self.selected_type = PlayerCharacter
                 case "INTERACTIBLE_ENEMY_CHARACTER_SPRITE":
                     if self.selected_card != -1:
-                        self.selected_target = source.context_id
-                        self.selected_type = source.type_id
+                        self.selected_target = source.character_context_id
+                        self.selected_type = StandardEnemy
         except AttributeError as e:
             print("[GAMEMODE][SELECTION] ", e)
 
@@ -516,9 +514,9 @@ class Endless(Gamemode):
             # ### ### #
             # level.update()
             if self.active_player_character != -1:
-                self.__sync_character(player_character_data.get_sprite(), player_character_data)
+                self.__sync_character(self.ecso_context.get_game_object(player_character_data.get_sprite(), InteractibleCharacter), player_character_data)
             if self.active_enemy_character != -1:
-                self.__sync_character(enemy_character_data.get_sprite(), enemy_character_data)
+                self.__sync_character(self.ecso_context.get_game_object(enemy_character_data.get_sprite(), InteractibleCharacter), enemy_character_data)
             # self.renderer.add_sprites(level.get_sprites())  # Adds all sprites from the active level to the renderers sprite group
         except ValueError as e:
             print("Flupp", e)
@@ -531,4 +529,9 @@ class Endless(Gamemode):
         # Maybe update image?
         # TODO: Do we even need that?? The systems update the character class and card entities.
         #       The character classes update elements like the health bar on a change.. :think:
-        pass
+        if data.health_changed:
+            pb = cast(ProgressBar, self.ecso_context.get_game_object(151, ProgressBar))
+            pb.set_value(data.get_health())
+        
+        if sprite is not None and not data.is_alive:
+            sprite.destroy = True

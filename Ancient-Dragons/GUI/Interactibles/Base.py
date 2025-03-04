@@ -58,3 +58,15 @@ class InteractibleSprite(pygame.sprite.Sprite):
         # ### INITIAL RELATIVE POSITIONING ### #
         self.rect.x = self.reference_rect.x + self.relative_x
         self.rect.y = self.reference_rect.y + self.relative_y
+
+    def get_subscribtion_on_hover(self) -> int:
+        try:
+            return self.subscribtion_on_hover
+        except AttributeError:
+            return -1
+
+    def get_subscribtion_on_click(self) -> int:
+        try:
+            return self.subscribtion_on_click
+        except AttributeError:
+            return -1

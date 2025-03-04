@@ -6,11 +6,12 @@ import pygame
 from Characters.Base import Character
 from ECSO_Context import ECSO_Context
 from Components import Components
-from GUI.Base import GUI
+from GUI.GUI import GUI
+from GUI.Interactibles.Environmental import InteractibleEnvironmental
 from GUI.Interactibles.Button import Button
 from Handlers.Flags import SubscriptionType
 from Handlers.Subscriptions.Types import InputSubscribtion
-from Levels.Static.Menu import MenuLevel
+from Levels.Menu import MenuLevel
 from Handlers import Input_Handler
 from Levels.Base import Level
 from Sprites import Base
@@ -33,65 +34,62 @@ class LevelFactory():
             column_names.append(column_name)
         return column_names
 
-    def fabricate_all(self):
-        """NOT IMPLEMENTED"""
-        character_collection = self.database_connection.cursor().execute("SELECT * FROM Charakters")
-        column_names = self.get_database_column_names("Charakters")
-        for character_data in character_collection.fetchall():
-            # PATTERN
-            # CHARACTER ID; CHARACTER NAME;
-            if len(character_data) != len(column_names):
-                print("[OFactory] Character data and Colum names do not match!")
-                continue
-
-            created_character = Character(character_data[0], character_data[1], None)
-            created_character.health = 100
-            created_character.mana = 100
-            created_character.gold = 100
-            self.ecso_context.add_object("CHARACTERS", created_character)
-            print("[OFactory] Created character: " + str(created_character))
-
-    def generate_level(self) -> Any:
+    def generate_level(self) -> int:
         # seed = 69
         # random.seed(seed)
 
         environment_categories = ["BACKGROUND1", "BACKGROUND2", "FOREGROUND1", "FOREGROUND2"]
-        
         sprites: dict[str, list[Any]] = {}
-        for category in environment_categories:
-            if category not in sprites:
-                sprites[category] = []
+        # for category in environment_categories:
+        #     if category not in sprites:
+        #         sprites[category] = []
 
-            r = random.randint(0, 255)
-            g = random.randint(0, 255)
-            b = random.randint(0, 255)
-            color = pygame.Color(50, 50, 255)
-            match category:
-                case "BACKGROUND1":
-                    sprite = Base.Sprite(-1, "---", "sky.color", color, 1440, 900)
-                    sprite.rect.x = 0
-                    sprite.rect.y = 0
-                    sprites[category].append(sprite)
-                case "BACKGROUND2":
-                    # Clouds
-                    for index in range(6):
-                        sprite = Base.Sprite(-1, "---", "cloud.png", color, 200, 50, "Levels\Data\cloud.png")
-                        sprite.rect.x += 250 * index
-                        sprite.rect.y = 200
-                        sprites[category].append(sprite)
-                case "FOREGROUND1":
-                    for index in range(4):
-                        sprite = Base.Sprite(-1, "---", "tree.png", color, 200, 200, "Levels\Data\gangsta_tree.png")
-                        sprite.rect.x = 350 * index + 100
-                        sprite.rect.y = 500
-                        sprites[category].append(sprite)
-                case "FOREGROUND2":
-                    sprite = Base.Sprite(-1, "---", "ground.color", (125, 80, 50), 1440, 500)
-                    sprite.rect.x = 0
-                    sprite.rect.y = 700
-                    sprites[category].append(sprite)
+        #     r = random.randint(0, 255)
+        #     g = random.randint(0, 255)
+        #     b = random.randint(0, 255)
+        #     color = pygame.Color(50, 50, 255)
+        #     rect = pygame.Rect(0, 0, 0, 0)
+        #     rect.x = 0
+        #     rect.y = 0
+        #     match category:
+        #         case "BACKGROUND1":
+        #             entity = self.ecso_context.add_entity()
+        #             sprite = InteractibleEnvironmental(entity, "LEVEL_BACKGROUND_1", rect, "", color, 1440, 900)
+        #             sprite.image.set_alpha(0)
+        #             sprite.rect.x = 0
+        #             sprite.rect.y = 0
+        #             self.ecso_context.add_game_object(entity, sprite)
+        #             sprites[category].append(sprite)
+        #         case "BACKGROUND2":
+        #             # Clouds
+        #             for index in range(6):
+        #                 entity = self.ecso_context.add_entity()
+        #                 sprite = InteractibleEnvironmental(entity, "LEVEL_BACKGROUND_2", rect, "", color, 200, 50, "Levels\Data\cloud.png")
+        #                 sprite.rect.x += 250 * index
+        #                 sprite.rect.y = 100
+        #                 self.ecso_context.add_game_object(entity, sprite)
+        #                 sprites[category].append(sprite)
+        #         case "FOREGROUND1":
+        #             for index in range(4):
+        #                 entity = self.ecso_context.add_entity()
+        #                 sprite = InteractibleEnvironmental(entity, "LEVEL_FOREGROUND_1", rect, "", color, 200, 200, "Levels\Data\gangsta_tree.png")
+        #                 sprite.rect.x = 350 * index + 100
+        #                 sprite.rect.y = 400
+        #                 self.ecso_context.add_game_object(entity, sprite)
+        #                 sprites[category].append(sprite)
+        #         case "FOREGROUND2":
+        #             entity = self.ecso_context.add_entity()
+        #             sprite = InteractibleEnvironmental(entity, "LEVEL_FOREGROUND_2", rect, "", (125, 80, 50), 1440, 500)
+        #             sprite.rect.x = 0
+        #             sprite.rect.y = 600
+        #             self.ecso_context.add_game_object(entity, sprite)
+        #             sprites[category].append(sprite)
 
-        id = len(self.ecso_context.objects["LEVELS"])
-        created_level = Level(id, sprites)
-        print("[OFactory] Level generated with id: ", id)
-        return created_level
+        entity = self.ecso_context.add_entity()
+        rect = pygame.Rect(0, 0, 0, 0)
+        rect.x = 0
+        rect.y = 0
+        created_level = Level(entity, "GAME_LEVEL", rect, "", (50, 50, 50), 1440, 900, sprites, "Levels/Data/level_background_1.png")
+        self.ecso_context.add_game_object(entity, created_level)
+        print("[OFactory] Level generated with id: ", entity)
+        return entity

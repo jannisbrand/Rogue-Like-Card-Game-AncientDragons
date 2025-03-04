@@ -37,7 +37,9 @@ class GamemodeHandler():
 
     def update(self) -> None:
         gamemode = self.gamemodes[self.active_gamemode]
+        gamemode.entity_update()
         gamemode.update()
+        gamemode.entity_render()
         if gamemode.is_finished:
             match gamemode.next_gamemode:
                 case "START":

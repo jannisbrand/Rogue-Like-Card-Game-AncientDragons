@@ -12,6 +12,7 @@ from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME, C_DISPLAY_TEXT
 from ECSO_Context import ECSO_Context
 from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
+from Factories.GUI_Factory import GUIFactory
 from Factories.Level_Factory import LevelFactory
 from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
@@ -27,6 +28,8 @@ from Levels.Base import Level
 from Levels.Menu import MenuLevel
 from Renderer import Renderer
 from Sprites.Base import Sprite
+from Systems.Stacks.Hand import Hand
+from Systems.Stacks.Play import Play
 
 
 # ### GLOBAL GAMERULES ### #
@@ -148,39 +151,42 @@ class Endless(Gamemode):
         # TIER-0 IMPLEMENTATION: Stack composition with cards only listed in chararcter object
         player_character_data = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
 
-        stack_name = "DRAW"
-        if stack_name not in self.card_stacks:
-            self.card_stacks[stack_name] = []
+        play_entity = self.ecso_context.add_entity()
+        stack = Play(play_entity)
+        self.ecso_context.add_game_object(play_entity, stack)
 
         stack_composition = player_character_data.get_stack_composition()
         temporary_index = 0
-        for card in stack_composition:
+        for card_name in stack_composition:
             if temporary_index % 2 == 0:  # Skips the card amount (As long as the "stack_composition" stays like this)
                 for _ in range(stack_composition[temporary_index + 1]):
-                    entity_id = self.ecso_context.get_entity(C_DISPLAY_NAME, card)
-                    copied_card = cast(CardFactory, self.factories["CARDS"]).copy_entity(entity_id)
-                    self.card_stacks["DRAW"].append(copied_card)
-                    print("[GAMEMODE] Stack composition with id: ", entity_id)
+                    # GETS CARD ENTITY WITH THE NAME IN CARD COMPOSITION
+                    card_entity = self.ecso_context.get_entity(C_DISPLAY_NAME, card_name)
+                    # COPIES THE CARD TO BE USED. (LIKE BETHESDA DOES IT :))
+                    copied_card = cast(CardFactory, self.factories["CARDS"]).copy_entity(card_entity)
+                    stack.add_card(copied_card)
+                    print("[GAMEMODE] Added card to play stack: ", copied_card)
 
             temporary_index += 1
 
-        print(self.card_stacks["DRAW"])
-        self.card_stacks["DRAW"] = self.shuffle_stack(self.card_stacks["DRAW"], 10)
-        print(self.card_stacks["DRAW"])
+        stack.shuffle(10)
+        self.active_play_stack = stack.context_id  # Does what its says
         # ### DRAW STACK ### #
 
         # ### HAND STACK ### #
-        stack_name = "HAND"
-        if stack_name not in self.card_stacks:
-            self.card_stacks[stack_name] = []
+        play_stack = cast(Play, self.ecso_context.get_game_object(self.active_play_stack, Play))
+
+        hand_entity = self.ecso_context.add_entity()
+        stack = Hand(hand_entity)
+        self.ecso_context.add_game_object(hand_entity, stack)
 
         # Add top cards to the hand stack of the character
         draw_amount = 5
         for _ in range(draw_amount):
-            entity = self.card_stacks["DRAW"].pop()
-            player_character_data.add_card_to_hand(entity)
-            self.card_stacks["HAND"].append(entity)
+            stack.add_card(play_stack.take_card())
         print("[GAMEMODE] Cards drawn from character: ", 0)
+
+        player_character_data.set_stack(stack.context_id)
         # ### HAND STACK ### #
 
     def shuffle_stack(self, stack: list, times: int) -> list:
@@ -433,17 +439,14 @@ class Endless(Gamemode):
                     self.is_generating_stacks = False
                     self.current_stage = 2
                 case 2:
-                    self.shuffle_stack(self.card_stacks["DRAW"], AMOUNT_STACK_SHUFFLE)
-                    self.current_stage = 3
-                case 3:
                     if level is None:
                         generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level()
                         generated_level = cast(Level, self.ecso_context.get_game_object(generated_entity, Level))
                         self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
                         self.active_level = generated_entity
                         self.is_generating_level = False
-                    self.current_stage = 4
-                case 4:
+                    self.current_stage = 3
+                case 3:
                     # The player & enemy characters are assingned to the same gui
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
@@ -454,11 +457,11 @@ class Endless(Gamemode):
                         gui_object = cast(GUI, self.ecso_context.get_game_object(gui_entity, GUI))
                         if gui_object.type_id == "GUI_CHARACTERS":
                             self.is_creating_gui = False
-                            self.current_stage = 5
-                case 5:
+                            self.current_stage = 4
+                case 4:
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
-                        self.__create_card_gui()
+                        cast(GUIFactory, self.factories["GUIS"]).generate_card_gui(self.active_level, self.active_play_stack, player_character_data.get_stack(), self.__stage_select_targets)
 
                     gui_entities = level.get_guis()
                     for gui_entity in gui_entities:
@@ -530,7 +533,7 @@ class Endless(Gamemode):
         # TODO: Do we even need that?? The systems update the character class and card entities.
         #       The character classes update elements like the health bar on a change.. :think:
         if data.health_changed:
-            pb = cast(ProgressBar, self.ecso_context.get_game_object(151, ProgressBar))
+            pb = cast(ProgressBar, self.ecso_context.get_game_object(153, ProgressBar))
             pb.set_value(data.get_health())
         
         if sprite is not None and not data.is_alive:

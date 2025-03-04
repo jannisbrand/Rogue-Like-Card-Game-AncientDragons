@@ -270,12 +270,12 @@ class ECSO_Context():
         return value_to_modify
             
     def card_system(self, selected_card: int,selected_type: str, selected_target: int) -> bool:
-        components = self.get_components(selected_card)
+        components = self.get_components(selected_card)	#the list is empty
         split_type = selected_type.split("_")
         split_type.pop()
         split_type.insert(1, "_")
         parsed_type = "".join(split_type) + "S"
-        target = self.get_object(parsed_type, selected_target)
+        target = self.get_game_object(parsed_type, selected_target)
         
         for component in components:
             try:

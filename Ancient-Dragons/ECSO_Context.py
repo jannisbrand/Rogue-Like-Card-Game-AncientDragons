@@ -215,17 +215,21 @@ class ECSO_Context():
                     pass
         return value_to_modify
             
-    def card_system(self, selected_card: int, selected_target: int) -> bool:
+    def card_system(self, selected_card: int,selected_type: str, selected_target: int) -> bool:
         components = self.get_components(selected_card)
-        target = self.get_object("PLAYER_CHARACTERS", selected_target)
+        split_type = selected_type.split("_")
+        split_type.pop()
+        split_type.insert(1, "_")
+        parsed_type = "".join(split_type) + "S"
+        target = self.get_object(parsed_type, selected_target)
         
         for component in components:
             try:
                 match type(component):
                     case Components.C_ATTACK:
-                        if target.type == "ENEMY_CHARACTERS":
+                        if parsed_type == "ENEMY_CHARACTERS":
                             # seperate funktion für die veränderung von attack
-                            attack = self.attack_modifiers(component.value, components) - target.effect["BLOCK"]
+                            attack = self.attack_modifiers(component.value, components) - target.add_effect["BLOCK"]
                             target.health_points -= attack
                             pass
                     case Components.C_DEFENSE:
@@ -426,12 +430,13 @@ class ECSO_Context():
                     case Components.C_WHEN_DEF:
                         # when the def of the player gets raised
                         pass
-                return True
             except AttributeError as e:
                 print ("AttributeError " + e)
                 return False
             except TypeError as e:
                 print ("TypeError " + e)
                 return False
+            
+        return True
 
 

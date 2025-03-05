@@ -3,8 +3,10 @@ from typing import Type, Any, cast
 import pygame
 
 from Characters import Base
+from Characters.Player_Character import PlayerCharacter
+from Characters.Standard_Enemy import StandardEnemy
 from Sprites.Base import Sprite
-from Components import Components
+from Components import Components, Effects
 
 """
 TODO:
@@ -269,25 +271,23 @@ class ECSO_Context():
                     pass
         return value_to_modify
             
-    def card_system(self, selected_card: int,selected_type: str, selected_target: int) -> bool:
-        components = self.get_components(selected_card)	#the list is empty
-        split_type = selected_type.split("_")
-        split_type.pop()
-        split_type.insert(1, "_")
-        parsed_type = "".join(split_type) + "S"
-        target = self.get_game_object(parsed_type, selected_target)
+    def card_system(self, selected_card: int,selected_type: Any, selected_target: int) -> bool:
+        components = self.get_components(selected_card)
+        target = self.get_game_object(selected_target, selected_type)
         
         for component in components:
             try:
                 match type(component):
                     case Components.C_ATTACK:
-                        if parsed_type == "ENEMY_CHARACTERS":
+                        if selected_type == StandardEnemy: #or selected_type == BossEnemy
+                            target = cast(StandardEnemy, target)
                             # seperate funktion für die veränderung von attack
-                            attack = self.attack_modifiers(component.value, components) - target.add_effect["BLOCK"]
-                            target.health_points -= attack
+                            attack = int(self.attack_modifiers(component.value, components)) - int(target.get_effect(Effects.SharedDebuffs.Dexterity))
+                            new_health = target.get_health() - attack
+                            target.set_health(new_health)
                             pass
                     case Components.C_DEFENSE:
-                        if target.type == "PLAYER_CHARACTERS":
+                        if selected_type == PlayerCharacter:
                             # def is missing for the charakter
                             pass
                     case Components.C_DEFENSE_STAY:
@@ -325,7 +325,7 @@ class ECSO_Context():
                         # add card to the exhaust pile
                         pass
                     case Components.C_DAMAGE_DEF:
-                        if target.type == "ENEMY_CHARACTERS":
+                        if selected_type == StandardEnemy:
                             # get current def
                             # attack = self. - target.effect["BLOCK"]
                             # target.health_points -= attack
@@ -348,20 +348,20 @@ class ECSO_Context():
                         # draw value number of cards
                         pass
                     case Components.C_GAIN_HP:
-                        if target.type == "PLAYER_CHARACTERS":
-                            target.health_points += component.value
+                        if selected_type == PlayerCharacter:
+                            target.set_health += component.value
                         pass
                     case Components.C_GAIN_MANA:
-                        if target.type == "PLAYER_CHARACTERS":
-                            target.mana_points += component.value
+                        if selected_type == PlayerCharacter:
+                            target.set_mana += component.value
                         pass
                     case Components.C_LOSE_HP:
-                        if target.type == "PLAYER_CHARACTERS":
-                            target.health_points -= component.value
+                        if selected_type == PlayerCharacter:
+                            target.set_health -= component.value
                         pass
                     case Components.C_LOSE_MANA:
-                        if target.type == "PLAYER_CHARACTERS":
-                            target.mana_points -= component.value
+                        if selected_type == PlayerCharacter:
+                            target.set_mana -= component.value
                         pass
                     case Components.C_ETHEREAL:
                         # card not played at the end of the round add it to exhaust pile
@@ -419,15 +419,15 @@ class ECSO_Context():
                         # lose value number of HP per card
                         pass
                     case Components.C_DEBUFF_ALL:
-                        if target.type == "ENEMY_CHARACTERS":
+                        if selected_type == StandardEnemy:
                             # add buff/debuff to all enemy. value = buff name. round = number of rounds it stays
                             pass
                     case Components.C_DEBUFF:
-                        if target.type == "ENEMY_CHARACTERS":
+                        if selected_type == StandardEnemy:
                             # add buff/debuff to enemy. value = buff name. round = number of rounds it stays
                             pass
                     case Components.C_BUFF:
-                        if target.type == "PLAYER_CHARACTERS":
+                        if selected_type == PlayerCharacter:
                             # add buff/debuff to the player. value = buff name. round = number of rounds it stays
                             pass
                     case Components.C_WHEN_CURSE_OR_STATUS:

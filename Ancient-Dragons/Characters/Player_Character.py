@@ -7,7 +7,7 @@ class PlayerCharacter(Character):
     def __init__(self, id, name):
         super().__init__(id, name)
         self.stack_composition = ["Strike", 15, "Defend", 9, "Pummel", 6]  # TODO: ...Names of cards the draw stack should be made of
-        self.card_hand: list[int] = []  # Ids of cards in the card stack
+        self.card_hand: int  # Id of an CardStack game object
         self.mana: int   # Currency to play cards
         self.gold: int   # Currency to shop
 
@@ -35,9 +35,14 @@ class PlayerCharacter(Character):
     def get_stack_composition(self) -> list:
         return self.stack_composition
 
-    def add_card_to_hand(self, entity: int):
-        self.card_hand.append(entity)
-        print("[CHARACTER] Card drawn: ", entity)
+    def set_stack(self, stack: int):
+        try:
+            self.card_hand = stack
+        except AttributeError as e:
+            print("[CHARACTER][PLAYER]", e)
 
-    def get_cards_on_hand(self) -> list:
-        return self.card_hand
+    def get_stack(self) -> int:
+        try:
+            return self.card_hand
+        except AttributeError as e:
+            print("[CHARACTER][PLAYER]", e)

@@ -295,8 +295,8 @@ class C_PLAY_DWP_EX():
     
 @dataclass
 class C_COST_RED():
-    """cost to play the card will be raised equal to the number the
-    player got attacked in this combat
+    """cost to play the card will be reduced by the number of
+    attacked the player got in this combat
     """
     value: int = 0
     

@@ -70,7 +70,7 @@ class MainMenu(Gamemode):
         logo.relative_x = 0
         logo.rect.y = 50
         self.ecso_context.add_game_object(entity, logo)
-        main_gui.add_interactible(logo)
+        main_gui.add_interactible(entity)
         self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, logo)
 
         # TITLE
@@ -79,7 +79,7 @@ class MainMenu(Gamemode):
         logo.rect.x = (level.rect.width / 2 + main_gui.rect.width / 2) - logo.rect.width / 2
         logo.rect.y = level.rect.height / 2 - logo.rect.height / 2
         self.ecso_context.add_game_object(entity, logo)
-        main_gui.add_interactible(logo)
+        main_gui.add_interactible(entity)
         self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, logo)
 
         # BUTTON

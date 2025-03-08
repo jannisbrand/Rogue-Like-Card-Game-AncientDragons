@@ -49,8 +49,17 @@ class Renderer():
         self.clear()
 
         window = cast(pygame.Surface, self.__application_context.get_window())
-        for group_type, group in self.sprite_groups.items():
-            cast(pygame.sprite.Group, group).draw(window)
+        # for group_type, group in self.sprite_groups.items():
+        #     cast(pygame.sprite.Group, group).draw(window)
+        dirty_rects = []
+        dirty_rects.extend(self.sprite_groups[SpriteGroupTypes.LEVELS].draw(window))
+        dirty_rects.extend(self.sprite_groups[SpriteGroupTypes.GUIS].draw(window))
+        dirty_rects.extend(self.sprite_groups[SpriteGroupTypes.CHARACTERS].draw(window))
+        dirty_rects.extend(self.sprite_groups[SpriteGroupTypes.CARDS].draw(window))
+        dirty_rects.extend(self.sprite_groups[SpriteGroupTypes.INTERACTIBLES].draw(window))
+        dirty_rects.extend(self.sprite_groups[SpriteGroupTypes.POPUPS].draw(window))
+        pygame.display.update(dirty_rects)
 
         pygame.display.flip()
+        print(self.__application_context.get_clock().get_fps())
         self.__application_context.get_clock().tick(self.__frames_per_secound)

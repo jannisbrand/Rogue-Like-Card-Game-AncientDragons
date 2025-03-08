@@ -100,6 +100,7 @@ class Endless(Gamemode):
         rect = pygame.Rect(0, 0, 0, 0)
         character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {}, "Levels/Data/selection-menu_background_test.png")
         self.ecso_context.add_game_object(entity, character_selection)
+        self.renderer.add_sprite(SpriteGroupTypes.LEVELS, character_selection)
         self.active_level = entity
 
         entity = self.ecso_context.add_entity()
@@ -122,7 +123,7 @@ class Endless(Gamemode):
             button.relative_y = 50 + button_offset_y * index
             self.ecso_context.add_game_object(entity, button)
             selection_menu.add_interactible(entity)
-            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLE, button)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, button)
 
             entity = self.ecso_context.add_entity()
             subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.rect)

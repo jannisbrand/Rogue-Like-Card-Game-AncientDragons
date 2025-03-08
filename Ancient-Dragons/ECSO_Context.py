@@ -234,8 +234,9 @@ class ECSO_Context():
         try:
             for game_object_type, game_objects in self.game_objects.items():
                 try: 
-                    game_objects.pop(entity)
-                    self.entities.remove(entity)  # TEST
+                    game_object = game_objects.pop(entity)
+                    del game_object
+                    self.entities.discard(entity)  # TEST
                 except KeyError:
                     continue
         except KeyError as e:

@@ -1,4 +1,7 @@
 from typing import Any, Callable, cast
+
+import pygame
+from Characters.Base import Character
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from ECSO_Context import ECSO_Context
@@ -19,6 +22,7 @@ from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
 from Levels.Menu import MenuLevel
+from Renderer.Group_Types import SpriteGroupTypes
 from Renderer.Renderer import Renderer
 from Sprites.Base import Sprite
 from Systems.Stacks.Base import CardStack
@@ -79,3 +83,107 @@ class Gamemode():
             except IndexError as e:
                 print(f"[GAMEMODE] Factorie: {e} not found")
         # ### FACTORIES ### #
+
+    def update_entities(self):
+        stage_deletions = []
+        try:
+            for game_object_type, game_objects in self.ecso_context.game_objects.items():
+                for game_object_entity, game_object in self.ecso_context.game_objects[game_object_type].items():
+                    try:
+                        if issubclass(type(game_object), Character):
+                            stage_deletions.extend(self.handle_data_class(game_object))
+                            continue
+                        if issubclass(type(game_object), InteractibleSprite):
+                            stage_deletions.extend(self.handle_interactible(game_object))
+                            continue
+                        if issubclass(type(game_object), Level):
+                            stage_deletions.extend(self.handle_level(game_object))
+                            continue
+                        if issubclass(type(game_object), GUISprite):
+                            stage_deletions.extend(self.handle_gui(game_object))
+                            continue
+                        if issubclass(type(game_object), InputSubscribtion):
+                            stage_deletions.extend(self.handle_subscribtion(game_object))
+                    except TypeError:
+                        continue
+                    except AttributeError:
+                        continue
+        except AttributeError as e:
+            print("[GAMEMODE][UPDATE]", e)
+        finally:
+            for entity in stage_deletions:
+                self.ecso_context.remove_game_object(entity)
+
+    def handle_data_class(self, data_class) -> list:
+        """DATA CLASS SPECIFICS"""
+        return []
+
+    def handle_level(self, level: Level) -> list:
+        """LEVEL SPECIFICS"""
+        deletion = []
+        if level.is_visible:
+            if len(level.groups()) == 0:
+                self.renderer.add_sprite(SpriteGroupTypes.LEVELS, level)
+        else:
+            level.kill()
+
+        if level.is_active:
+            level.update()
+
+        if level.destroy:
+            level.kill()
+            for gui_id in level.get_guis():
+                gui = cast(GUI, self.ecso_context.get_game_object(gui_id, GUI))
+                gui.destroy = True
+                for interactible_id in gui.get_interactibles():
+                    interactible = cast(InteractibleSprite, self.ecso_context.get_game_objects(interactible_id)[0])
+                    interactible.destroy = True
+            deletion.append(level.context_id)
+
+        return deletion
+
+    def handle_gui(self, gui: GUISprite) -> list:
+        deletion = []
+        if gui.is_visible:
+            if len(gui.groups()) == 0:
+                print(len(gui.groups()))
+                self.renderer.add_sprite(SpriteGroupTypes.GUIS, gui)
+        else:
+            gui.kill()
+
+        if gui.is_active:
+            gui.update()
+
+        if gui.destroy:
+            gui.kill()
+            deletion.append(gui.context_id)
+
+        return deletion
+
+    def handle_subscribtion(self, subscribtion: Any) -> list:
+        """COULD BE ANY SUBSCRIBTION TYPE IN THE FUTURE"""
+        return []
+
+    def handle_interactible(self, interactible: InteractibleSprite) -> list:
+        deletion = []
+        if interactible.is_visible:
+            if len(interactible.groups()) == 0:
+                self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, interactible)
+        else:
+            interactible.kill()
+
+        if interactible.is_active:
+            interactible.update()
+
+        if interactible.destroy:
+            interactible.kill()
+            on_hover = interactible.subscribtion_on_hover
+            self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(on_hover, InputSubscribtion))
+            deletion.append(interactible.subscribtion_on_hover)
+
+            on_click = interactible.subscribtion_on_click
+            self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(on_click, InputSubscribtion))
+            deletion.append(interactible.subscribtion_on_click)
+            deletion.append(interactible.context_id)
+
+        return deletion

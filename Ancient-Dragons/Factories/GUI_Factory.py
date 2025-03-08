@@ -18,6 +18,7 @@ from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
+from Renderer.Group_Types import SpriteGroupTypes
 from Renderer.Renderer import Renderer
 from Systems.Stacks.Hand import Hand
 
@@ -60,6 +61,7 @@ class GUIFactory():
         gui_cards.relative_x = (level.rect.x + level.rect.width / 2) - int(gui_cards.rect.width / 2)
         gui_cards.relative_y = (level.rect.x + level.rect.height) - gui_cards.rect.height
         self.ecso_context.add_game_object(gui_entity, gui_cards)
+        self.renderer.add_sprite(SpriteGroupTypes.GUIS, gui_cards)
         level.add_gui(gui_entity)
 
         hand_stack = cast(Hand, self.ecso_context.get_game_object(hand_stack_id, Hand))
@@ -87,6 +89,7 @@ class GUIFactory():
             # card.animation_initial_y = card.rect.y  # TODO: Not a good  solution
             card.callback_on_click = card_callback_on_click
             self.ecso_context.add_game_object(card_entity, card)
+            self.renderer.add_sprite(SpriteGroupTypes.CARDS, card)
             gui_cards.add_interactible(card_entity)
 
             subscribtion_entity = self.ecso_context.add_entity()
@@ -110,6 +113,7 @@ class GUIFactory():
         pull_stack.set_text("STACK")
         pull_stack.font_size = 32
         self.ecso_context.add_game_object(entity, pull_stack)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, pull_stack)
         gui_cards.add_interactible(entity)
 
         # ### END TURN BUTTON ### #
@@ -127,6 +131,7 @@ class GUIFactory():
         gui_characters.relative_x = 0
         gui_characters.relative_y = gui_characters.rect.height - 200
         self.ecso_context.add_game_object(entity, gui_characters)
+        self.renderer.add_sprite(SpriteGroupTypes.GUIS, gui_characters)
         level.add_gui(entity)
 
         player_character_data = cast(Character, self.ecso_context.get_game_object(player_character_id, PlayerCharacter))
@@ -155,6 +160,7 @@ class GUIFactory():
         self.input_handler.subscribe_to_event(subscription)
 
         self.ecso_context.add_game_object(player_character_sprite_entity, player_character_sprite)
+        self.renderer.add_sprite(SpriteGroupTypes.CHARACTERS, player_character_sprite)
         gui_characters.add_interactible(player_character_sprite_entity)
         player_character_data.set_sprite(player_character_sprite_entity)
         # ## SURROUNDING INDICATORS
@@ -167,6 +173,7 @@ class GUIFactory():
         progressbar.relative_y = -40
 
         self.ecso_context.add_game_object(progressbar_entity, progressbar)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, progressbar)
         gui_characters.add_interactible(progressbar_entity)
         # SPRITE LIST AS EFFECT LIST
         # base_color = pygame.Color(50, 120, 90)
@@ -198,6 +205,7 @@ class GUIFactory():
         subscription_entity = self.ecso_context.add_entity()
         subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, enemy_character_sprite, enemy_character_sprite.on_click, enemy_character_sprite.rect, [], (True, False, False))
         self.ecso_context.add_game_object(subscription_entity, subscription)
+        self.renderer.add_sprite(SpriteGroupTypes.CHARACTERS, enemy_character_sprite)
         self.input_handler.subscribe_to_event(subscription)
 
         self.ecso_context.add_game_object(enemy_character_sprite_entity, enemy_character_sprite)
@@ -213,6 +221,7 @@ class GUIFactory():
         progressbar.relative_y = -40
 
         self.ecso_context.add_game_object(progressbar_entity, progressbar)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, progressbar)
         gui_characters.add_interactible(progressbar)
         # SPRITE LIST AS EFFECT LIST
         # base_color = pygame.Color(50, 120, 90)

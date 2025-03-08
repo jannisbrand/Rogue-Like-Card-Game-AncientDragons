@@ -14,11 +14,13 @@ from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Menu import MenuLevel
 from Handlers import Input_Handler
 from Levels.Base import Level
+from Renderer.Group_Types import SpriteGroupTypes
+from Renderer.Renderer import Renderer
 from Sprites import Base
 
 
 class LevelFactory():
-    def __init__(self, application, renderer, ecso_context: "ECSO_Context", database_path: str = "Ancient-Dragons_Database.db"):
+    def __init__(self, application, renderer: Renderer, ecso_context: "ECSO_Context", database_path: str = "Ancient-Dragons_Database.db"):
         # ### Database ### #
         self.application = application
         self.renderer = renderer
@@ -93,5 +95,6 @@ class LevelFactory():
         rect.y = 0
         created_level = Level(entity, "GAME_LEVEL", rect, "", (50, 50, 50), 1440, 900, sprites, "Levels/Data/level_background_1.png")
         self.ecso_context.add_game_object(entity, created_level)
+        self.renderer.add_sprite(SpriteGroupTypes.LEVELS, created_level)
         print("[OFactory] Level generated with id: ", entity)
         return entity

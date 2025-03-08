@@ -8,6 +8,7 @@ from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from ECSO_Context import ECSO_Context
 from Components import Components
+from Renderer.Group_Types import SpriteGroupTypes
 
 
 class CharacterFactory():

@@ -50,6 +50,7 @@ class Gamemode():
         self.move_running: bool
         
         self.current_stage = 0
+        self.level_end = False
         self.active_level: int  # Id of the level in the context
         self.active_player_character: int  # Id of the character in the context
         self.active_enemy_character: int
@@ -93,14 +94,14 @@ class Gamemode():
                         if issubclass(type(game_object), Character):
                             stage_deletions.extend(self.handle_data_class(game_object))
                             continue
-                        if issubclass(type(game_object), InteractibleSprite):
-                            stage_deletions.extend(self.handle_interactible(game_object))
-                            continue
                         if issubclass(type(game_object), Level):
                             stage_deletions.extend(self.handle_level(game_object))
                             continue
                         if issubclass(type(game_object), GUISprite):
                             stage_deletions.extend(self.handle_gui(game_object))
+                            continue
+                        if issubclass(type(game_object), InteractibleSprite):
+                            stage_deletions.extend(self.handle_interactible(game_object))
                             continue
                         if issubclass(type(game_object), InputSubscribtion):
                             stage_deletions.extend(self.handle_subscribtion(game_object))
@@ -136,8 +137,12 @@ class Gamemode():
                 gui = cast(GUI, self.ecso_context.get_game_object(gui_id, GUI))
                 gui.destroy = True
                 for interactible_id in gui.get_interactibles():
-                    interactible = cast(InteractibleSprite, self.ecso_context.get_game_objects(interactible_id)[0])
-                    interactible.destroy = True
+                    try:
+                        """IF THE INTERACTIBLE IS ALREADY REMOVED"""
+                        interactible = cast(InteractibleSprite, self.ecso_context.get_game_objects(interactible_id)[0])
+                        interactible.destroy = True
+                    except IndexError:
+                        pass
             deletion.append(level.context_id)
 
         return deletion
@@ -177,13 +182,18 @@ class Gamemode():
 
         if interactible.destroy:
             interactible.kill()
-            on_hover = interactible.subscribtion_on_hover
-            self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(on_hover, InputSubscribtion))
-            deletion.append(interactible.subscribtion_on_hover)
-
-            on_click = interactible.subscribtion_on_click
-            self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(on_click, InputSubscribtion))
-            deletion.append(interactible.subscribtion_on_click)
+            try:
+                on_hover = interactible.subscribtion_on_hover
+                self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(on_hover, InputSubscribtion))
+                deletion.append(interactible.subscribtion_on_hover)
+            except AttributeError:
+                pass
+            try:
+                on_click = interactible.subscribtion_on_click
+                self.input_handler.remove_subscribtion(self.ecso_context.get_game_object(on_click, InputSubscribtion))
+                deletion.append(interactible.subscribtion_on_click)
+            except AttributeError:
+                pass
             deletion.append(interactible.context_id)
 
         return deletion

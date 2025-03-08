@@ -18,8 +18,8 @@ from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
+from Renderer import Renderer
 from Renderer.Group_Types import SpriteGroupTypes
-from Renderer.Renderer import Renderer
 from Systems.Stacks.Hand import Hand
 
 
@@ -29,6 +29,9 @@ class GUIFactory():
         self.renderer = renderer
         self.ecso_context = ecso_context
         self.input_handler = input_handler
+
+        self.card_callback_on_click = None
+        self.card_callback_on_hover = None
 
     def generate_menu(self, pos_x: int, pos_y: int, button_pos_start: tuple[int, int], buttons: list[tuple[str, int, int, Any]]) -> int:
         """DONT USE IT!"""
@@ -51,7 +54,7 @@ class GUIFactory():
             gui.add_interactible(new_button)
         return gui_entity
     
-    def generate_card_gui(self, level_id: int, play_stack_id: int, hand_stack_id: int, card_callback_on_click: Any):
+    def generate_card_gui(self, level_id: int, play_stack_id: int, hand_stack_id: int):
         level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
 
         color = pygame.Color(10, 10, 10)
@@ -66,12 +69,68 @@ class GUIFactory():
 
         hand_stack = cast(Hand, self.ecso_context.get_game_object(hand_stack_id, Hand))
 
+        self.draw_cards(gui_cards, hand_stack.get_cards())
+
+        # x_offset = 215
+        # index = 0
+        # for entity_on_hand in hand_stack.get_cards():
+        #     card_entity = self.ecso_context.add_entity()
+        #     color = pygame.Color(80, 20, 60)
+        #     card = Card(card_entity, entity_on_hand, "INTERACTIBLE_CARD_SPRITE", gui_cards.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
+        #     cost_resource = pygame.image.load("Levels/Data/card_cost_background.png")  # Background of the card costs area (Mana)
+        #     try:
+        #         # CARD PICTURE
+        #         card.set_picture(pygame.image.load("Levels/Data/gangsta_tree.png"))
+        #         # CARD TITLE
+        #         card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity_on_hand, C_DISPLAY_NAME)).value)
+        #         # CARD COSTS
+        #         card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity_on_hand, C_CARD_COSTS)).value, cost_resource)
+        #         # CARD DESCRIBTION
+        #         card.set_description(cast(C_DISPLAY_TEXT, self.ecso_context.get_component(entity_on_hand, C_DISPLAY_TEXT)).value)
+        #     except Exception as e:
+        #         print("FUCK!?", e)
+        #     card.relative_x = 100 + (x_offset * index)
+        #     card.relative_y = 20
+        #     # card.animation_initial_y = card.rect.y  # TODO: Not a good  solution
+        #     card.callback_on_click = card_callback_on_click
+        #     self.ecso_context.add_game_object(card_entity, card)
+        #     gui_cards.add_interactible(card_entity)
+
+        #     subscribtion_entity = self.ecso_context.add_entity()
+        #     subscribtion = InputSubscribtion(SubscriptionType.CURSOR, card, card.on_hover, card.rect)
+        #     self.ecso_context.add_game_object(subscribtion_entity, subscribtion)
+        #     self.input_handler.subscribe_to_event(subscribtion)
+
+        #     subscribtion_entity = self.ecso_context.add_entity()
+        #     subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, card, card.on_click, card.rect, [], mouse_buttons=(True, False, False))
+        #     self.ecso_context.add_game_object(subscribtion_entity, subscribtion)
+        #     self.input_handler.subscribe_to_event(subscription)
+        #     index += 1
+
+        # ### CARD PULL STACK ### #
+        color = pygame.Color(0, 0, 245)
+        highlight = pygame.Color(0, 0, 255)
+        entity = self.ecso_context.add_entity()
+        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 50, 50, "Levels/Data/pull_stack.png")
+        pull_stack.relative_x = 25
+        pull_stack.relative_y = (gui_cards.rect.height - pull_stack.rect.height) - 25
+        pull_stack.set_text("STACK")
+        pull_stack.font_size = 32
+        self.ecso_context.add_game_object(entity, pull_stack)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, pull_stack)
+        gui_cards.add_interactible(entity)
+        # ### END TURN BUTTON ### #
+        # TODO: Implement Button wich represents the exhaustion stack
+        # TODO: Implement Button wich calls a methond wich sets "self.move_running to false"
+
+    def draw_cards(self, gui: GUI, cards: list[int]):
+        gui.interactibles = []
         x_offset = 215
         index = 0
-        for entity_on_hand in hand_stack.get_cards():
+        for entity_on_hand in cards:
             card_entity = self.ecso_context.add_entity()
             color = pygame.Color(80, 20, 60)
-            card = Card(card_entity, entity_on_hand, "INTERACTIBLE_CARD_SPRITE", gui_cards.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
+            card = Card(card_entity, entity_on_hand, "INTERACTIBLE_CARD_SPRITE", gui.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
             cost_resource = pygame.image.load("Levels/Data/card_cost_background.png")  # Background of the card costs area (Mana)
             try:
                 # CARD PICTURE
@@ -87,38 +146,39 @@ class GUIFactory():
             card.relative_x = 100 + (x_offset * index)
             card.relative_y = 20
             # card.animation_initial_y = card.rect.y  # TODO: Not a good  solution
-            card.callback_on_click = card_callback_on_click
+            card.callback_on_hover = self.card_callback_on_hover
+            card.callback_on_click = self.card_callback_on_click
             self.ecso_context.add_game_object(card_entity, card)
             self.renderer.add_sprite(SpriteGroupTypes.CARDS, card)
-            gui_cards.add_interactible(card_entity)
+            gui.add_interactible(card_entity)
 
             subscribtion_entity = self.ecso_context.add_entity()
             subscribtion = InputSubscribtion(SubscriptionType.CURSOR, card, card.on_hover, card.rect)
+            card.subscribtion_on_hover = subscribtion_entity
             self.ecso_context.add_game_object(subscribtion_entity, subscribtion)
             self.input_handler.subscribe_to_event(subscribtion)
 
             subscribtion_entity = self.ecso_context.add_entity()
             subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, card, card.on_click, card.rect, [], mouse_buttons=(True, False, False))
+            card.subscribtion_on_click = subscribtion_entity
             self.ecso_context.add_game_object(subscribtion_entity, subscribtion)
             self.input_handler.subscribe_to_event(subscription)
             index += 1
 
-        # ### CARD PULL STACK ### #
-        color = pygame.Color(0, 0, 245)
-        highlight = pygame.Color(0, 0, 255)
-        entity = self.ecso_context.add_entity()
-        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 50, 50, "Levels/Data/pull_stack.png")
-        pull_stack.relative_x = 25
-        pull_stack.relative_y = (gui_cards.rect.height - pull_stack.rect.height) - 25
-        pull_stack.set_text("STACK")
-        pull_stack.font_size = 32
-        self.ecso_context.add_game_object(entity, pull_stack)
-        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, pull_stack)
-        gui_cards.add_interactible(entity)
+    def redraw_cards(self, level_id: int, cards: list[int]):
+        level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
+        card_gui = cast(GUI, self.ecso_context.get_game_object(level.get_guis()[1], GUI))
 
-        # ### END TURN BUTTON ### #
-        # TODO: Implement Button wich represents the exhaustion stack
-        # TODO: Implement Button wich calls a methond wich sets "self.move_running to false"
+        try:
+            for card_sprite_id in card_gui.get_interactibles():
+                card_sprite = self.ecso_context.get_game_object(card_sprite_id, Card)
+                if card_sprite is None:
+                    card_sprite = self.ecso_context.get_game_object(card_sprite_id, Button)
+                card_sprite.destroy = True
+        except Exception as e:
+            print("[GUIFACTORY][REDRAW] Found all card sprites", e)
+
+        self.draw_cards(card_gui, cards)
 
     def generate_character_gui(self, level_id: int, player_character_id: int, enemy_character_id: int, character_callback_on_click: Any):
         level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
@@ -156,6 +216,7 @@ class GUIFactory():
 
         subscription_entity = self.ecso_context.add_entity()
         subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, player_character_sprite, player_character_sprite.on_click, player_character_sprite.rect, [], (True, False, False))
+        player_character_sprite.subscribtion_on_click = subscription_entity
         self.ecso_context.add_game_object(subscription_entity, subscription)
         self.input_handler.subscribe_to_event(subscription)
 
@@ -175,6 +236,7 @@ class GUIFactory():
         self.ecso_context.add_game_object(progressbar_entity, progressbar)
         self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, progressbar)
         gui_characters.add_interactible(progressbar_entity)
+        player_character_sprite.health_bar = progressbar_entity
         # SPRITE LIST AS EFFECT LIST
         # base_color = pygame.Color(50, 120, 90)
         # sprite_list = SpriteList(len(gui_characters.interactibles) - 1, "PLAYER_EFFECTS", "SPRITELIST", base_color, player_character_sprite.rect.width, 50)
@@ -204,6 +266,7 @@ class GUIFactory():
 
         subscription_entity = self.ecso_context.add_entity()
         subscription = InputSubscribtion(SubscriptionType.MOUSEBUTTON, enemy_character_sprite, enemy_character_sprite.on_click, enemy_character_sprite.rect, [], (True, False, False))
+        enemy_character_sprite.subscribtion_on_click = subscription_entity
         self.ecso_context.add_game_object(subscription_entity, subscription)
         self.renderer.add_sprite(SpriteGroupTypes.CHARACTERS, enemy_character_sprite)
         self.input_handler.subscribe_to_event(subscription)
@@ -223,6 +286,7 @@ class GUIFactory():
         self.ecso_context.add_game_object(progressbar_entity, progressbar)
         self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, progressbar)
         gui_characters.add_interactible(progressbar)
+        enemy_character_sprite.health_bar = progressbar_entity
         # SPRITE LIST AS EFFECT LIST
         # base_color = pygame.Color(50, 120, 90)
         # sprite_list = SpriteList(len(gui_characters.interactibles) - 1, "ENEMY_EFFECTS", "SPRITELIST", base_color, enemy_character_sprite.rect.width, 50)

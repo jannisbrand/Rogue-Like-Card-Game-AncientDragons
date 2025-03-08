@@ -18,13 +18,14 @@ from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
 from Levels.Menu import MenuLevel
-from Renderer import Renderer
+from Renderer.Group_Types import SpriteGroupTypes
+from Renderer.Renderer import Renderer
 from Sprites.Base import Sprite
 
 
 class MainMenu(Gamemode):
-    def __init__(self, id: int, name: str, input_handler: InputHandler, renderer: "Renderer") -> None:
-        super().__init__(id, name, input_handler, renderer)
+    def __init__(self, id: int, name: str, application, input_handler: InputHandler, renderer: "Renderer") -> None:
+        super().__init__(id, name, application, input_handler, renderer)
         pass
 
     def initialise(self) -> None:
@@ -50,6 +51,7 @@ class MainMenu(Gamemode):
         level = MenuLevel(entity, "MAIN_MENU", rect, "", (13, 50, 89), 1440, 900, environment, "Levels/Data/main-menu_background.png")
         self.active_level = entity
         self.ecso_context.add_game_object(entity, level)
+        self.renderer.add_sprite(SpriteGroupTypes.GUIS, level)
         self.active_level = entity
 
         # GUI
@@ -60,6 +62,7 @@ class MainMenu(Gamemode):
         main_gui.image.set_alpha(100)
         level.add_gui(entity)
         self.ecso_context.add_game_object(entity, main_gui)
+        self.renderer.add_sprite(SpriteGroupTypes.GUIS, main_gui)
 
         # LOGO
         entity = self.ecso_context.add_entity()
@@ -68,6 +71,7 @@ class MainMenu(Gamemode):
         logo.rect.y = 50
         self.ecso_context.add_game_object(entity, logo)
         main_gui.add_interactible(logo)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, logo)
 
         # TITLE
         entity = self.ecso_context.add_entity()
@@ -76,6 +80,7 @@ class MainMenu(Gamemode):
         logo.rect.y = level.rect.height / 2 - logo.rect.height / 2
         self.ecso_context.add_game_object(entity, logo)
         main_gui.add_interactible(logo)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, logo)
 
         # BUTTON
         entity = self.ecso_context.add_entity()
@@ -84,6 +89,7 @@ class MainMenu(Gamemode):
         button.relative_y = 500
         main_gui.add_interactible(entity)
         self.ecso_context.add_game_object(entity, button)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, button)
 
         entity = self.ecso_context.add_entity()
         subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.rect)

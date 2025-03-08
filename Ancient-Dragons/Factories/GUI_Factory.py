@@ -18,12 +18,14 @@ from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
-from Renderer import Renderer
+from Renderer.Renderer import Renderer
 from Systems.Stacks.Hand import Hand
 
 
 class GUIFactory():
-    def __init__(self, ecso_context: ECSO_Context, input_handler: InputHandler):
+    def __init__(self, application, renderer, ecso_context: ECSO_Context, input_handler: InputHandler):
+        self.application = application
+        self.renderer = renderer
         self.ecso_context = ecso_context
         self.input_handler = input_handler
 

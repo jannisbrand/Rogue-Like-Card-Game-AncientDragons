@@ -11,8 +11,10 @@ from Components import Components
 
 
 class CharacterFactory():
-    def __init__(self, ecso_context: "ECSO_Context", database_path: str = "Ancient-Dragons_Database.db"):
+    def __init__(self, application, renderer, ecso_context: "ECSO_Context", database_path: str = "Ancient-Dragons_Database.db"):
         # ### Database ### #
+        self.application = application
+        self.renderer = renderer
         self.database_connection = sqlite3.connect(database_path)
         # ### Database ### #
 

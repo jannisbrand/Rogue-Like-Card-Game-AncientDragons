@@ -26,7 +26,8 @@ from Handlers.Flags import SubscriptionType
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
 from Levels.Menu import MenuLevel
-from Renderer import Renderer
+from Renderer.Group_Types import SpriteGroupTypes
+from Renderer.Renderer import Renderer
 from Sprites.Base import Sprite
 from Systems.Stacks.Hand import Hand
 from Systems.Stacks.Play import Play
@@ -57,8 +58,8 @@ CHARACTERS_ONLY_WARRIOR = 0b10000
 
 
 class Endless(Gamemode):
-    def __init__(self, id: int, name: str, input_handler: Input_Handler, renderer: "Renderer") -> None:
-        super().__init__(id, name, input_handler, renderer)
+    def __init__(self, id: int, name: str, application, input_handler: Input_Handler, renderer: "Renderer") -> None:
+        super().__init__(id, name, application, input_handler, renderer)
         # ### STAGES ### #
         # PLAYER MOVE #
         self.selected_target: int
@@ -108,6 +109,7 @@ class Endless(Gamemode):
         selection_menu.image.set_alpha(100)
         self.ecso_context.add_game_object(entity, selection_menu)
         character_selection.add_gui(entity)  # Adds context id of the gui to the parent level
+        self.renderer.add_sprite(SpriteGroupTypes.GUIS, selection_menu)
 
         index = 0
         button_offset_y = 75
@@ -120,6 +122,7 @@ class Endless(Gamemode):
             button.relative_y = 50 + button_offset_y * index
             self.ecso_context.add_game_object(entity, button)
             selection_menu.add_interactible(entity)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLE, button)
 
             entity = self.ecso_context.add_entity()
             subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.rect)

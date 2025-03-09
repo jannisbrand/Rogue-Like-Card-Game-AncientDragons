@@ -86,7 +86,7 @@ class Endless(Gamemode):
         self.is_initialised = True
 
         # ### Generate all character classes and at selected
-        cast(CharacterFactory, self.factories["CHARACTERS"]).fabricate_player_characters()
+        cast(CharacterFactory, self.factories["CHARACTERS"]).generate_player(self.current_round)
 
         # ### Generate all card entities ### #
         cast(CardFactory, self.factories["CARDS"]).fabricate_all()
@@ -286,15 +286,15 @@ class Endless(Gamemode):
                     self.current_stage = 2
                 case 2:
                     if level is None:
-                        generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level()
+                        generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level(self.current_round)
                         generated_level = cast(Level, self.ecso_context.get_game_object(generated_entity, Level))
-                        self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
+                        # self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
                         self.active_level = generated_entity
                         self.is_generating_level = False
                     self.current_stage = 3
                 case 3:
                     if self.active_enemy_character == -1:
-                        new_enemy = cast(CharacterFactory, self.factories["CHARACTERS"]).fabricate_enemy()
+                        new_enemy = cast(CharacterFactory, self.factories["CHARACTERS"]).generate_enemy(self.current_round)
                         if new_enemy is not None:
                             self.active_enemy_character = new_enemy
                             self.current_stage = 4
@@ -374,6 +374,7 @@ class Endless(Gamemode):
                         self.active_enemy_character = -1
                         self.current_stage = 1  # Starts from the beginning
                         self.level_end = False
+                        self.current_round += 1
                     except AttributeError:
                         self.current_stage = 1
                 case 999:

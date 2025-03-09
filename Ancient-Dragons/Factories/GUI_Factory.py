@@ -131,13 +131,18 @@ class GUIFactory():
             card_entity = self.ecso_context.add_entity()
             color = pygame.Color(80, 20, 60)
             card = Card(card_entity, entity_on_hand, "INTERACTIBLE_CARD_SPRITE", gui.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
-            cost_resource = pygame.image.load("Levels/Data/card_cost_background.png")  # Background of the card costs area (Mana)
             try:
                 # CARD PICTURE
-                card.set_picture(pygame.image.load("Levels/Data/gangsta_tree.png"))
+                picture = pygame.image.load("Levels/Data/gangsta_tree.png")
+                picture.convert()
+                picture.convert_alpha()
+                card.set_picture(picture)
                 # CARD TITLE
                 card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity_on_hand, C_DISPLAY_NAME)).value)
                 # CARD COSTS
+                cost_resource = pygame.image.load("Levels/Data/card_cost_background.png")  # Background of the card costs area (Mana)
+                cost_resource.convert()
+                cost_resource.convert_alpha()
                 card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity_on_hand, C_CARD_COSTS)).value, cost_resource)
                 # CARD DESCRIBTION
                 card.set_description(cast(C_DISPLAY_TEXT, self.ecso_context.get_component(entity_on_hand, C_DISPLAY_TEXT)).value)

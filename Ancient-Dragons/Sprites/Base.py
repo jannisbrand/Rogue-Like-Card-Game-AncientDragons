@@ -13,6 +13,8 @@ class Sprite(pygame.sprite.Sprite):
 
         if image_path != "":
             self.image = pygame.image.load(image_path)
+            self.image.convert()
+            self.image.convert_alpha()
             self.image = pygame.transform.scale(self.image, (width, height))
         else:
             self.image = pygame.Surface((width, height))

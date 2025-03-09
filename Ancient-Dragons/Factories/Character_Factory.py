@@ -10,6 +10,11 @@ from ECSO_Context import ECSO_Context
 from Components import Components
 from Renderer.Group_Types import SpriteGroupTypes
 
+HEALTH_DEFAULT_START = 10
+HEALTH_PLAYER_START = 10
+HEALTH_ENEMY_START = 10
+HEALTH_PRGRESSION = 1.20
+
 
 class CharacterFactory():
     def __init__(self, application, renderer, ecso_context: "ECSO_Context", database_path: str = "Ancient-Dragons_Database.db"):
@@ -29,7 +34,7 @@ class CharacterFactory():
             column_names.append(column_name)
         return column_names
 
-    def fabricate_player_characters(self):
+    def generate_player(self, round: int):
         character_collection = self.database_connection.cursor().execute("SELECT * FROM Charakters")
         column_names = self.get_database_column_names("Charakters")
         for character_data in character_collection.fetchall():
@@ -41,19 +46,22 @@ class CharacterFactory():
 
             entity = self.ecso_context.add_entity()
             created_character = PlayerCharacter(entity, character_data[1])
-            created_character.set_health(1000)
+            created_character.set_health(self.calculate_health(round))
             created_character.set_mana(10)
             created_character.set_gold(1000)
             self.ecso_context.add_game_object(entity, created_character)
             print("[OFactory] Created character: " + str(created_character))
 
-    def fabricate_enemy(self) -> int:
+    def generate_enemy(self, round: int) -> int:
         ENEMY_BASE_ATTACK = 137
         ENEMY_BASE_IDK = 0
     
         entity = self.ecso_context.add_entity()
         created_enemy = StandardEnemy(entity, "LUGENE CRABS")
-        created_enemy.set_health(10)
+        created_enemy.set_health(self.calculate_health(round))
         created_enemy.set_attack_damage(ENEMY_BASE_ATTACK)
         self.ecso_context.add_game_object(entity, created_enemy)
         return entity
+    
+    def calculate_health(self, round: int):
+        return int(HEALTH_DEFAULT_START * pow(HEALTH_PRGRESSION, round))

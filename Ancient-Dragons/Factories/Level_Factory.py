@@ -38,7 +38,7 @@ class LevelFactory():
             column_names.append(column_name)
         return column_names
 
-    def generate_level(self) -> int:
+    def generate_level(self, round: int) -> int:
         # seed = 69
         # random.seed(seed)
 

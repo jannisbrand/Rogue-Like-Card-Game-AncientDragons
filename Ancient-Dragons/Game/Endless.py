@@ -1,11 +1,13 @@
 from email.mime import base
 from itertools import tee
 import os
+import random
 import pygame
 from random import randint
 from re import S
 from typing import Any, cast
 from Characters.Base import Character
+from Characters.Boss_Enemy import BossEnemy
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME, C_DISPLAY_TEXT
@@ -26,7 +28,8 @@ from Handlers.Flags import SubscriptionType
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
 from Levels.Menu import MenuLevel
-from Renderer import Renderer
+from Renderer.Group_Types import SpriteGroupTypes
+from Renderer.Renderer import Renderer
 from Sprites.Base import Sprite
 from Systems.Stacks.Hand import Hand
 from Systems.Stacks.Play import Play
@@ -57,8 +60,8 @@ CHARACTERS_ONLY_WARRIOR = 0b10000
 
 
 class Endless(Gamemode):
-    def __init__(self, id: int, name: str, input_handler: Input_Handler, renderer: "Renderer") -> None:
-        super().__init__(id, name, input_handler, renderer)
+    def __init__(self, id: int, name: str, application, input_handler: Input_Handler, renderer: "Renderer") -> None:
+        super().__init__(id, name, application, input_handler, renderer)
         # ### STAGES ### #
         # PLAYER MOVE #
         self.selected_target: int
@@ -71,6 +74,8 @@ class Endless(Gamemode):
         self.is_finished = False
         self.is_initialised = False
         self.current_stage = 0
+        self.current_round = 1
+        self.game_over = False
         self.active_level = -1  # No level active
         self.selected_type = ""
         self.selected_target = -1
@@ -85,10 +90,14 @@ class Endless(Gamemode):
         self.is_initialised = True
 
         # ### Generate all character classes and at selected
-        cast(CharacterFactory, self.factories["CHARACTERS"]).fabricate_player_characters()
+        cast(CharacterFactory, self.factories["CHARACTERS"]).generate_player(self.current_round)
 
         # ### Generate all card entities ### #
         cast(CardFactory, self.factories["CARDS"]).fabricate_all()
+
+        # ### Set card callbacks
+        cast(GUIFactory, self.factories["GUIS"]).card_callback_on_click = self.__stage_select_targets
+
         return True
 
     def __show_selection_menu(self) -> None:
@@ -97,8 +106,9 @@ class Endless(Gamemode):
         # ### CHARACTER SELECTION MENU ### #
         entity = self.ecso_context.add_entity()
         rect = pygame.Rect(0, 0, 0, 0)
-        character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {}, "Levels/Data/selection-menu_background_test.png")
+        character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {}, "Ressources/Pictures/Levels/Menus/selection-menu_background_test.png")
         self.ecso_context.add_game_object(entity, character_selection)
+        self.renderer.add_sprite(SpriteGroupTypes.LEVELS, character_selection)
         self.active_level = entity
 
         entity = self.ecso_context.add_entity()
@@ -108,6 +118,7 @@ class Endless(Gamemode):
         selection_menu.image.set_alpha(100)
         self.ecso_context.add_game_object(entity, selection_menu)
         character_selection.add_gui(entity)  # Adds context id of the gui to the parent level
+        self.renderer.add_sprite(SpriteGroupTypes.GUIS, selection_menu)
 
         index = 0
         button_offset_y = 75
@@ -120,6 +131,7 @@ class Endless(Gamemode):
             button.relative_y = 50 + button_offset_y * index
             self.ecso_context.add_game_object(entity, button)
             selection_menu.add_interactible(entity)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, button)
 
             entity = self.ecso_context.add_entity()
             subscription = InputSubscribtion(SubscriptionType.CURSOR, button, button.on_hover, button.rect)
@@ -204,7 +216,10 @@ class Endless(Gamemode):
                 case "INTERACTIBLE_ENEMY_CHARACTER_SPRITE":
                     if self.selected_card != -1:
                         self.selected_target = source.character_context_id
-                        self.selected_type = StandardEnemy
+                        if self.current_round % 10 == 0:
+                            self.selected_type = BossEnemy
+                        else:
+                            self.selected_type = StandardEnemy
         except AttributeError as e:
             print("[GAMEMODE][SELECTION] ", e)
 
@@ -218,12 +233,29 @@ class Endless(Gamemode):
             # h = player_character_data = cast(Character, self.ecso_context.get_object("PLAYER_CHARACTERS", self.active_player_character)).get_health()
             # player_character_data = cast(Character, self.ecso_context.get_object("PLAYER_CHARACTERS", self.active_player_character)).set_health(h - 40)
             # TEST TEST TEST TEST TEST TEST TEST TEST TEST
+            
+            play_stack = cast(Play, self.ecso_context.get_game_object(self.active_play_stack, Play))
+            char = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
+            hand = cast(Hand, self.ecso_context.get_game_object(char.get_stack(), Hand))
+
+
+            print(hand.cards)
+            hand.cards.remove(self.selected_card)
+            drawed = play_stack.take_card()
+            hand.add_card(drawed)
+            print(hand.cards)
+
+            cast(GUIFactory, self.factories["GUIS"]).redraw_cards(self.active_level, hand.get_cards())
 
             # Necessary reset
             self.selected_card = -1
             self.selected_target = -1
             self.selected_type = ""
+
+            self.move_running = False
         except AttributeError as e:
+            print("[GAMEMODE][MOVEHANDLING] Cardsystem not defined:", e)
+        except ValueError as e:
             print("[GAMEMODE][MOVEHANDLING] Cardsystem not defined:", e)
             # Necessary reset
             self.selected_card = -1
@@ -239,7 +271,10 @@ class Endless(Gamemode):
                 level = cast(Level, self.ecso_context.get_game_object(self.active_level, Level))
 
             player_character_data = cast(Character, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
-            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
+            if self.current_round % 10 == 0:
+                enemy_character_data = cast(BossEnemy, self.ecso_context.get_game_object(self.active_enemy_character, BossEnemy))    
+            else:
+                enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
 
             match self.current_stage:
                 case 0:
@@ -261,15 +296,15 @@ class Endless(Gamemode):
                     self.current_stage = 2
                 case 2:
                     if level is None:
-                        generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level()
+                        generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level(self.current_round)
                         generated_level = cast(Level, self.ecso_context.get_game_object(generated_entity, Level))
-                        self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
+                        # self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
                         self.active_level = generated_entity
                         self.is_generating_level = False
                     self.current_stage = 3
                 case 3:
                     if self.active_enemy_character == -1:
-                        new_enemy = cast(CharacterFactory, self.factories["CHARACTERS"]).fabricate_enemy()
+                        new_enemy = cast(CharacterFactory, self.factories["CHARACTERS"]).generate_enemy(self.current_round)
                         if new_enemy is not None:
                             self.active_enemy_character = new_enemy
                             self.current_stage = 4
@@ -278,7 +313,7 @@ class Endless(Gamemode):
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
                         # self.__create_character_gui()
-                        cast(GUIFactory, self.factories["GUIS"]).generate_character_gui(self.active_level, self.active_player_character, self.active_enemy_character, self.__stage_select_targets)
+                        cast(GUIFactory, self.factories["GUIS"]).generate_character_gui(self.active_level, self.active_player_character, self.active_enemy_character, self.current_round, self.__stage_select_targets)
 
                     gui_entities = level.get_guis()
                     for gui_entity in gui_entities:
@@ -289,7 +324,7 @@ class Endless(Gamemode):
                 case 5:
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
-                        cast(GUIFactory, self.factories["GUIS"]).generate_card_gui(self.active_level, self.active_play_stack, player_character_data.get_stack(), self.__stage_select_targets)
+                        cast(GUIFactory, self.factories["GUIS"]).generate_card_gui(self.active_level, self.active_play_stack, player_character_data.get_stack())
 
                     gui_entities = level.get_guis()
                     for gui_entity in gui_entities:
@@ -297,6 +332,8 @@ class Endless(Gamemode):
                         if gui_object.type_id == "GUI_CARDS":
                             self.is_creating_gui = False
                             self.current_stage = 10
+
+                    self.on_game_start()
                 case 10:
                     """GAME LOGIC"""
                     """ TARGET - ACTION SELECTION """
@@ -317,31 +354,50 @@ class Endless(Gamemode):
                     # Sets next stage
                     self.move_running = True
                     self.__handle_move()
-                    self.current_stage = 10
                     if not self.move_running:
+                        self.on_move_end()
                         self.current_stage = 12
+                        if self.level_end:
+                            self.current_stage = 14
                 case 12:
                     """ ENEMY MOVES"""
                     # The enemy does its thing
-                    self.current_stage = 13
+                    self.move_running = True
+                    self.handle_enemy_move()
+                    print(self.move_running)
+                    if not self.move_running:
+                        self.on_move_end()
+                        if self.level_end:
+                            self.current_stage = 14
+                        else:
+                            self.current_stage = 13
                 case 13:
                     # ### RESTART LOOP ### #
                     try:
                         if self.on_round_end is not None:
                             self.on_round_end()
+
+                        self.current_stage = 10
                     except TypeError as e:
                         print("[GAMEMODE][ENDLESS] Callback 'on_round_end' is not callable:", e)
-                    self.current_stage = 1  # Starts from the beginning
+                case 14:
+                    try:
+                        level.destroy = True
+                        self.active_enemy_character = -1
+                        self.current_stage = 1  # Starts from the beginning
+                        self.level_end = False
+                        self.current_round += 1
+                        if self.game_over:
+                            self.current_stage = 99
+                    except AttributeError:
+                        self.current_stage = 1
                 case 999:
                     # Error GUI popup
                     # Return to main menu or restart
                     pass
-                case 9:
-                    self.is_finished = True
-                    self.next_gamemode = "START"
+                case 99:
+                    self.stop_game_mode()
 
-            # ### ### #
-            # level.update()
             if self.active_player_character != -1:
                 self.__sync_character(self.ecso_context.get_game_object(player_character_data.get_sprite(), InteractibleCharacter), player_character_data)
             if self.active_enemy_character != -1:
@@ -352,15 +408,76 @@ class Endless(Gamemode):
         except AttributeError as e:
             print(f"[GAMEMODE] No level found: {e}")
 
+    def stop_game_mode(self) -> None:
+        self.is_finished = True
+        self.next_gamemode = "START"
+        self.input_handler.set_wait(0.25)
+
+        try:
+            cast(Level, self.ecso_context.get_game_object(self.active_level, Level)).destroy = True
+        except AttributeError as e:
+            print("[GAMEMODE][MENU] No active level could be found:", e)
+
+    def on_game_start(self):
+        player_character_data = self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter)
+        enemy_character_data = self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy)
+
+    def on_move_end(self):
+        player_character_data = self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter)
+
+        if self.current_round % 10 == 0:
+            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, BossEnemy))    
+        else:
+            enemy_character_data = self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy)
+
+        if enemy_character_data.get_health() <= 0:
+            enemy_character_data.is_alive = False
+            self.level_end = True
+            pass
+
+        if player_character_data.get_health() <= 0:
+            player_character_data.is_alive = False
+            self.level_end = True
+            self.game_over = True
+        # self.renderer.add_sprites(level.get_sprites())  # Adds all sprites from the active level to the renderers sprite group
+
     def __sync_character(self, sprite, data: Character):
         # sprite.set_display_name(data.get_name())
         # sprite.set_health(data.get_health())
         # Maybe update image?
         # TODO: Do we even need that?? The systems update the character class and card entities.
         #       The character classes update elements like the health bar on a change.. :think:
-        if data.health_changed:
-            pb = cast(ProgressBar, self.ecso_context.get_game_object(153, ProgressBar))
-            pb.set_value(data.get_health())
+        try:
+            pb = cast(ProgressBar, self.ecso_context.get_game_object(sprite.health_bar, ProgressBar))
+            if pb is not None and data.health_changed:
+                pb.set_value(data.get_health())
+
+            if sprite is not None and not data.is_alive:
+                sprite.destroy = True
+                pb.destroy = True
+        except AttributeError:
+            return
         
-        if sprite is not None and not data.is_alive:
-            sprite.destroy = True
+    def handle_enemy_move(self):
+        ENEMY_ATTACK_MODIFIER_MAX = 200
+
+        player = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
+        if self.current_round % 10 == 0:
+            enemy = cast(BossEnemy, self.ecso_context.get_game_object(self.active_enemy_character, BossEnemy))
+        else:
+            enemy = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
+
+        attack = enemy.get_attack_damage()
+        modifier = randint(80, ENEMY_ATTACK_MODIFIER_MAX) / 100
+        attack = int(attack * modifier)
+
+        # First
+        # Defensive or Offensive
+        descision = randint(1, 101)
+        if descision <= 60:
+            player.damage(attack)
+        else:
+            block_amount = randint(1, 5)
+            enemy.increase_shield(block_amount)
+
+        self.move_running = False

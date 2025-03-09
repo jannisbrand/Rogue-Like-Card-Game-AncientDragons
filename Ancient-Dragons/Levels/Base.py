@@ -24,6 +24,8 @@ class Level(pygame.sprite.Sprite):
         self.image.fill(self.color)
         if image_path != "":
             self.image = pygame.image.load(image_path)
+            self.image.convert()
+            self.image.convert_alpha()
             self.image = pygame.transform.scale(self.image, (width, height))
 
         self.rect = self.image.get_rect()

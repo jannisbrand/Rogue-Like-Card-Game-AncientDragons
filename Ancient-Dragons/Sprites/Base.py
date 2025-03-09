@@ -13,6 +13,8 @@ class Sprite(pygame.sprite.Sprite):
 
         if image_path != "":
             self.image = pygame.image.load(image_path)
+            self.image.convert()
+            self.image.convert_alpha()
             self.image = pygame.transform.scale(self.image, (width, height))
         else:
             self.image = pygame.Surface((width, height))
@@ -29,6 +31,7 @@ class Sprite(pygame.sprite.Sprite):
         self.callback_on_drag_on = None
 
         self.is_visible = True
+        self.is_active = True
         self.destroy = False
         # pygame.draw.rect(self.image, color, pygame.Rect(0, 0, width, height))
 

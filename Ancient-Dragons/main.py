@@ -10,7 +10,7 @@ from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Event_Handler import Event_Handler
 from Handlers.Subscriptions.Types import InputSubscribtion
-from Renderer import Renderer
+from Renderer.Renderer import Renderer
 """
 Application # CONTEXT: Pygame / Window / Key mappings / Application state / etc.
     GameMode # STATEMACHINE: Game rules / Game state
@@ -85,11 +85,11 @@ if __name__ == "__main__":
     gm_handler = GamemodeHandler()
     gm_handler.initialise()
 
-    gm_menu = MainMenu(0, "START", input_handler, renderer)
+    gm_menu = MainMenu(0, "START", application, input_handler, renderer)
     gm_menu.initialise()
     gm_handler.add_gamemode(gm_menu)
 
-    gm_endless = Endless(1, "ENDLESS", input_handler, renderer)
+    gm_endless = Endless(1, "ENDLESS", application, input_handler, renderer)
     gm_handler.add_gamemode(gm_endless)
 
     while not application.window_should_close:

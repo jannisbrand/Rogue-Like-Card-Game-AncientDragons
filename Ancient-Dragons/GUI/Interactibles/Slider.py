@@ -15,7 +15,7 @@ class ProgressBar(InteractibleSprite):
         self.fragment_width = int(self.total_range / 10)
         self.value_color = value_color
 
-        self.base_font = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", height - 2)
+        self.base_font = pygame.font.Font("Ressources/Fonts/Agency_Gothic_CT.otf", height - 2)
 
         self.offset_x = int((self.min_value + self.max_value) / 10)
 
@@ -23,15 +23,18 @@ class ProgressBar(InteractibleSprite):
         background = Surface((self.rect.width, self.rect.height))
         background.fill(pygame.Color(20, 20, 20))
 
-        # self.fragment_width = int(self.current_value / self.fragmentation)
-        amount_of_fragments = int((self.current_value / self.total_range) * (self.total_range / self.fragment_width)) * 2
-        for index in range(amount_of_fragments):
-            fragment = Surface((self.fragment_width, self.rect.height))
-            fragment.fill(self.value_color)
-            x_placement_offset = self.fragment_width
-            background.blit(fragment, (fragment.get_rect().x + (x_placement_offset * index), background.get_rect().y))
-            index += 1
-        self.image.blit(background, (0, 0))
+        try:
+            # self.fragment_width = int(self.current_value / self.fragmentation)
+            amount_of_fragments = int((self.current_value / self.total_range) * (self.total_range / self.fragment_width)) * 2
+            for index in range(amount_of_fragments):
+                fragment = Surface((self.fragment_width, self.rect.height))
+                fragment.fill(self.value_color)
+                x_placement_offset = self.fragment_width
+                background.blit(fragment, (fragment.get_rect().x + (x_placement_offset * index), background.get_rect().y))
+                index += 1
+            self.image.blit(background, (0, 0))
+        except ZeroDivisionError:
+            pass
         self.generate_text()
 
     def decrement(self, amount: int = 1) -> None:

@@ -47,7 +47,7 @@ class Button(InteractibleSprite):
         return self.name
     
     def set_text(self, text: str = "DEFAULT_BUTTON") -> None:
-        self.font_text = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", self.font_size)
+        self.font_text = pygame.font.Font("Ressources/Fonts/Agency_Gothic_CT.otf", self.font_size)
         self.text = text  # Updates saved text
         surface_text = self.font_text.render(text, True, (255, 255, 255))
         rect_text = surface_text.get_rect()

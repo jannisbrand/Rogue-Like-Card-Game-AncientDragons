@@ -3,6 +3,7 @@ from typing import Type, Any, cast
 import pygame
 
 from Characters import Base
+from Characters.Boss_Enemy import BossEnemy
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from Sprites.Base import Sprite
@@ -234,8 +235,9 @@ class ECSO_Context():
         try:
             for game_object_type, game_objects in self.game_objects.items():
                 try: 
-                    game_objects.pop(entity)
-                    self.entities.remove(entity)  # TEST
+                    game_object = game_objects.pop(entity)
+                    del game_object
+                    self.entities.discard(entity)  # TEST
                 except KeyError:
                     continue
         except KeyError as e:
@@ -279,16 +281,17 @@ class ECSO_Context():
             try:
                 match type(component):
                     case Components.C_ATTACK:
-                        if selected_type == StandardEnemy: #or selected_type == BossEnemy
-                            target = cast(StandardEnemy, target)
+                        if selected_type == StandardEnemy or selected_type == BossEnemy:
+                            target = cast(Base.Character, target)
                             # seperate funktion für die veränderung von attack
                             attack = int(self.attack_modifiers(component.value, components)) - int(target.get_effect(Effects.SharedDebuffs.Dexterity))
-                            new_health = target.get_health() - attack
-                            target.set_health(new_health)
+                            target.damage(attack)
                             pass
                     case Components.C_DEFENSE:
                         if selected_type == PlayerCharacter:
                             # def is missing for the charakter
+                            print(component.value)
+                            target.increase_shield(int(component.value))
                             pass
                     case Components.C_DEFENSE_STAY:
                         # still no def i could reference
@@ -485,12 +488,9 @@ class ECSO_Context():
                         # when the def of the player gets raised
                         pass
             except AttributeError as e:
-                print ("AttributeError " + e)
+                print("[ECSOContext][CARDSYSTEM]", e)
                 return False
             except TypeError as e:
-                print ("TypeError " + e)
+                print("[ECSOContext][CARDSYSTEM]", e)
                 return False
-            
         return True
-
-

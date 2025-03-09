@@ -17,6 +17,9 @@ class InteractibleCharacter(InteractibleSprite):
         self.display_name = name
         self.show_name = False
 
+        self.health_bar = int
+        self.effect_bar = int
+
     def set_display_name(self, value: str):
         self.display_name = value
 

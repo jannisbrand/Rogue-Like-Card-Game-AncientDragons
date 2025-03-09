@@ -9,6 +9,7 @@ class Character():
         self.id = id    # ID
         self.name = name    # Name of the character
         self.health: int  # Currency for life
+        self.shield = 0
 
         self.is_alive = True
         self.sprite = int
@@ -50,6 +51,44 @@ class Character():
                 self.health = 0
                 self.is_alive = False
             self.health_changed = True
+        except AttributeError as e:
+            print("[CHARACTER][DATA]", e)
+        except ValueError as e:
+            print("[CHARACTER][DATA]", e)
+        except TypeError as e:
+            print("[CHARACTER][DATA]", e)
+
+    def damage(self, value: int):
+        try:
+            if value > self.shield:
+                after_shield = value - self.shield
+                self.health -= after_shield
+            else:
+                self.shield -= value
+            if self.health <= 0:
+                self.health = 0
+                self.is_alive = False
+            self.health_changed = True
+        except AttributeError as e:
+            print("[CHARACTER][DATA]", e)
+        except ValueError as e:
+            print("[CHARACTER][DATA]", e)
+        except TypeError as e:
+            print("[CHARACTER][DATA]", e)
+
+    def set_shield(self, value: int):
+        try:
+            self.shield = value
+        except AttributeError as e:
+            print("[CHARACTER][DATA]", e)
+        except ValueError as e:
+            print("[CHARACTER][DATA]", e)
+        except TypeError as e:
+            print("[CHARACTER][DATA]", e)
+
+    def increase_shield(self, value: int):
+        try:
+            self.shield = self.shield + value
         except AttributeError as e:
             print("[CHARACTER][DATA]", e)
         except ValueError as e:

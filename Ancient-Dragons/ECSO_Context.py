@@ -285,11 +285,13 @@ class ECSO_Context():
                             target = cast(Base.Character, target)
                             # seperate funktion für die veränderung von attack
                             attack = int(self.attack_modifiers(component.value, components)) - int(target.get_effect(Effects.SharedDebuffs.Dexterity))
-                            new_health = target.damage(attack)
+                            target.damage(attack)
                             pass
                     case Components.C_DEFENSE:
                         if selected_type == PlayerCharacter:
                             # def is missing for the charakter
+                            print(component.value)
+                            target.increase_shield(int(component.value))
                             pass
                     case Components.C_DEFENSE_STAY:
                         # still no def i could reference

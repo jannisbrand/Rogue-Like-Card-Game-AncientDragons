@@ -398,8 +398,6 @@ class Endless(Gamemode):
                 case 99:
                     self.stop_game_mode()
 
-            print(enemy_character_data.get_health())
-
             if self.active_player_character != -1:
                 self.__sync_character(self.ecso_context.get_game_object(player_character_data.get_sprite(), InteractibleCharacter), player_character_data)
             if self.active_enemy_character != -1:
@@ -435,6 +433,7 @@ class Endless(Gamemode):
         if enemy_character_data.get_health() <= 0:
             enemy_character_data.is_alive = False
             self.level_end = True
+            pass
 
         if player_character_data.get_health() <= 0:
             player_character_data.is_alive = False
@@ -478,7 +477,7 @@ class Endless(Gamemode):
         if descision <= 60:
             player.damage(attack)
         else:
-            block_amount = randint(1, 25)
-            enemy.set_shield(block_amount)
+            block_amount = randint(1, 5)
+            enemy.increase_shield(block_amount)
 
         self.move_running = False

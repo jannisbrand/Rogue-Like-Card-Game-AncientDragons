@@ -54,7 +54,7 @@ class CharacterFactory():
             print("[OFactory] Created character: " + str(created_character))
 
     def boss_enemy(self, round: int) -> int:
-        BOSS_BASE_ATTACK = 9
+        BOSS_BASE_ATTACK = 5
         ENEMY_BASE_IDK = 0
 
         entity = self.ecso_context.add_entity()
@@ -65,7 +65,7 @@ class CharacterFactory():
         return entity
 
     def standard_enemy(self, round: int) -> int:
-        ENEMY_BASE_ATTACK = 5
+        ENEMY_BASE_ATTACK = 3
         ENEMY_BASE_IDK = 0
     
         entity = self.ecso_context.add_entity()

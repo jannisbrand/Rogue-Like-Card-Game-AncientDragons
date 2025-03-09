@@ -3,6 +3,7 @@ from typing import Type, Any, cast
 import pygame
 
 from Characters import Base
+from Characters.Boss_Enemy import BossEnemy
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from Sprites.Base import Sprite
@@ -280,8 +281,8 @@ class ECSO_Context():
             try:
                 match type(component):
                     case Components.C_ATTACK:
-                        if selected_type == StandardEnemy: #or selected_type == BossEnemy
-                            target = cast(StandardEnemy, target)
+                        if selected_type == StandardEnemy or selected_type == BossEnemy:
+                            target = cast(Base.Character, target)
                             # seperate funktion für die veränderung von attack
                             attack = int(self.attack_modifiers(component.value, components)) - int(target.get_effect(Effects.SharedDebuffs.Dexterity))
                             new_health = target.get_health() - attack
@@ -486,12 +487,9 @@ class ECSO_Context():
                         # when the def of the player gets raised
                         pass
             except AttributeError as e:
-                print ("AttributeError " + e)
+                print("[ECSOContext][CARDSYSTEM]", e)
                 return False
             except TypeError as e:
-                print ("TypeError " + e)
+                print("[ECSOContext][CARDSYSTEM]", e)
                 return False
-            
         return True
-
-

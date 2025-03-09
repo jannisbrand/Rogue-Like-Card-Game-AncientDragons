@@ -4,6 +4,7 @@ from typing import Any
 
 import pygame
 from Characters.Base import Character
+from Characters.Boss_Enemy import BossEnemy
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from ECSO_Context import ECSO_Context
@@ -13,7 +14,7 @@ from Renderer.Group_Types import SpriteGroupTypes
 HEALTH_DEFAULT_START = 10
 HEALTH_PLAYER_START = 10
 HEALTH_ENEMY_START = 10
-HEALTH_PRGRESSION = 1.20
+HEALTH_PRGRESSION = 1.15
 
 
 class CharacterFactory():
@@ -52,7 +53,18 @@ class CharacterFactory():
             self.ecso_context.add_game_object(entity, created_character)
             print("[OFactory] Created character: " + str(created_character))
 
-    def generate_enemy(self, round: int) -> int:
+    def boss_enemy(self, round: int) -> int:
+        BOSS_BASE_ATTACK = 9
+        ENEMY_BASE_IDK = 0
+
+        entity = self.ecso_context.add_entity()
+        created_enemy = BossEnemy(entity, "LUGENE CRABSUS")
+        created_enemy.set_health(self.calculate_health(round, 1.20))
+        created_enemy.set_attack_damage(BOSS_BASE_ATTACK)
+        self.ecso_context.add_game_object(entity, created_enemy)
+        return entity
+
+    def standard_enemy(self, round: int) -> int:
         ENEMY_BASE_ATTACK = 137
         ENEMY_BASE_IDK = 0
     
@@ -62,6 +74,14 @@ class CharacterFactory():
         created_enemy.set_attack_damage(ENEMY_BASE_ATTACK)
         self.ecso_context.add_game_object(entity, created_enemy)
         return entity
+
+    def generate_enemy(self, round: int) -> int:
+        if round % 10 == 0:
+            created_enemy = self.boss_enemy(round)
+        else:
+            created_enemy = self.standard_enemy(round)
+
+        return created_enemy
     
-    def calculate_health(self, round: int):
-        return int(HEALTH_DEFAULT_START * pow(HEALTH_PRGRESSION, round))
+    def calculate_health(self, round: int, multiplier: float = 1.0):
+        return int(HEALTH_DEFAULT_START * pow(HEALTH_PRGRESSION, round)) * multiplier

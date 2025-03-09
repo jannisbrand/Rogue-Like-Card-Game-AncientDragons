@@ -48,7 +48,7 @@ class MainMenu(Gamemode):
         rect.y = 0
 
         entity = self.ecso_context.add_entity()
-        level = MenuLevel(entity, "MAIN_MENU", rect, "", (13, 50, 89), 1440, 900, environment, "Levels/Data/main-menu_background.png")
+        level = MenuLevel(entity, "MAIN_MENU", rect, "", (13, 50, 89), 1440, 900, environment, "Ressources/Pictures/Levels/Menus/main-menu_background.png")
         self.active_level = entity
         self.ecso_context.add_game_object(entity, level)
         self.renderer.add_sprite(SpriteGroupTypes.GUIS, level)
@@ -66,7 +66,7 @@ class MainMenu(Gamemode):
 
         # LOGO
         entity = self.ecso_context.add_entity()
-        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 300, 300, "Levels/Data/main-menu_logo_test.png")
+        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 300, 300, "Ressources/Pictures/Levels/Menus/main-menu_logo_test.png")
         logo.relative_x = 0
         logo.rect.y = 50
         self.ecso_context.add_game_object(entity, logo)
@@ -75,7 +75,7 @@ class MainMenu(Gamemode):
 
         # TITLE
         entity = self.ecso_context.add_entity()
-        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 1140, 120, "Levels/Data/main-menu_title_test.png")
+        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 1140, 120, "Ressources/Pictures/Levels/Menus/main-menu_title_test.png")
         logo.rect.x = (level.rect.width / 2 + main_gui.rect.width / 2) - logo.rect.width / 2
         logo.rect.y = level.rect.height / 2 - logo.rect.height / 2
         self.ecso_context.add_game_object(entity, logo)

@@ -3,6 +3,7 @@ from random import randint
 from typing import Any, cast
 import pygame
 from Characters.Base import Character
+from Characters.Boss_Enemy import BossEnemy
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME, C_DISPLAY_TEXT
@@ -111,7 +112,7 @@ class GUIFactory():
         color = pygame.Color(0, 0, 245)
         highlight = pygame.Color(0, 0, 255)
         entity = self.ecso_context.add_entity()
-        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 50, 50, "Levels/Data/pull_stack.png")
+        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 50, 50, "Ressources/Pictures/pull_stack.png")
         pull_stack.relative_x = 25
         pull_stack.relative_y = (gui_cards.rect.height - pull_stack.rect.height) - 25
         pull_stack.set_text("STACK")
@@ -130,17 +131,17 @@ class GUIFactory():
         for entity_on_hand in cards:
             card_entity = self.ecso_context.add_entity()
             color = pygame.Color(80, 20, 60)
-            card = Card(card_entity, entity_on_hand, "INTERACTIBLE_CARD_SPRITE", gui.rect, "", color, 200, 300, "Levels/Data/card_background.png")  # It's possible to use an image as a base background!
+            card = Card(card_entity, entity_on_hand, "INTERACTIBLE_CARD_SPRITE", gui.rect, "", color, 200, 300, "Ressources/Pictures/card_background.png")  # It's possible to use an image as a base background!
             try:
                 # CARD PICTURE
-                picture = pygame.image.load("Levels/Data/gangsta_tree.png")
+                picture = pygame.image.load("Ressources/Pictures/gangsta_tree.png")
                 picture.convert()
                 picture.convert_alpha()
                 card.set_picture(picture)
                 # CARD TITLE
                 card.set_title(cast(C_DISPLAY_NAME, self.ecso_context.get_component(entity_on_hand, C_DISPLAY_NAME)).value)
                 # CARD COSTS
-                cost_resource = pygame.image.load("Levels/Data/card_cost_background.png")  # Background of the card costs area (Mana)
+                cost_resource = pygame.image.load("Ressources/Pictures/card_cost_background.png")  # Background of the card costs area (Mana)
                 cost_resource.convert()
                 cost_resource.convert_alpha()
                 card.set_cost(cast(C_CARD_COSTS, self.ecso_context.get_component(entity_on_hand, C_CARD_COSTS)).value, cost_resource)
@@ -185,8 +186,9 @@ class GUIFactory():
 
         self.draw_cards(card_gui, cards)
 
-    def generate_character_gui(self, level_id: int, player_character_id: int, enemy_character_id: int, character_callback_on_click: Any):
+    def generate_character_gui(self, level_id: int, player_character_id: int, enemy_character_id: int, round: int, character_callback_on_click: Any):
         level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
+        ressource_directory = "Ressources/Pictures"
         # ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y  # ...
         
         color = pygame.Color(0, 0, 0)
@@ -205,7 +207,7 @@ class GUIFactory():
 
         # ### MAIN CHARACTER SPRITE ### #
         # BASE
-        list_of_images = os.listdir("Levels/Data/Charakters")
+        list_of_images = os.listdir(ressource_directory + "/Characters")
         base_color = pygame.Color(255, 255, 255)
         resource = ""
         for image_name in list_of_images:
@@ -214,7 +216,7 @@ class GUIFactory():
         player_character_sprite_entity = self.ecso_context.add_entity()
         character_width = level.rect.height / 3
         charcter_height = level.rect.height / 3
-        player_character_sprite = InteractibleCharacter(player_character_sprite_entity, player_character_id, "INTERACTIBLE_PLAYER_CHARACTER_SPRITE", gui_characters.rect, "", base_color, character_width, charcter_height, f"Levels/Data/Charakters/{resource}")
+        player_character_sprite = InteractibleCharacter(player_character_sprite_entity, player_character_id, "INTERACTIBLE_PLAYER_CHARACTER_SPRITE", gui_characters.rect, "", base_color, character_width, charcter_height, ressource_directory + "/Characters/" + resource)
         player_character_sprite.relative_x = 50
         player_character_sprite.relative_y = gui_characters.rect.height - player_character_sprite.rect.height
         player_character_sprite.callback_on_click = character_callback_on_click
@@ -252,19 +254,26 @@ class GUIFactory():
         # ### MAIN PLAYER SPRITE ### #
 
         # TODO: TEST self.active_enemy_character = cast(CharacterFactory, self.factories["CHARACTERS"]).fabricate_enemy()
-        enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(enemy_character_id, StandardEnemy))
+        if round % 10 == 0:
+            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(enemy_character_id, BossEnemy))
+        else:
+            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(enemy_character_id, StandardEnemy))
 
         if enemy_character_data is None:
             return
 
         # ### MAIN ENEMY SPRITE ### #
         base_color = pygame.Color(255, 255, 255)
-        list_of_enemy_images = os.listdir("Levels/Data/Enemies")
-        resource = list_of_enemy_images[randint(0, len(list_of_enemy_images) - 1)]
+        if round % 10 == 0:
+            ressources = os.listdir(ressource_directory + "/Dragons")
+            resource = ressource_directory + "/Dragons/" + ressources[randint(0, len(ressources) - 1)]
+        else:
+            ressources = os.listdir(ressource_directory + "/Enemies")
+            resource = ressource_directory + "/Enemies/" + ressources[randint(0, len(ressources) - 1)]
         enemy_character_sprite_entity = self.ecso_context.add_entity()
         character_width = level.rect.height / 3
         charcter_height = level.rect.height / 3
-        enemy_character_sprite = InteractibleCharacter(enemy_character_sprite_entity, enemy_character_id, "INTERACTIBLE_ENEMY_CHARACTER_SPRITE", gui_characters.rect, "", base_color, character_width, charcter_height, f"Levels/Data/Enemies/{resource}")
+        enemy_character_sprite = InteractibleCharacter(enemy_character_sprite_entity, enemy_character_id, "INTERACTIBLE_ENEMY_CHARACTER_SPRITE", gui_characters.rect, "", base_color, character_width, charcter_height, resource)
         enemy_character_sprite.callback_on_click = character_callback_on_click
         enemy_character_sprite.relative_x = 1100
         enemy_character_sprite.relative_y = gui_characters.rect.height - enemy_character_sprite.rect.height

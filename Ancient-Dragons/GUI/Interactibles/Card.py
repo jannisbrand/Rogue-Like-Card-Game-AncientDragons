@@ -17,9 +17,9 @@ class Card(InteractibleSprite):
         self.picture = None
         self.description = None
 
-        self.base_font = pygame.font.Font("C:\Windows\Fonts\Arial.ttf", 18)
-        self.cost_font = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", 26)
-        self.describtion_font = pygame.font.Font("Fonts/Agency_Gothic_CT.otf", 18)
+        self.base_font = pygame.font.Font("Ressources/Fonts/Agency_Gothic_CT.otf", 18)
+        self.cost_font = pygame.font.Font("Ressources/Fonts/Agency_Gothic_CT.otf", 26)
+        self.describtion_font = pygame.font.Font("Ressources/Fonts/Agency_Gothic_CT.otf", 18)
 
         # ### Animation ### #
         self.should_animate = False

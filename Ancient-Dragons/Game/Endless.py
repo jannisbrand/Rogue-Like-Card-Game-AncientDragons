@@ -6,6 +6,7 @@ from random import randint
 from re import S
 from typing import Any, cast
 from Characters.Base import Character
+from Characters.Boss_Enemy import BossEnemy
 from Characters.Player_Character import PlayerCharacter
 from Characters.Standard_Enemy import StandardEnemy
 from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME, C_DISPLAY_TEXT
@@ -102,7 +103,7 @@ class Endless(Gamemode):
         # ### CHARACTER SELECTION MENU ### #
         entity = self.ecso_context.add_entity()
         rect = pygame.Rect(0, 0, 0, 0)
-        character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {}, "Levels/Data/selection-menu_background_test.png")
+        character_selection = MenuLevel(entity, "CHARACTER_SELECTION", rect, "", (0, 0, 0), 1440, 900, {}, "Ressources/Pictures/Levels/Menus/selection-menu_background_test.png")
         self.ecso_context.add_game_object(entity, character_selection)
         self.renderer.add_sprite(SpriteGroupTypes.LEVELS, character_selection)
         self.active_level = entity
@@ -212,7 +213,10 @@ class Endless(Gamemode):
                 case "INTERACTIBLE_ENEMY_CHARACTER_SPRITE":
                     if self.selected_card != -1:
                         self.selected_target = source.character_context_id
-                        self.selected_type = StandardEnemy
+                        if self.current_round % 10 == 0:
+                            self.selected_type = BossEnemy
+                        else:
+                            self.selected_type = StandardEnemy
         except AttributeError as e:
             print("[GAMEMODE][SELECTION] ", e)
 
@@ -264,7 +268,10 @@ class Endless(Gamemode):
                 level = cast(Level, self.ecso_context.get_game_object(self.active_level, Level))
 
             player_character_data = cast(Character, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
-            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
+            if self.current_round % 10 == 0:
+                enemy_character_data = cast(BossEnemy, self.ecso_context.get_game_object(self.active_enemy_character, BossEnemy))    
+            else:
+                enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
 
             match self.current_stage:
                 case 0:
@@ -303,7 +310,7 @@ class Endless(Gamemode):
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
                         # self.__create_character_gui()
-                        cast(GUIFactory, self.factories["GUIS"]).generate_character_gui(self.active_level, self.active_player_character, self.active_enemy_character, self.__stage_select_targets)
+                        cast(GUIFactory, self.factories["GUIS"]).generate_character_gui(self.active_level, self.active_player_character, self.active_enemy_character, self.current_round, self.__stage_select_targets)
 
                     gui_entities = level.get_guis()
                     for gui_entity in gui_entities:
@@ -405,7 +412,12 @@ class Endless(Gamemode):
 
     def on_move_end(self):
         player_character_data = self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter)
-        enemy_character_data = self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy)
+
+        if self.current_round % 10 == 0:
+            enemy_character_data = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, BossEnemy))    
+        else:
+            enemy_character_data = self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy)
+
         if player_character_data is not None:
             self.__sync_character(self.ecso_context.get_game_object(player_character_data.get_sprite(), InteractibleCharacter), player_character_data)
         if enemy_character_data is not None:
@@ -422,10 +434,13 @@ class Endless(Gamemode):
         # Maybe update image?
         # TODO: Do we even need that?? The systems update the character class and card entities.
         #       The character classes update elements like the health bar on a change.. :think:
-        pb = cast(ProgressBar, self.ecso_context.get_game_object(sprite.health_bar, ProgressBar))
-        if pb is not None and data.health_changed:
-            pb.set_value(data.get_health())
-        
-        if sprite is not None and not data.is_alive:
-            sprite.destroy = True
-            pb.destroy = True
+        try:
+            pb = cast(ProgressBar, self.ecso_context.get_game_object(sprite.health_bar, ProgressBar))
+            if pb is not None and data.health_changed:
+                pb.set_value(data.get_health())
+
+            if sprite is not None and not data.is_alive:
+                sprite.destroy = True
+                pb.destroy = True
+        except AttributeError:
+            return

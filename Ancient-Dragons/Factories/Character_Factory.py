@@ -65,7 +65,7 @@ class CharacterFactory():
         return entity
 
     def standard_enemy(self, round: int) -> int:
-        ENEMY_BASE_ATTACK = 137
+        ENEMY_BASE_ATTACK = 5
         ENEMY_BASE_IDK = 0
     
         entity = self.ecso_context.add_entity()

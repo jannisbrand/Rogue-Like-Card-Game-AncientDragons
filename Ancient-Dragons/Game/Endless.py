@@ -1,6 +1,7 @@
 from email.mime import base
 from itertools import tee
 import os
+import random
 import pygame
 from random import randint
 from re import S
@@ -359,6 +360,8 @@ class Endless(Gamemode):
                 case 12:
                     """ ENEMY MOVES"""
                     # The enemy does its thing
+                    self.move_running = True
+                    self.handle_enemy_move()
                     if not self.move_running:
                         self.on_move_end()
                         if self.level_end:
@@ -444,3 +447,28 @@ class Endless(Gamemode):
                 pb.destroy = True
         except AttributeError:
             return
+        
+    def handle_enemy_move(self):
+        ENEMY_ATTACK_MODIFIER_MAX = 200
+
+        player = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
+        if self.current_round % 10 == 0:
+            enemy = cast(BossEnemy, self.ecso_context.get_game_object(self.active_enemy_character, BossEnemy))
+        else:
+            enemy = cast(StandardEnemy, self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy))
+
+        attack = enemy.get_attack_damage()
+        modifier = randint(80, ENEMY_ATTACK_MODIFIER_MAX) / 100
+        attack = int(attack * modifier)
+
+        # First
+        # Defensive or Offensive
+        descision = randint(1, 101)
+        if descision <= 60:
+            player.damage(attack)
+            return
+
+        block_amount = randint(1, 25)
+        enemy.set_shield(block_amount)
+
+        self.move_running = False

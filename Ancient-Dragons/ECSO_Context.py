@@ -285,8 +285,7 @@ class ECSO_Context():
                             target = cast(Base.Character, target)
                             # seperate funktion für die veränderung von attack
                             attack = int(self.attack_modifiers(component.value, components)) - int(target.get_effect(Effects.SharedDebuffs.Dexterity))
-                            new_health = target.get_health() - attack
-                            target.set_health(new_health)
+                            new_health = target.damage(attack)
                             pass
                     case Components.C_DEFENSE:
                         if selected_type == PlayerCharacter:

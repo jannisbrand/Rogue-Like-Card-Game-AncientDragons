@@ -61,5 +61,5 @@ class Renderer():
         pygame.display.update(dirty_rects)
 
         pygame.display.flip()
-        print(self.__application_context.get_clock().get_fps())
+        # print(self.__application_context.get_clock().get_fps())
         self.__application_context.get_clock().tick(self.__frames_per_secound)

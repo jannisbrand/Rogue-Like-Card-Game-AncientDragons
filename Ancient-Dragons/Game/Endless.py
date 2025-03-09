@@ -74,6 +74,8 @@ class Endless(Gamemode):
         self.is_finished = False
         self.is_initialised = False
         self.current_stage = 0
+        self.current_round = 1
+        self.game_over = False
         self.active_level = -1  # No level active
         self.selected_type = ""
         self.selected_target = -1
@@ -362,13 +364,13 @@ class Endless(Gamemode):
                     # The enemy does its thing
                     self.move_running = True
                     self.handle_enemy_move()
+                    print(self.move_running)
                     if not self.move_running:
                         self.on_move_end()
                         if self.level_end:
                             self.current_stage = 14
                         else:
                             self.current_stage = 13
-                    self.current_stage = 13
                 case 13:
                     # ### RESTART LOOP ### #
                     try:
@@ -385,15 +387,18 @@ class Endless(Gamemode):
                         self.current_stage = 1  # Starts from the beginning
                         self.level_end = False
                         self.current_round += 1
+                        if self.game_over:
+                            self.current_stage = 99
                     except AttributeError:
                         self.current_stage = 1
                 case 999:
                     # Error GUI popup
                     # Return to main menu or restart
                     pass
-                case 9:
-                    self.is_finished = True
-                    self.next_gamemode = "START"
+                case 99:
+                    self.stop_game_mode()
+
+            print(enemy_character_data.get_health())
 
             if self.active_player_character != -1:
                 self.__sync_character(self.ecso_context.get_game_object(player_character_data.get_sprite(), InteractibleCharacter), player_character_data)
@@ -405,13 +410,19 @@ class Endless(Gamemode):
         except AttributeError as e:
             print(f"[GAMEMODE] No level found: {e}")
 
+    def stop_game_mode(self) -> None:
+        self.is_finished = True
+        self.next_gamemode = "START"
+        self.input_handler.set_wait(0.25)
+
+        try:
+            cast(Level, self.ecso_context.get_game_object(self.active_level, Level)).destroy = True
+        except AttributeError as e:
+            print("[GAMEMODE][MENU] No active level could be found:", e)
+
     def on_game_start(self):
         player_character_data = self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter)
         enemy_character_data = self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy)
-        if player_character_data is not None:
-            self.__sync_character(self.ecso_context.get_game_object(player_character_data.get_sprite(), InteractibleCharacter), player_character_data)
-        if enemy_character_data is not None:
-            self.__sync_character(self.ecso_context.get_game_object(enemy_character_data.get_sprite(), InteractibleCharacter), enemy_character_data)
 
     def on_move_end(self):
         player_character_data = self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter)
@@ -421,14 +432,14 @@ class Endless(Gamemode):
         else:
             enemy_character_data = self.ecso_context.get_game_object(self.active_enemy_character, StandardEnemy)
 
-        if player_character_data is not None:
-            self.__sync_character(self.ecso_context.get_game_object(player_character_data.get_sprite(), InteractibleCharacter), player_character_data)
-        if enemy_character_data is not None:
-            self.__sync_character(self.ecso_context.get_game_object(enemy_character_data.get_sprite(), InteractibleCharacter), enemy_character_data)
-        
         if enemy_character_data.get_health() <= 0:
             enemy_character_data.is_alive = False
             self.level_end = True
+
+        if player_character_data.get_health() <= 0:
+            player_character_data.is_alive = False
+            self.level_end = True
+            self.game_over = True
         # self.renderer.add_sprites(level.get_sprites())  # Adds all sprites from the active level to the renderers sprite group
 
     def __sync_character(self, sprite, data: Character):
@@ -466,9 +477,8 @@ class Endless(Gamemode):
         descision = randint(1, 101)
         if descision <= 60:
             player.damage(attack)
-            return
-
-        block_amount = randint(1, 25)
-        enemy.set_shield(block_amount)
+        else:
+            block_amount = randint(1, 25)
+            enemy.set_shield(block_amount)
 
         self.move_running = False

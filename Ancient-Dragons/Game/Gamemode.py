@@ -51,6 +51,7 @@ class Gamemode():
         
         self.current_stage = 0
         self.current_round = 10
+        self.game_over = False
         self.level_end = False
         self.active_level: int  # Id of the level in the context
         self.active_player_character: int  # Id of the character in the context

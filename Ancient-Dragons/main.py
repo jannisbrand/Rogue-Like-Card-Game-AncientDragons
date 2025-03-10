@@ -72,7 +72,7 @@ class Application():
 if __name__ == "__main__":
     application = Application(1440, 900, (1440 - 720) - 450, 100, pygame.RESIZABLE, "")
     application.initialise()
-    application.set_window_caption("Ancient Dragons - Ver: 0.001")
+    application.set_window_caption("Ancient Dragons - Ver: 0.1_10.03.2025")
     
     event_handler = Event_Handler(application)
     input_handler = InputHandler(application)

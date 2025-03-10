@@ -66,7 +66,7 @@ class MainMenu(Gamemode):
 
         # LOGO
         entity = self.ecso_context.add_entity()
-        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 300, 300, "Ressources/Pictures/Levels/Menus/main-menu_logo_test.png")
+        logo = InteractibleEnvironmental(entity, "INTERACTIBLE_ENVIRONMENTAL_SPRITE", main_gui.rect, "", (0, 0, 0), 300, 300, "Ressources/Pictures/Levels/Menus/main-menu_logo_final.png")
         logo.relative_x = 0
         logo.rect.y = 50
         self.ecso_context.add_game_object(entity, logo)

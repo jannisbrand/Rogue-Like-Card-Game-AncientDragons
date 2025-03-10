@@ -108,7 +108,7 @@ class GUIFactory():
         #     self.input_handler.subscribe_to_event(subscription)
         #     index += 1
 
-        # ### CARD PULL STACK ### #
+        # ### CARD PULL STACK ### # TODO: MOVE TO OWN DRAW METHOD
         color = pygame.Color(0, 0, 245)
         highlight = pygame.Color(0, 0, 255)
         entity = self.ecso_context.add_entity()
@@ -236,7 +236,7 @@ class GUIFactory():
         base_color = pygame.Color(50, 120, 90)
         value_color = pygame.Color(255, 0, 0)
         progressbar_entity = self.ecso_context.add_entity()
-        progressbar = ProgressBar(progressbar_entity, "INTERACTIBLE_PLAYER_PROGRESSBAR_SPRITE", player_character_sprite.rect, "", base_color, value_color, player_character_sprite.rect.width, 20, player_character_data.get_health(), 0, "")
+        progressbar = ProgressBar(progressbar_entity, "INTERACTIBLE_PLAYER_PROGRESSBAR_SPRITE", player_character_sprite.rect, "", base_color, value_color, player_character_sprite.rect.width, 20, player_character_data.get_health_max(), 0, "")
         progressbar.relative_x = 0
         progressbar.relative_y = -40
 

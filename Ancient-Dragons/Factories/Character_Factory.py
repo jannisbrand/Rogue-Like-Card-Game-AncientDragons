@@ -47,6 +47,7 @@ class CharacterFactory():
 
             entity = self.ecso_context.add_entity()
             created_character = PlayerCharacter(entity, character_data[1])
+            created_character.set_health_max(self.calculate_health(round))
             created_character.set_health(self.calculate_health(round))
             created_character.set_mana(10)
             created_character.set_gold(1000)

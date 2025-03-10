@@ -12,8 +12,8 @@ from Components import Components
 from Renderer.Group_Types import SpriteGroupTypes
 
 HEALTH_DEFAULT_START = 10
-HEALTH_PLAYER_START = 10
-HEALTH_ENEMY_START = 10
+HEALTH_PLAYER_START = 45
+HEALTH_ENEMY_START = 15
 HEALTH_PRGRESSION = 1.15
 
 
@@ -47,8 +47,8 @@ class CharacterFactory():
 
             entity = self.ecso_context.add_entity()
             created_character = PlayerCharacter(entity, character_data[1])
-            created_character.set_health_max(self.calculate_health(round))
-            created_character.set_health(self.calculate_health(round))
+            created_character.set_health_max(HEALTH_PLAYER_START)
+            created_character.set_health(HEALTH_PLAYER_START)
             created_character.set_mana(10)
             created_character.set_gold(1000)
             self.ecso_context.add_game_object(entity, created_character)

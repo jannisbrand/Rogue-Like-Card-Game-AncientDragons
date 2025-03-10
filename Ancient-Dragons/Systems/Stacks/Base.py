@@ -35,3 +35,5 @@ class CardStack():
             return self.cards.pop(len(self.cards) - 1)
         except AttributeError as e:
             print("[CARDSTACK]", e)
+        except IndexError:
+            return -1

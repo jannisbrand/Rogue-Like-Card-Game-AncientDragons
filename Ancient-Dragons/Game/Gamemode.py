@@ -57,6 +57,7 @@ class Gamemode():
         self.active_player_character: int  # Id of the character in the context
         self.active_enemy_character: int
         self.active_play_stack: int
+        self.active_exhaust_stack: int
         self.selected_type: str
 
         self.on_round_start = None

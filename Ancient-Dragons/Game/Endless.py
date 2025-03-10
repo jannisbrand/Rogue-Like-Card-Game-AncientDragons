@@ -31,6 +31,7 @@ from Levels.Menu import MenuLevel
 from Renderer.Group_Types import SpriteGroupTypes
 from Renderer.Renderer import Renderer
 from Sprites.Base import Sprite
+from Systems.Stacks.Exhaust import Exhaust
 from Systems.Stacks.Hand import Hand
 from Systems.Stacks.Play import Play
 
@@ -185,6 +186,13 @@ class Endless(Gamemode):
         self.active_play_stack = stack.context_id  # Does what its says
         # ### DRAW STACK ### #
 
+        # ### EXHAUST STACK ### #
+        exhaust_entity = self.ecso_context.add_entity()
+        exhaust_stack = Exhaust(exhaust_entity)
+        self.ecso_context.add_game_object(exhaust_entity, exhaust_stack)
+        self.active_exhaust_stack = exhaust_entity
+        # ### EXHAUST STACK ### #
+
         # ### HAND STACK ### #
         play_stack = cast(Play, self.ecso_context.get_game_object(self.active_play_stack, Play))
 
@@ -235,14 +243,27 @@ class Endless(Gamemode):
             # TEST TEST TEST TEST TEST TEST TEST TEST TEST
             
             play_stack = cast(Play, self.ecso_context.get_game_object(self.active_play_stack, Play))
+            exhaust_stack = cast(Exhaust, self.ecso_context.get_game_object(self.active_exhaust_stack, Exhaust))
             char = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
             hand = cast(Hand, self.ecso_context.get_game_object(char.get_stack(), Hand))
 
 
             print(hand.cards)
             hand.cards.remove(self.selected_card)
+            exhaust_stack.add_card(self.selected_card)
+
             drawed = play_stack.take_card()
-            hand.add_card(drawed)
+            if drawed == -1:
+                # play_stack.cards = exhaust_stack.cards
+                # exhaust_stack.cards = []
+                # hand.cards = []
+                # play_stack.shuffle(10)
+                self.__create_stacks()
+                play_stack = cast(Play, self.ecso_context.get_game_object(self.active_play_stack, Play))
+                char = cast(PlayerCharacter, self.ecso_context.get_game_object(self.active_player_character, PlayerCharacter))
+                hand = cast(Hand, self.ecso_context.get_game_object(char.get_stack(), Hand))
+            else:
+                hand.add_card(drawed)
             print(hand.cards)
 
             cast(GUIFactory, self.factories["GUIS"]).redraw_cards(self.active_level, hand.get_cards())

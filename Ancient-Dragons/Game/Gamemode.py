@@ -18,6 +18,7 @@ from GUI.Interactibles.Character import InteractibleCharacter
 from GUI.Interactibles.Environmental import InteractibleEnvironmental
 from GUI.Interactibles.Slider import ProgressBar
 from GUI.Interactibles.Sprite_List import SpriteList
+from GUI.Scene_GUI import SceneGUI
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
@@ -103,6 +104,9 @@ class Gamemode():
                         if issubclass(type(game_object), LevelGUI):
                             stage_deletions.extend(self.handle_level_gui(game_object))
                             continue
+                        if issubclass(type(game_object), SceneGUI):
+                            stage_deletions.extend(self.handle_scene_gui(game_object))
+                            continue
                         if issubclass(type(game_object), InteractibleSprite):
                             stage_deletions.extend(self.handle_interactible(game_object))
                             continue
@@ -152,6 +156,24 @@ class Gamemode():
         return deletion
 
     def handle_level_gui(self, gui: LevelGUI) -> list:
+        deletion = []
+        if gui.is_visible:
+            if len(gui.groups()) == 0:
+                print(len(gui.groups()))
+                self.renderer.add_sprite(SpriteGroupTypes.GUIS, gui)
+        else:
+            gui.kill()
+
+        if gui.is_active:
+            gui.update()
+
+        if gui.destroy:
+            gui.kill()
+            deletion.append(gui.context_id)
+
+        return deletion
+
+    def handle_scene_gui(self, gui: SceneGUI) -> list
         deletion = []
         if gui.is_visible:
             if len(gui.groups()) == 0:

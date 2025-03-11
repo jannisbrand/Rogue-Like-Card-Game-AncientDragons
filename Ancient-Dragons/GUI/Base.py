@@ -34,6 +34,7 @@ class GUISprite(pygame.sprite.Sprite):
         self.callback_on_click = None
         self.callback_on_drag_on = None
 
+        self.is_persistent = False
         self.is_visible = True
         self.is_active = True
         self.destroy = False

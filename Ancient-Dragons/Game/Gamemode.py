@@ -108,6 +108,7 @@ class Gamemode():
                             continue
                         if issubclass(type(game_object), InputSubscribtion):
                             stage_deletions.extend(self.handle_subscribtion(game_object))
+                        # TODO: Handle global entities (GUIs)
                     except TypeError:
                         continue
                     except AttributeError:
@@ -138,6 +139,10 @@ class Gamemode():
             level.kill()
             for gui_id in level.get_guis():
                 gui = cast(GUI, self.ecso_context.get_game_object(gui_id, GUI))
+                # TODO: Remove that if a specific routine for global GUIs is implemented.
+                # Global GUIs (Persistent GUIs) stay
+                if gui.is_persistent:
+                    continue
                 gui.destroy = True
                 for interactible_id in gui.get_interactibles():
                     try:

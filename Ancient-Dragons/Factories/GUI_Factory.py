@@ -9,6 +9,7 @@ from Characters.Standard_Enemy import StandardEnemy
 from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME, C_DISPLAY_TEXT
 from ECSO_Context import ECSO_Context
 from Factories.Character_Factory import CharacterFactory
+from GUI.Base import GUISprite
 from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
@@ -22,6 +23,8 @@ from Levels.Base import Level
 from Renderer import Renderer
 from Renderer.Group_Types import SpriteGroupTypes
 from Systems.Stacks.Hand import Hand
+
+DEFAULT_CHARACTER_TYPE_ID = "GUI_CHARACTERS"
 
 
 class GUIFactory():
@@ -190,10 +193,10 @@ class GUIFactory():
         level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
         ressource_directory = "Ressources/Pictures"
         # ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y  # ...
-        
+
         color = pygame.Color(0, 0, 0)
         entity = self.ecso_context.add_entity()
-        gui_characters = GUI(entity, "GUI_CHARACTERS", level.rect, "", color, 1440, 400)
+        gui_characters = GUI(entity, DEFAULT_CHARACTER_TYPE_ID, level.rect, "", color, 1440, 400)
         gui_characters.image.set_alpha(50)
         gui_characters.relative_x = 0
         gui_characters.relative_y = gui_characters.rect.height - 200
@@ -315,3 +318,23 @@ class GUIFactory():
         #     sprite.image = pygame.image.load(f"Levels/Data/Charakters/{image}")
         #     sprite_list.add_sprite(sprite)
         # ### MAIN ENEMY SPRITE ### #
+
+    def check_for_global_guis(self) -> set[int, GUISprite]:
+        """Persistent GUIs wont get deleted during a level change.
+        It is possible to find them.
+
+        Returns:
+            set[int, GUISprite]: Entity with its gameobject
+        """
+        result = self.ecso_context.get_game_objects_of_type(GUI)
+        print(result)
+        return result
+
+    def get_gui_by_type_id(self, type_id: str, gui_set: set[dict[int, GUISprite]]) -> GUISprite:
+        try:
+            for gui_items in gui_set:
+                if gui_items[1].type_id == type_id:
+                    return gui_items[1]
+            return None
+        except KeyError:
+            return None

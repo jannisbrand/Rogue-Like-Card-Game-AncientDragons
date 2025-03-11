@@ -8,6 +8,7 @@ class Character():
     def __init__(self, id: int, name: str):
         self.id = id    # ID
         self.name = name    # Name of the character
+        self.health_max: int
         self.health: int  # Currency for life
         self.shield = 0
 
@@ -43,6 +44,9 @@ class Character():
 
     def get_health(self) -> int:
         return self.health
+    
+    def get_health_max(self) -> int:
+        return self.health_max
 
     def set_health(self, value):
         try:
@@ -51,6 +55,16 @@ class Character():
                 self.health = 0
                 self.is_alive = False
             self.health_changed = True
+        except AttributeError as e:
+            print("[CHARACTER][DATA]", e)
+        except ValueError as e:
+            print("[CHARACTER][DATA]", e)
+        except TypeError as e:
+            print("[CHARACTER][DATA]", e)
+
+    def set_health_max(self, value):
+        try:
+            self.health_max = value
         except AttributeError as e:
             print("[CHARACTER][DATA]", e)
         except ValueError as e:

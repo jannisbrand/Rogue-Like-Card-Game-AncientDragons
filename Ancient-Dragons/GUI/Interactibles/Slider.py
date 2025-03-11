@@ -24,15 +24,11 @@ class ProgressBar(InteractibleSprite):
         background.fill(pygame.Color(20, 20, 20))
 
         try:
-            # self.fragment_width = int(self.current_value / self.fragmentation)
-            amount_of_fragments = int((self.current_value / self.total_range) * (self.total_range / self.fragment_width)) * 2
-            for index in range(amount_of_fragments):
-                fragment = Surface((self.fragment_width, self.rect.height))
-                fragment.fill(self.value_color)
-                x_placement_offset = self.fragment_width
-                background.blit(fragment, (fragment.get_rect().x + (x_placement_offset * index), background.get_rect().y))
-                index += 1
-            self.image.blit(background, (0, 0))
+            value_part = self.current_value / self.max_value
+            value_width = self.rect.width * value_part
+            value_surface = Surface((value_width, self.rect.height))
+            value_surface.fill(self.value_color)
+            self.image.blit(value_surface, (0, 0))
         except ZeroDivisionError:
             pass
         self.generate_text()

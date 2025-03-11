@@ -1,11 +1,8 @@
 from typing import Any
-import pygame
-
-from GUI.GUISprite import GUISprite
-from Sprites.Base import Sprite
+from GUI.BaseGUI import BaseGUI
 
 
-class GUI(GUISprite):
+class GUI(BaseGUI):
     """
     NOTE: If a text or title gets added it gets blit to the Surface() of the background.
     That means the text stays at the same position relative to the gui's position.

@@ -173,7 +173,7 @@ class Gamemode():
 
         return deletion
 
-    def handle_scene_gui(self, gui: SceneGUI) -> list
+    def handle_scene_gui(self, gui: SceneGUI) -> list:
         deletion = []
         if gui.is_visible:
             if len(gui.groups()) == 0:

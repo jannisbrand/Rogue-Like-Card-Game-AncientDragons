@@ -310,26 +310,30 @@ class Endless(Gamemode):
                             print("[GAMEMODE][ENDLESS] Menu level class not found:", e)
                         self.current_stage = 1
                 case 1:
+                    # TODO: Creation of the status bar
+                    if cast(GUIFactory, self.factories["GUIS"]).generate_status_bar(self, self.active_player_character, self.active_enemy_character, self.current_round) != -1:
+                        self.current_stage = 2
+                case 2:
                     # STACK AND HAND
                     self.is_generating_stacks = True
                     self.__create_stacks()
                     self.is_generating_stacks = False
-                    self.current_stage = 2
-                case 2:
+                    self.current_stage = 3
+                case 3:
                     if level is None:
                         generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level(self.current_round)
                         generated_level = cast(Level, self.ecso_context.get_game_object(generated_entity, Level))
                         # self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
                         self.active_level = generated_entity
                         self.is_generating_level = False
-                    self.current_stage = 3
-                case 3:
+                    self.current_stage = 4
+                case 4:
                     if self.active_enemy_character == -1:
                         new_enemy = cast(CharacterFactory, self.factories["CHARACTERS"]).generate_enemy(self.current_round)
                         if new_enemy is not None:
                             self.active_enemy_character = new_enemy
-                            self.current_stage = 4
-                case 4:
+                            self.current_stage = 5
+                case 5:
                     # The player & enemy characters are assingned to the same gui
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
@@ -341,8 +345,8 @@ class Endless(Gamemode):
                         gui_object = cast(LevelGUI, self.ecso_context.get_game_object(gui_entity, LevelGUI))
                         if gui_object.type_id == "GUI_CHARACTERS":
                             self.is_creating_gui = False
-                            self.current_stage = 5
-                case 5:
+                            self.current_stage = 6
+                case 6:
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
                         cast(GUIFactory, self.factories["GUIS"]).generate_card_gui(self.active_level, self.active_play_stack, player_character_data.get_stack())

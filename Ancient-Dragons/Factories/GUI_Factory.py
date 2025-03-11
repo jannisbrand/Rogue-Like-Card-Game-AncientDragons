@@ -16,6 +16,7 @@ from GUI.Interactibles.Card import Card
 from GUI.Interactibles.Character import InteractibleCharacter
 from GUI.Interactibles.Slider import ProgressBar
 from GUI.Level_GUI import LevelGUI
+from GUI.Scene_GUI import SceneGUI
 from Handlers import Input_Handler
 from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
@@ -26,6 +27,7 @@ from Renderer.Group_Types import SpriteGroupTypes
 from Systems.Stacks.Hand import Hand
 
 DEFAULT_CHARACTER_TYPE_ID = "GUI_CHARACTERS"
+DEFAULT_STATUS_BAR_TYPE_ID = "GUI_STATUS_BAR"
 
 
 class GUIFactory():
@@ -319,6 +321,23 @@ class GUIFactory():
         #     sprite.image = pygame.image.load(f"Levels/Data/Charakters/{image}")
         #     sprite_list.add_sprite(sprite)
         # ### MAIN ENEMY SPRITE ### #
+
+    def generate_status_bar(self, scene, player_character_id=-1, enemy_character_id=-1, round=-1) -> int:
+        try:
+            if scene is None:
+                return -1
+            
+            entity = self.ecso_context.add_entity()
+            window_rect = self.application.get_window().get_rect()
+            height_percentage = 0.1
+            status_bar = SceneGUI(entity, DEFAULT_STATUS_BAR_TYPE_ID, window_rect, "", (0, 0, 0), window_rect.width, window_rect.height * height_percentage, "")
+            status_bar.relative_x = 0
+            status_bar.relative_y = 0
+            self.ecso_context.add_game_object(entity, status_bar)
+            self.renderer.add_sprite(SpriteGroupTypes.GUIS, status_bar)
+            # NOTE: THE LEVEL DOES NOT RECIEVE THE SCENE GUI ID!
+        except AttributeError as e:
+            print("[GUIFactory]", e)
 
     def check_for_global_guis(self) -> set[int, BaseGUI]:
         """Persistent GUIs wont get deleted during a level change.

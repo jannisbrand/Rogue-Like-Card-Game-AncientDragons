@@ -2,7 +2,7 @@ from typing import Any, Callable
 import pygame
 
 
-class GUISprite(pygame.sprite.Sprite):
+class BaseGUI(pygame.sprite.Sprite):
     def __init__(self, context_id, type_id, reference_rect, name, color, width, height, image_path=""):
         super().__init__()
         self.context_id = context_id  # Represents object or entity id

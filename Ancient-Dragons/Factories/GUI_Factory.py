@@ -15,6 +15,7 @@ from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
 from GUI.Interactibles.Character import InteractibleCharacter
 from GUI.Interactibles.Slider import ProgressBar
+from GUI.Level_GUI import LevelGUI
 from Handlers import Input_Handler
 from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
@@ -45,7 +46,7 @@ class GUIFactory():
         # level = MenuLevel(self.ecso_context.next_object_id)
         # level.add_gui(self.factories["GUI"].generate_menu(710, 100, (150, 100), buttons))
         gui_entity = self.ecso_context.add_entity()
-        gui = GUI(gui_entity, pygame.Color(0, 0, 0), "MENU", 500, 700, pos_x, pos_y)
+        gui = LevelGUI(gui_entity, pygame.Color(0, 0, 0), "MENU", 500, 700, pos_x, pos_y)
 
         button_index = 0
         for button in buttons:
@@ -63,7 +64,7 @@ class GUIFactory():
 
         color = pygame.Color(10, 10, 10)
         gui_entity = self.ecso_context.add_entity()
-        gui_cards = GUI(gui_entity, "GUI_CARDS", level.rect, "", color, 1240, 300)
+        gui_cards = LevelGUI(gui_entity, "GUI_CARDS", level.rect, "", color, 1240, 300)
         gui_cards.image.set_alpha(50)
         gui_cards.relative_x = (level.rect.x + level.rect.width / 2) - int(gui_cards.rect.width / 2)
         gui_cards.relative_y = (level.rect.x + level.rect.height) - gui_cards.rect.height
@@ -176,7 +177,7 @@ class GUIFactory():
 
     def redraw_cards(self, level_id: int, cards: list[int]):
         level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
-        card_gui = cast(GUI, self.ecso_context.get_game_object(level.get_guis()[1], GUI))
+        card_gui = cast(LevelGUI, self.ecso_context.get_game_object(level.get_guis()[1], LevelGUI))
 
         try:
             for card_sprite_id in card_gui.get_interactibles():
@@ -196,7 +197,7 @@ class GUIFactory():
 
         color = pygame.Color(0, 0, 0)
         entity = self.ecso_context.add_entity()
-        gui_characters = GUI(entity, DEFAULT_CHARACTER_TYPE_ID, level.rect, "", color, 1440, 400)
+        gui_characters = LevelGUI(entity, DEFAULT_CHARACTER_TYPE_ID, level.rect, "", color, 1440, 400)
         gui_characters.image.set_alpha(50)
         gui_characters.relative_x = 0
         gui_characters.relative_y = gui_characters.rect.height - 200

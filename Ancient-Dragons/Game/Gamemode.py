@@ -10,7 +10,7 @@ from Factories.Character_Factory import CharacterFactory
 from Factories.GUI_Factory import GUIFactory
 from Factories.Level_Factory import LevelFactory
 from GUI.BaseGUI import BaseGUI
-from GUI.GUI import GUI
+from GUI.Level_GUI import LevelGUI
 from GUI.Interactibles.Base import InteractibleSprite
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
@@ -100,8 +100,8 @@ class Gamemode():
                         if issubclass(type(game_object), Level):
                             stage_deletions.extend(self.handle_level(game_object))
                             continue
-                        if issubclass(type(game_object), BaseGUI):
-                            stage_deletions.extend(self.handle_gui(game_object))
+                        if issubclass(type(game_object), LevelGUI):
+                            stage_deletions.extend(self.handle_level_gui(game_object))
                             continue
                         if issubclass(type(game_object), InteractibleSprite):
                             stage_deletions.extend(self.handle_interactible(game_object))
@@ -138,11 +138,7 @@ class Gamemode():
         if level.destroy:
             level.kill()
             for gui_id in level.get_guis():
-                gui = cast(GUI, self.ecso_context.get_game_object(gui_id, GUI))
-                # TODO: Remove that if a specific routine for global GUIs is implemented.
-                # Global GUIs (Persistent GUIs) stay
-                if gui.is_persistent:
-                    continue
+                gui = cast(LevelGUI, self.ecso_context.get_game_object(gui_id, LevelGUI))
                 gui.destroy = True
                 for interactible_id in gui.get_interactibles():
                     try:
@@ -155,7 +151,7 @@ class Gamemode():
 
         return deletion
 
-    def handle_gui(self, gui: BaseGUI) -> list:
+    def handle_level_gui(self, gui: LevelGUI) -> list:
         deletion = []
         if gui.is_visible:
             if len(gui.groups()) == 0:

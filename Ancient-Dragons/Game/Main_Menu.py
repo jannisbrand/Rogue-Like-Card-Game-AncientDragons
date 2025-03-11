@@ -3,8 +3,8 @@ from typing import Any, cast
 import pygame
 from Characters.Base import Character
 from ECSO_Context import ECSO_Context
-from GUI.BaseGUI import BaseGUI
-from GUI.GUI import GUI
+from GUI.Level_GUI import LevelGUI
+from GUI.Level_GUI import LevelGUI
 from GUI.Interactibles.Base import InteractibleSprite
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
@@ -34,7 +34,7 @@ class MainMenu(Gamemode):
         #     ("Endless", 200, 50, self.stop_game_mode)
         # ]
         # level = MenuLevel(self.ecso_context.next_object_id)
-        # level.add_gui(self.factories["GUI"].generate_menu(710, 100, (150, 100), buttons))
+        # level.add_LevelGUI(self.factories["GUI"].generate_menu(710, 100, (150, 100), buttons))
         self.ecso_context = ECSO_Context()
         self.is_finished = False
         self.input_handler.reset()
@@ -56,7 +56,7 @@ class MainMenu(Gamemode):
 
         # GUI
         entity = self.ecso_context.add_entity()
-        main_gui = GUI(entity, "GUI_MAIN_MENU", level.rect, "", pygame.Color(25, 25, 25), 300, 900)
+        main_gui = LevelGUI(entity, "GUI_MAIN_MENU", level.rect, "", pygame.Color(25, 25, 25), 300, 900)
         main_gui.relative_x = 0
         main_gui.relative_y = 0
         main_gui.image.set_alpha(100)

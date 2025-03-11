@@ -9,7 +9,7 @@ from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
 from Factories.GUI_Factory import GUIFactory
 from Factories.Level_Factory import LevelFactory
-from GUI.Base import GUISprite
+from GUI.BaseGUI import BaseGUI
 from GUI.GUI import GUI
 from GUI.Interactibles.Base import InteractibleSprite
 from GUI.Interactibles.Button import Button
@@ -100,7 +100,7 @@ class Gamemode():
                         if issubclass(type(game_object), Level):
                             stage_deletions.extend(self.handle_level(game_object))
                             continue
-                        if issubclass(type(game_object), GUISprite):
+                        if issubclass(type(game_object), BaseGUI):
                             stage_deletions.extend(self.handle_gui(game_object))
                             continue
                         if issubclass(type(game_object), InteractibleSprite):
@@ -155,7 +155,7 @@ class Gamemode():
 
         return deletion
 
-    def handle_gui(self, gui: GUISprite) -> list:
+    def handle_gui(self, gui: BaseGUI) -> list:
         deletion = []
         if gui.is_visible:
             if len(gui.groups()) == 0:

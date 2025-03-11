@@ -3,7 +3,7 @@ from typing import Any, cast
 import pygame
 from Characters.Base import Character
 from ECSO_Context import ECSO_Context
-from GUI.Base import GUISprite
+from GUI.BaseGUI import BaseGUI
 from GUI.GUI import GUI
 from GUI.Interactibles.Base import InteractibleSprite
 from GUI.Interactibles.Button import Button

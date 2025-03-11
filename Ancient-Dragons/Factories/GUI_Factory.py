@@ -9,7 +9,7 @@ from Characters.Standard_Enemy import StandardEnemy
 from Components.Components import C_CARD_COSTS, C_DISPLAY_NAME, C_DISPLAY_TEXT
 from ECSO_Context import ECSO_Context
 from Factories.Character_Factory import CharacterFactory
-from GUI.Base import GUISprite
+from GUI.BaseGUI import BaseGUI
 from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
@@ -319,7 +319,7 @@ class GUIFactory():
         #     sprite_list.add_sprite(sprite)
         # ### MAIN ENEMY SPRITE ### #
 
-    def check_for_global_guis(self) -> set[int, GUISprite]:
+    def check_for_global_guis(self) -> set[int, BaseGUI]:
         """Persistent GUIs wont get deleted during a level change.
         It is possible to find them.
 
@@ -330,7 +330,7 @@ class GUIFactory():
         print(result)
         return result
 
-    def get_gui_by_type_id(self, type_id: str, gui_set: set[dict[int, GUISprite]]) -> GUISprite:
+    def get_gui_by_type_id(self, type_id: str, gui_set: set[dict[int, BaseGUI]]) -> BaseGUI:
         try:
             for gui_items in gui_set:
                 if gui_items[1].type_id == type_id:

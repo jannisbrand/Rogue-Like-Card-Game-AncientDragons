@@ -2,7 +2,7 @@ import unittest
 from ECSO_Context import ECSO_Context
 
 
-class TestECSOContext(unittest.TestCase):
+class ECSOContextTest(unittest.TestCase):
 
     def setUp(self):
         self.context = ECSO_Context()

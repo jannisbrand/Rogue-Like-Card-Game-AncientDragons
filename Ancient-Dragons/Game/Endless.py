@@ -17,6 +17,7 @@ from Factories.Character_Factory import CharacterFactory
 from Factories.GUI_Factory import GUIFactory
 from Factories.Level_Factory import LevelFactory
 from GUI import Scene_GUI
+from GUI.Interactibles.Base import InteractibleSprite
 from GUI.Level_GUI import LevelGUI
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
@@ -68,6 +69,7 @@ class Endless(Gamemode):
         # PLAYER MOVE #
         self.selected_target: int
         self.selected_card: int
+        self.last_selected_card: int
 
     def initialise(self) -> bool:
         self.ecso_context = ECSO_Context()
@@ -82,6 +84,7 @@ class Endless(Gamemode):
         self.selected_type = ""
         self.selected_target = -1
         self.selected_card = -1
+        self.last_selected_card = -1
         self.active_player_character = -1
         self.active_enemy_character = -1
 
@@ -214,10 +217,18 @@ class Endless(Gamemode):
         print("Target ID:", source.context_id)
         print("Target TYPE:", source.type_id)
         print("Target NAME:", source.name)
+
+        last_card = self.ecso_context.get_game_object(self.last_selected_card, Card)
+        if last_card is not None:
+            last_card.is_selected = False
+
         try:
             match source.type_id:
                 case "INTERACTIBLE_CARD_SPRITE":
                     self.selected_card = source.card_context_id  # Saves the entity id of selected card
+                    source.is_selected = True
+                    cast(GUIFactory, self.factories["GUIS"]).update_character_selection_effect(True)
+                    self.last_selected_card = source.context_id
                 case "INTERACTIBLE_PLAYER_CHARACTER_SPRITE":
                     if self.selected_card != -1:
                         self.selected_target = source.character_context_id  # Saves object id of selected character
@@ -268,6 +279,7 @@ class Endless(Gamemode):
             print(hand.cards)
 
             cast(GUIFactory, self.factories["GUIS"]).redraw_cards(self.active_level, hand.get_cards())
+            cast(GUIFactory, self.factories["GUIS"]).update_character_selection_effect(False)
 
             # Necessary reset
             self.selected_card = -1

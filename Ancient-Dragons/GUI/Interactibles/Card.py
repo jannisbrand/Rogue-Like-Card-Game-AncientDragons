@@ -28,6 +28,8 @@ class Card(InteractibleSprite):
         self.animation_range_min_y = 50
         self.animation_initial_y = self.relative_y
 
+        self.is_selected = False
+
     def set_cost(self, value: int, picture: pygame.Surface) -> None:
         square_measure = self.rect.width * 0.25
         background = pygame.Surface((square_measure, square_measure))  # ~25% smaller than the card
@@ -115,7 +117,7 @@ class Card(InteractibleSprite):
             line_width += surface_word.get_rect().width + word_spacing
 
     def animation(self) -> None:
-        if self.should_animate:
+        if self.should_animate or self.is_selected:
             if self.relative_y > self.animation_initial_y - self.animation_range_max_y:
                 self.relative_y -= self.animation_increment_y
         else:
@@ -138,6 +140,7 @@ class Card(InteractibleSprite):
 
     def on_click(self, source: Any, mouse_buttons: tuple[bool]) -> None:
         try:
+            self.is_selected = True
             if self.callback_on_click is not None:
                 self.callback_on_click(source, mouse_buttons)
         except AttributeError as e:

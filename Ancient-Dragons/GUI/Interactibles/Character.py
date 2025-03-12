@@ -20,6 +20,8 @@ class InteractibleCharacter(InteractibleSprite):
         self.health_bar = int
         self.effect_bar = int
 
+        self.is_selected = False
+
     def set_display_name(self, value: str):
         self.display_name = value
 
@@ -33,6 +35,7 @@ class InteractibleCharacter(InteractibleSprite):
 
     def on_click(self, source: Any, mouse_buttons: tuple[bool]) -> None:
         try:
+            self.is_selected = True
             # Does noting with it self atm
             if self.callback_on_click is not None:
                 self.callback_on_click(source, mouse_buttons)

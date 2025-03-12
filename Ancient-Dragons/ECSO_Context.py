@@ -186,6 +186,9 @@ class ECSO_Context():
         except AttributeError as e:
             print("[ECSOContext] Attribute not initialised:", e)
             return ()
+        except KeyError as e:
+            print("[ECSOContext]", e)
+            return ()
 
     def get_game_object(self, entity: int, game_object_type: Any = None) -> Any:
         try:

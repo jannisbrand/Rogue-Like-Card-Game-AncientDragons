@@ -16,7 +16,8 @@ from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
 from Factories.GUI_Factory import GUIFactory
 from Factories.Level_Factory import LevelFactory
-from GUI.GUI import GUI
+from GUI import Scene_GUI
+from GUI.Level_GUI import LevelGUI
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
 from GUI.Interactibles.Character import InteractibleCharacter
@@ -113,7 +114,7 @@ class Endless(Gamemode):
         self.active_level = entity
 
         entity = self.ecso_context.add_entity()
-        selection_menu = GUI(entity, "GUI_MAIN_MENU", character_selection.rect, "", (25, 25, 25), 300, 900)
+        selection_menu = LevelGUI(entity, "GUI_MAIN_MENU", character_selection.rect, "", (25, 25, 25), 300, 900)
         selection_menu.relative_x = 0
         selection_menu.relative_y = 0
         selection_menu.image.set_alpha(100)
@@ -283,6 +284,10 @@ class Endless(Gamemode):
             self.selected_target = -1
             self.selected_type = ""
 
+    def callback_level_end(self, source: Any, mouse_buttons: tuple[bool]):
+        self.game_over = True
+        self.current_stage = 14
+        self.input_handler.set_wait(0.25)
 
     def update(self) -> None:
         try:
@@ -306,6 +311,7 @@ class Endless(Gamemode):
                     if self.active_player_character != -1:
                         try:
                             cast(MenuLevel, self.ecso_context.get_game_object(self.active_level, MenuLevel)).destroy = True
+                            cast(GUIFactory, self.factories["GUIS"]).generate_status_bar(self, self.active_player_character, self.active_enemy_character, self.current_round) != -1    
                         except AttributeError as e:
                             print("[GAMEMODE][ENDLESS] Menu level class not found:", e)
                         self.current_stage = 1
@@ -333,12 +339,12 @@ class Endless(Gamemode):
                     # The player & enemy characters are assingned to the same gui
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
-                        # self.__create_character_gui()
+                        # self.__create_character_LevelGUI()
                         cast(GUIFactory, self.factories["GUIS"]).generate_character_gui(self.active_level, self.active_player_character, self.active_enemy_character, self.current_round, self.__stage_select_targets)
 
                     gui_entities = level.get_guis()
                     for gui_entity in gui_entities:
-                        gui_object = cast(GUI, self.ecso_context.get_game_object(gui_entity, GUI))
+                        gui_object = cast(LevelGUI, self.ecso_context.get_game_object(gui_entity, LevelGUI))
                         if gui_object.type_id == "GUI_CHARACTERS":
                             self.is_creating_gui = False
                             self.current_stage = 5
@@ -349,7 +355,7 @@ class Endless(Gamemode):
 
                     gui_entities = level.get_guis()
                     for gui_entity in gui_entities:
-                        gui_object = cast(GUI, self.ecso_context.get_game_object(gui_entity, GUI))
+                        gui_object = cast(LevelGUI, self.ecso_context.get_game_object(gui_entity, LevelGUI))
                         if gui_object.type_id == "GUI_CARDS":
                             self.is_creating_gui = False
                             self.current_stage = 10
@@ -361,6 +367,8 @@ class Endless(Gamemode):
                     try:
                         if self.on_round_start is not None:
                             self.on_round_start()
+
+                        cast(GUIFactory, self.factories["GUIS"]).update_status_bar(self)
                     except TypeError as e:
                         print("[GAMEMODE][ENDLESS] Callback 'on_round_start' is not callable:", e)
 
@@ -398,6 +406,7 @@ class Endless(Gamemode):
                         if self.on_round_end is not None:
                             self.on_round_end()
 
+                        cast(GUIFactory, self.factories["GUIS"]).update_status_bar(self)
                         self.current_stage = 10
                     except TypeError as e:
                         print("[GAMEMODE][ENDLESS] Callback 'on_round_end' is not callable:", e)
@@ -405,12 +414,13 @@ class Endless(Gamemode):
                     try:
                         level.destroy = True
                         self.active_enemy_character = -1
-                        self.current_stage = 1  # Starts from the beginning
+                        self.current_stage = 1  # Starts from the beginning.
                         self.level_end = False
                         self.current_round += 1
                         if self.game_over:
                             self.current_stage = 99
-                    except AttributeError:
+                    except AttributeError as e:
+                        print("[GAMEMODE][ENDLESS][STAGE] 14", e)
                         self.current_stage = 1
                 case 999:
                     # Error GUI popup
@@ -435,7 +445,7 @@ class Endless(Gamemode):
         self.input_handler.set_wait(0.25)
 
         try:
-            cast(Level, self.ecso_context.get_game_object(self.active_level, Level)).destroy = True
+            cast(GUIFactory, self.factories["GUIS"]).destroy_scene_guis()
         except AttributeError as e:
             print("[GAMEMODE][MENU] No active level could be found:", e)
 

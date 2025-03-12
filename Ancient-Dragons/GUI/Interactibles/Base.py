@@ -12,10 +12,11 @@ class InteractibleSprite(pygame.sprite.Sprite):
         self.reference_rect = reference_rect
 
         if image_path != "":
-            self.image = pygame.image.load(image_path)
-            self.image.convert()
-            self.image.convert_alpha()
-            self.image = pygame.transform.scale(self.image, (width, height))
+            ressource_surface = pygame.image.load(image_path)
+            ressource_surface.convert()
+            ressource_surface.convert_alpha()
+            self.image = pygame.transform.scale(ressource_surface, (width, height))
+            self.image_backup = pygame.transform.scale(ressource_surface, (width, height))
         else:
             self.image = pygame.Surface((width, height))
             self.image.fill(self.color)

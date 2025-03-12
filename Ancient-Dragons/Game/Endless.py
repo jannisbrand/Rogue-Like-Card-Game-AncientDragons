@@ -367,6 +367,8 @@ class Endless(Gamemode):
                     try:
                         if self.on_round_start is not None:
                             self.on_round_start()
+
+                        cast(GUIFactory, self.factories["GUIS"]).update_status_bar(self)
                     except TypeError as e:
                         print("[GAMEMODE][ENDLESS] Callback 'on_round_start' is not callable:", e)
 
@@ -404,6 +406,7 @@ class Endless(Gamemode):
                         if self.on_round_end is not None:
                             self.on_round_end()
 
+                        cast(GUIFactory, self.factories["GUIS"]).update_status_bar(self)
                         self.current_stage = 10
                     except TypeError as e:
                         print("[GAMEMODE][ENDLESS] Callback 'on_round_end' is not callable:", e)

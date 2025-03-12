@@ -375,14 +375,14 @@ class GUIFactory():
             self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_current_level)
             status_bar.add_interactible(label_current_level.context_id)
 
-            label_player_deck = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_DECK", status_bar.rect, "", (255, 255, 0), 50, status_bar.rect.height, "DECK", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_player_deck = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_DECK", status_bar.rect, "", (255, 255, 0), status_bar.rect.height, status_bar.rect.height, "DECK", (255, 255, 255), "Ressources/Pictures/gui.jpg")
             label_player_deck.relative_x = window_rect.width - 160
             label_player_deck.font_size = 20
             self.ecso_context.add_game_object(label_player_deck.context_id, label_player_deck)
             self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_player_deck)
             status_bar.add_interactible(label_player_deck.context_id)
 
-            label_settings = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_SETTINGS", status_bar.rect, "", (100, 100, 100), 50, status_bar.rect.height, "COG", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_settings = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_SETTINGS", status_bar.rect, "", (100, 100, 100), status_bar.rect.height, status_bar.rect.height, "COG", (255, 255, 255), "Ressources/Pictures/gui.jpg")
             label_settings.relative_x = window_rect.width - 70
             label_settings.font_size = 20
             label_settings.callback_on_click = scene.callback_level_end
@@ -398,9 +398,47 @@ class GUIFactory():
         except AttributeError as e:
             print("[GUIFactory]", e)
 
-    def draw_status(self, scene: Any):
+    def update_status_bar(self, scene: Any):
         try:
-            status_bar = cast(SceneGUI, self.get_gui_by_type_id(DEFAULT_STATUS_BAR_TYPE_ID, self.check_for__guis(DEFAULT_STATUS_BAR_TYPE_ID)))
+            gui_entity = None
+            gui_object = None
+            for gui_items in self.check_for__guis(SceneGUI):
+                if gui_items[1].type_id is DEFAULT_STATUS_BAR_TYPE_ID:
+                    gui_entity = gui_items[0]
+                    gui_object = gui_items[1]
+
+            for interactible_entity in gui_object.get_interactibles():
+                interactible = cast(InteractibleLabel, self.ecso_context.get_game_object(interactible_entity, InteractibleLabel))
+                match interactible.type_id:
+                    case "INTERACTIBLE_STATUS_BAR_DEVELOPER":
+                        interactible.font_size = 32
+                        interactible.set_text("MEJA")
+                    case "INTERACTIBLE_STATUS_BAR_ENEMY_NAME":
+                        if scene.current_round % 10 == 0:
+                            enenmy = cast(BossEnemy, self.ecso_context.get_game_object(scene.active_enemy_character, BossEnemy))
+                        else:
+                            enenmy = cast(StandardEnemy, self.ecso_context.get_game_object(scene.active_enemy_character, StandardEnemy))
+                        if enenmy is not None:
+                            interactible.set_text(enenmy.get_name())
+                    case "INTERACTIBLE_STATUS_BAR_PLAYER_HEALTH":
+                        player = cast(PlayerCharacter, self.ecso_context.get_game_object(scene.active_player_character, PlayerCharacter))
+                        if player is not None:
+                            styled_health = str(player.get_health()) + "/" + str(player.get_health_max())
+                            interactible.font_size = 24
+                            interactible.set_text(styled_health)
+                    case "INTERACTIBLE_STATUS_BAR_PLAYER_CURRENCY":
+                        player = cast(PlayerCharacter, self.ecso_context.get_game_object(scene.active_player_character, PlayerCharacter))
+                        if player is not None:
+                            interactible.color_text = (255, 255, 0)
+                            interactible.font_size = 24
+                            styled_currency = "GOLD: " + str(player.get_gold())
+                            interactible.set_text(styled_currency)
+                    case "INTERACTIBLE_STATUS_BAR_CURRENT_ROUND":
+                        styled_round = "LEVEL: " + str(scene.current_round)
+                        interactible.font_size = 24
+                        interactible.set_text(styled_round)
+                    case "INTERACTIBLE_STATUS_BAR_PLAYER_DECK":
+                        continue
         except Exception:
             pass
 
@@ -419,7 +457,6 @@ class GUIFactory():
             set[int, GUISprite]: Entity with its gameobject
         """
         result = self.ecso_context.get_game_objects_of_type(type)
-        print(result)
         return result
 
     def get_gui_by_type_id(self, type_id: str, gui_set: set[dict[int, Any]]) -> Any:

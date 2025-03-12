@@ -20,12 +20,15 @@ class InteractibleLabel(InteractibleSprite):
             surface_text = font.render(self.text, True, self.color_text)
             middle_x = (self.rect.width / 2) - (surface_text.get_rect().width / 2)
             middle_y = (self.rect.height / 2) - (surface_text.get_rect().height / 2)
+            self.image.fill((0, 0, 0))
+            self.image.blit(self.image_backup, (0, 0))
             cast(pygame.Surface, self.image).blit(surface_text, (middle_x, middle_y))
         except AttributeError as e:
             print("[INTERACTIBLE][LABEL]", e)
 
     def set_text(self, value: str):
         self.text = value
+        self.text_changed = True
     
     def on_hover(self, source: Any, cursor: tuple[int]):
         if self.enabled:

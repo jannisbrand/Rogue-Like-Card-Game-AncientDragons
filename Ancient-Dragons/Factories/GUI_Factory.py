@@ -14,6 +14,7 @@ from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
 from GUI.Interactibles.Character import InteractibleCharacter
+from GUI.Interactibles.Label import InteractibleLabel
 from GUI.Interactibles.Slider import ProgressBar
 from GUI.Level_GUI import LevelGUI
 from GUI.Scene_GUI import SceneGUI
@@ -326,31 +327,102 @@ class GUIFactory():
         try:
             if scene is None:
                 return -1
-            
+            TODO: "PENISS"
             entity = self.ecso_context.add_entity()
             window_rect = self.application.get_window().get_rect()
-            height_percentage = 0.1
-            status_bar = SceneGUI(entity, DEFAULT_STATUS_BAR_TYPE_ID, window_rect, "", (0, 0, 0), window_rect.width, window_rect.height * height_percentage, "")
+            height_percentage = 0.08
+            status_bar = SceneGUI(entity, DEFAULT_STATUS_BAR_TYPE_ID, window_rect, "", (0, 0, 0), window_rect.width, window_rect.height * height_percentage, "Ressources/Pictures/gui.jpg")
             status_bar.relative_x = 0
             status_bar.relative_y = 0
             self.ecso_context.add_game_object(entity, status_bar)
             self.renderer.add_sprite(SpriteGroupTypes.GUIS, status_bar)
             # NOTE: THE LEVEL DOES NOT RECIEVE THE SCENE GUI ID!
+
+            # From left to right
+            label_developer = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_DEVELOPER", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, "MeJa", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_developer.relative_x = 20
+            label_developer.font_size = 20
+            self.ecso_context.add_game_object(label_developer.context_id, label_developer)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_developer)
+            status_bar.add_interactible(label_developer.context_id)
+
+            label_enemy_name = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_ENEMY_NAME", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, "TESTIGER TEST", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_enemy_name.relative_x = 140
+            label_enemy_name.font_size = 20
+            self.ecso_context.add_game_object(label_enemy_name.context_id, label_enemy_name)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_enemy_name)
+            status_bar.add_interactible(label_enemy_name.context_id)
+
+            player = cast(PlayerCharacter, self.ecso_context.get_game_object(scene.active_player_character, PlayerCharacter))
+            label_player_health = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_HEALTH", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, str(player.get_health_max()) + "/" + str(player.get_health()), (255, 0, 0), "Ressources/Pictures/gui.jpg")
+            label_player_health.relative_x = 260
+            label_player_health.font_size = 20
+            self.ecso_context.add_game_object(label_player_health.context_id, label_player_health)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_player_health)
+            status_bar.add_interactible(label_player_health.context_id)
+
+            label_player_currency = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_CURRENCY", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, str(player.get_gold()), (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_player_currency.relative_x = 380
+            label_player_currency.font_size = 20
+            self.ecso_context.add_game_object(label_player_currency.context_id, label_player_currency)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_player_currency)
+            status_bar.add_interactible(label_player_currency.context_id)
+
+            label_current_level = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_CURRENT_ROUND", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, "ROUND: " + str(scene.current_round), (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_current_level.relative_x = 500
+            label_current_level.font_size = 20
+            self.ecso_context.add_game_object(label_current_level.context_id, label_current_level)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_current_level)
+            status_bar.add_interactible(label_current_level.context_id)
+
+            label_player_deck = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_DECK", status_bar.rect, "", (255, 255, 0), 50, status_bar.rect.height, "DECK", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_player_deck.relative_x = window_rect.width - 160
+            label_player_deck.font_size = 20
+            self.ecso_context.add_game_object(label_player_deck.context_id, label_player_deck)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_player_deck)
+            status_bar.add_interactible(label_player_deck.context_id)
+
+            label_settings = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_SETTINGS", status_bar.rect, "", (100, 100, 100), 50, status_bar.rect.height, "COG", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_settings.relative_x = window_rect.width - 70
+            label_settings.font_size = 20
+            label_settings.callback_on_click = scene.callback_level_end
+            subscribtion_entity = self.ecso_context.add_entity()
+            subscribtion = InputSubscribtion(SubscriptionType.MOUSEBUTTON, label_settings, label_settings.on_click, label_settings.rect, [], (True, False, False))
+            self.input_handler.subscribe_to_event(subscribtion)
+            label_settings.subscribtion_on_click = subscribtion_entity
+            self.ecso_context.add_game_object(subscribtion_entity, subscribtion)
+            self.ecso_context.add_game_object(label_settings.context_id, label_settings)
+            self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_settings)
+            status_bar.add_interactible(label_settings.context_id)
+            
         except AttributeError as e:
             print("[GUIFactory]", e)
 
-    def check_for_global_guis(self) -> set[int, BaseGUI]:
+    def draw_status(self, scene: Any):
+        try:
+            status_bar = cast(SceneGUI, self.get_gui_by_type_id(DEFAULT_STATUS_BAR_TYPE_ID, self.check_for__guis(DEFAULT_STATUS_BAR_TYPE_ID)))
+        except Exception:
+            pass
+
+    def destroy_scene_guis(self):
+        try:
+            for gui_items in self.check_for__guis(SceneGUI):
+                gui_items[1].destroy = True
+        except KeyError:
+            print("[GUIFactory]", e)
+
+    def check_for__guis(self, type: Any) -> set[int, Any]:
         """Persistent GUIs wont get deleted during a level change.
         It is possible to find them.
 
         Returns:
             set[int, GUISprite]: Entity with its gameobject
         """
-        result = self.ecso_context.get_game_objects_of_type(GUI)
+        result = self.ecso_context.get_game_objects_of_type(type)
         print(result)
         return result
 
-    def get_gui_by_type_id(self, type_id: str, gui_set: set[dict[int, BaseGUI]]) -> BaseGUI:
+    def get_gui_by_type_id(self, type_id: str, gui_set: set[dict[int, Any]]) -> Any:
         try:
             for gui_items in gui_set:
                 if gui_items[1].type_id == type_id:

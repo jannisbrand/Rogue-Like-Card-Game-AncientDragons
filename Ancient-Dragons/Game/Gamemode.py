@@ -187,6 +187,12 @@ class Gamemode():
 
         if gui.destroy:
             gui.kill()
+            for interactible_id in gui.get_interactibles():
+                try:
+                    interactible = cast(InteractibleSprite, self.ecso_context.get_game_objects(interactible_id)[0])
+                    interactible.destroy = True
+                except IndexError:
+                    pass
             deletion.append(gui.context_id)
 
         return deletion

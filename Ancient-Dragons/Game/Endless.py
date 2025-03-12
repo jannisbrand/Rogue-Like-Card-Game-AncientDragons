@@ -16,6 +16,7 @@ from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
 from Factories.GUI_Factory import GUIFactory
 from Factories.Level_Factory import LevelFactory
+from GUI import Scene_GUI
 from GUI.Level_GUI import LevelGUI
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
@@ -283,6 +284,10 @@ class Endless(Gamemode):
             self.selected_target = -1
             self.selected_type = ""
 
+    def callback_level_end(self, source: Any, mouse_buttons: tuple[bool]):
+        self.game_over = True
+        self.current_stage = 14
+        self.input_handler.set_wait(0.25)
 
     def update(self) -> None:
         try:
@@ -306,34 +311,31 @@ class Endless(Gamemode):
                     if self.active_player_character != -1:
                         try:
                             cast(MenuLevel, self.ecso_context.get_game_object(self.active_level, MenuLevel)).destroy = True
+                            cast(GUIFactory, self.factories["GUIS"]).generate_status_bar(self, self.active_player_character, self.active_enemy_character, self.current_round) != -1    
                         except AttributeError as e:
                             print("[GAMEMODE][ENDLESS] Menu level class not found:", e)
                         self.current_stage = 1
                 case 1:
-                    # TODO: Creation of the status bar
-                    if cast(GUIFactory, self.factories["GUIS"]).generate_status_bar(self, self.active_player_character, self.active_enemy_character, self.current_round) != -1:
-                        self.current_stage = 2
-                case 2:
                     # STACK AND HAND
                     self.is_generating_stacks = True
                     self.__create_stacks()
                     self.is_generating_stacks = False
-                    self.current_stage = 3
-                case 3:
+                    self.current_stage = 2
+                case 2:
                     if level is None:
                         generated_entity = cast(LevelFactory, self.factories["LEVELS"]).generate_level(self.current_round)
                         generated_level = cast(Level, self.ecso_context.get_game_object(generated_entity, Level))
                         # self.ecso_context.add_game_object(generated_entity, generated_level)  #TODO: generate_level already adds the entity to the context
                         self.active_level = generated_entity
                         self.is_generating_level = False
-                    self.current_stage = 4
-                case 4:
+                    self.current_stage = 3
+                case 3:
                     if self.active_enemy_character == -1:
                         new_enemy = cast(CharacterFactory, self.factories["CHARACTERS"]).generate_enemy(self.current_round)
                         if new_enemy is not None:
                             self.active_enemy_character = new_enemy
-                            self.current_stage = 5
-                case 5:
+                            self.current_stage = 4
+                case 4:
                     # The player & enemy characters are assingned to the same gui
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
@@ -345,8 +347,8 @@ class Endless(Gamemode):
                         gui_object = cast(LevelGUI, self.ecso_context.get_game_object(gui_entity, LevelGUI))
                         if gui_object.type_id == "GUI_CHARACTERS":
                             self.is_creating_gui = False
-                            self.current_stage = 6
-                case 6:
+                            self.current_stage = 5
+                case 5:
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
                         cast(GUIFactory, self.factories["GUIS"]).generate_card_gui(self.active_level, self.active_play_stack, player_character_data.get_stack())
@@ -409,12 +411,13 @@ class Endless(Gamemode):
                     try:
                         level.destroy = True
                         self.active_enemy_character = -1
-                        self.current_stage = 1  # Starts from the beginning
+                        self.current_stage = 1  # Starts from the beginning.
                         self.level_end = False
                         self.current_round += 1
                         if self.game_over:
                             self.current_stage = 99
-                    except AttributeError:
+                    except AttributeError as e:
+                        print("[GAMEMODE][ENDLESS][STAGE] 14", e)
                         self.current_stage = 1
                 case 999:
                     # Error GUI popup
@@ -439,7 +442,7 @@ class Endless(Gamemode):
         self.input_handler.set_wait(0.25)
 
         try:
-            cast(Level, self.ecso_context.get_game_object(self.active_level, Level)).destroy = True
+            cast(GUIFactory, self.factories["GUIS"]).destroy_scene_guis()
         except AttributeError as e:
             print("[GAMEMODE][MENU] No active level could be found:", e)
 

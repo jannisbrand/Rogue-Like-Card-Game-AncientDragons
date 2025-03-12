@@ -24,7 +24,7 @@ from GUI.Interactibles.Card import Card
 from GUI.Interactibles.Character import InteractibleCharacter
 from GUI.Interactibles.Sprite_List import SpriteList
 from GUI.Interactibles.Slider import ProgressBar
-from Game.Gamemode import Gamemode
+from Scenes.Scene import Scene
 from Handlers import Input_Handler
 from Handlers.Flags import SubscriptionType
 from Handlers.Subscriptions.Types import InputSubscribtion
@@ -62,7 +62,7 @@ CHARACTERS_ONLY_WARRIOR = 0b10000
 # ...
 
 
-class Endless(Gamemode):
+class Endless(Scene):
     def __init__(self, id: int, name: str, application, input_handler: Input_Handler, renderer: "Renderer") -> None:
         super().__init__(id, name, application, input_handler, renderer)
         # ### STAGES ### #

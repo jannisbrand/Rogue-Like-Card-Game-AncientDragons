@@ -12,7 +12,7 @@ from GUI.Interactibles.Character import InteractibleCharacter
 from GUI.Interactibles.Environmental import InteractibleEnvironmental
 from GUI.Interactibles.Slider import ProgressBar
 from GUI.Interactibles.Sprite_List import SpriteList
-from Game.Gamemode import Gamemode
+from Scenes.Scene import Scene
 from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
@@ -23,7 +23,7 @@ from Renderer.Renderer import Renderer
 from Sprites.Base import Sprite
 
 
-class MainMenu(Gamemode):
+class MainMenu(Scene):
     def __init__(self, id: int, name: str, application, input_handler: InputHandler, renderer: "Renderer") -> None:
         super().__init__(id, name, application, input_handler, renderer)
         pass

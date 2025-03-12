@@ -1,4 +1,4 @@
-#MANUAL
+# MANUAL
 Step 1: Clone
 Step 2: Go to the directory
 Step 3: Hit "launch_game.bat"

@@ -160,13 +160,6 @@ class ECSO_Context():
             print(f"[ECSOContext] Object could not be added: {e}")
             return -1
 
-    def add_game_objects(self, entity: int, game_objects: list[Any]) -> None:
-        try:
-            for game_object in game_objects:
-                self.add_game_object(entity, game_object)  # Smart :)
-        except KeyError as e:
-            print(f"[ECSOContext] Objects could not be added: {e}")
-
     def get_game_objects(self, entity: int) -> list[Any]:
         list_of_game_objects = []
         for game_object_type in self.game_objects:
@@ -203,12 +196,6 @@ class ECSO_Context():
             return None
         except Exception as e:
             print(e)
-
-    def is_game_object_enity_existent(self, entity: int) -> bool:
-        for game_object_type, game_objects in self.game_objects.items():
-            if entity in self.game_objects[game_object_type]:
-                return True
-        return False
  
     def get_game_object_types(self) -> list[Any]:
         try:
@@ -232,7 +219,6 @@ class ECSO_Context():
         except AttributeError as e:
             print("[ECSOContext] An attribute is not initialised:", e)
             return []
-
 
     def remove_game_object(self, entity: int) -> None:
         try:

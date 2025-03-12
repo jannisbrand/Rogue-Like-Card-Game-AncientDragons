@@ -119,10 +119,9 @@ class GUIFactory():
         color = pygame.Color(0, 0, 245)
         highlight = pygame.Color(0, 0, 255)
         entity = self.ecso_context.add_entity()
-        pull_stack = Button(entity, "INTERACTIBLE_BUTTON_SPRITE", gui_cards.rect, color, highlight, "", "STACK", 50, 50, "Ressources/Pictures/pull_stack.png")
+        pull_stack = InteractibleLabel(entity, "INTERACTIBLE_STACK_LABEL", gui_cards.rect, "", color, 50, 50, image_path="Ressources/Pictures/pull_stack.png")
         pull_stack.relative_x = 25
         pull_stack.relative_y = (gui_cards.rect.height - pull_stack.rect.height) - 25
-        pull_stack.set_text("STACK")
         pull_stack.font_size = 32
         self.ecso_context.add_game_object(entity, pull_stack)
         self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, pull_stack)
@@ -193,7 +192,7 @@ class GUIFactory():
 
         self.draw_cards(card_gui, cards)
 
-    def generate_character_gui(self, level_id: int, player_character_id: int, enemy_character_id: int, round: int, character_callback_on_click: Any):
+    def generate_character_gui(self, scene: Any, level_id: int, player_character_id: int, enemy_character_id: int, round: int, character_callback_on_click: Any):
         level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
         ressource_directory = "Ressources/Pictures"
         # ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y  # ...
@@ -348,6 +347,13 @@ class GUIFactory():
         #     sprite_list.add_sprite(sprite)
         # ### MAIN ENEMY SPRITE ### #
 
+        end_turn = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_GUI_CHARACTERS_END_TURN", gui_characters.rect, "", (0, 0, 0), 100, 50, "", image_path="Ressources/Pictures/end_turn.png")
+        end_turn.relative_x = gui_characters.rect.width - end_turn.rect.width - 50
+        end_turn.relative_y = gui_characters.rect.height + 50
+        self.ecso_context.add_game_object(end_turn.context_id, end_turn)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, end_turn)
+        gui_characters.add_interactible(end_turn.context_id)
+
     def update_character_selection_effect(self, desired_state: bool):
         """Sets the is_visible flag positive or negative
             The selection effect is currently an InteractibleLabel"""
@@ -399,14 +405,14 @@ class GUIFactory():
             status_bar.add_interactible(label_enemy_name.context_id)
 
             player = cast(PlayerCharacter, self.ecso_context.get_game_object(scene.active_player_character, PlayerCharacter))
-            label_player_health = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_HEALTH", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, str(player.get_health_max()) + "/" + str(player.get_health()), (255, 0, 0), "Ressources/Pictures/gui.jpg")
+            label_player_health = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_HEALTH", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, str(player.get_health_max()) + "/" + str(player.get_health()), (255, 0, 0), "Ressources/Pictures/status_bar_health.png")
             label_player_health.relative_x = 260
             label_player_health.font_size = 20
             self.ecso_context.add_game_object(label_player_health.context_id, label_player_health)
             self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_player_health)
             status_bar.add_interactible(label_player_health.context_id)
 
-            label_player_currency = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_CURRENCY", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, str(player.get_gold()), (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_player_currency = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_CURRENCY", status_bar.rect, "", (255, 255, 0), 100, status_bar.rect.height, str(player.get_gold()), (255, 255, 255), "Ressources/Pictures/status_bar_currency.png")
             label_player_currency.relative_x = 380
             label_player_currency.font_size = 20
             self.ecso_context.add_game_object(label_player_currency.context_id, label_player_currency)
@@ -420,14 +426,14 @@ class GUIFactory():
             self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_current_level)
             status_bar.add_interactible(label_current_level.context_id)
 
-            label_player_deck = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_DECK", status_bar.rect, "", (255, 255, 0), status_bar.rect.height, status_bar.rect.height, "DECK", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_player_deck = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_PLAYER_DECK", status_bar.rect, "", (255, 255, 0), status_bar.rect.height, status_bar.rect.height, "DECK", (255, 255, 255), "Ressources/Pictures/pull_stack.png")
             label_player_deck.relative_x = window_rect.width - 160
             label_player_deck.font_size = 20
             self.ecso_context.add_game_object(label_player_deck.context_id, label_player_deck)
             self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, label_player_deck)
             status_bar.add_interactible(label_player_deck.context_id)
 
-            label_settings = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_SETTINGS", status_bar.rect, "", (100, 100, 100), status_bar.rect.height, status_bar.rect.height, "COG", (255, 255, 255), "Ressources/Pictures/gui.jpg")
+            label_settings = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_STATUS_BAR_SETTINGS", status_bar.rect, "", (100, 100, 100), status_bar.rect.height, status_bar.rect.height, "", (255, 255, 255), "Ressources/Pictures/settings_cog.png")
             label_settings.relative_x = window_rect.width - 70
             label_settings.font_size = 20
             label_settings.callback_on_click = scene.callback_level_end
@@ -476,7 +482,7 @@ class GUIFactory():
                         if player is not None:
                             interactible.color_text = (255, 255, 0)
                             interactible.font_size = 24
-                            styled_currency = "GOLD: " + str(player.get_gold())
+                            styled_currency = str(player.get_gold())
                             interactible.set_text(styled_currency)
                     case "INTERACTIBLE_STATUS_BAR_CURRENT_ROUND":
                         styled_round = "LEVEL: " + str(scene.current_round)

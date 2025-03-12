@@ -227,6 +227,7 @@ class Endless(Gamemode):
                 case "INTERACTIBLE_CARD_SPRITE":
                     self.selected_card = source.card_context_id  # Saves the entity id of selected card
                     source.is_selected = True
+                    cast(GUIFactory, self.factories["GUIS"]).update_character_selection_effect(True)
                     self.last_selected_card = source.context_id
                 case "INTERACTIBLE_PLAYER_CHARACTER_SPRITE":
                     if self.selected_card != -1:
@@ -278,6 +279,7 @@ class Endless(Gamemode):
             print(hand.cards)
 
             cast(GUIFactory, self.factories["GUIS"]).redraw_cards(self.active_level, hand.get_cards())
+            cast(GUIFactory, self.factories["GUIS"]).update_character_selection_effect(False)
 
             # Necessary reset
             self.selected_card = -1

@@ -224,7 +224,7 @@ class GUIFactory():
         character_width = level.rect.height / 3
         charcter_height = level.rect.height / 3
         player_character_sprite = InteractibleCharacter(player_character_sprite_entity, player_character_id, "INTERACTIBLE_PLAYER_CHARACTER_SPRITE", gui_characters.rect, "", base_color, character_width, charcter_height, ressource_directory + "/Characters/" + resource)
-        player_character_sprite.relative_x = 50
+        player_character_sprite.relative_x = 75
         player_character_sprite.relative_y = gui_characters.rect.height - player_character_sprite.rect.height
         player_character_sprite.callback_on_click = character_callback_on_click
 
@@ -282,7 +282,7 @@ class GUIFactory():
         charcter_height = level.rect.height / 3
         enemy_character_sprite = InteractibleCharacter(enemy_character_sprite_entity, enemy_character_id, "INTERACTIBLE_ENEMY_CHARACTER_SPRITE", gui_characters.rect, "", base_color, character_width, charcter_height, resource)
         enemy_character_sprite.callback_on_click = character_callback_on_click
-        enemy_character_sprite.relative_x = 1100
+        enemy_character_sprite.relative_x = gui_characters.rect.width - character_width - 75
         enemy_character_sprite.relative_y = gui_characters.rect.height - enemy_character_sprite.rect.height
 
         subscription_entity = self.ecso_context.add_entity()
@@ -308,6 +308,31 @@ class GUIFactory():
         self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, progressbar)
         gui_characters.add_interactible(progressbar)
         enemy_character_sprite.health_bar = progressbar_entity
+
+        # ### SICKK ### #
+        # BIOLERPLATE!
+        # EFFECT SPRITE FOR THE PLAYER
+        selection_effect_player = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_GUI_CHARACTERS_SELECTION_EFFECT", gui_characters.rect, "", (0, 255, 0), 25, charcter_height, image_path="Ressources/Pictures/selection_highlight_v2.png")
+        selection_effect_player.image.set_colorkey((255, 255, 255))
+        selection_effect_player.image.set_alpha(150)
+        selection_effect_player.is_visible = False
+        selection_effect_player.relative_x = player_character_sprite.relative_x - 50
+        selection_effect_player.relative_y = player_character_sprite.relative_y
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, selection_effect_player)
+        self.ecso_context.add_game_object(selection_effect_player.context_id, selection_effect_player)
+        gui_characters.add_interactible(selection_effect_player.context_id)
+
+        # EFFECT SPRITE FOR THE ENEMY
+        selection_effect_enemy = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_GUI_CHARACTERS_SELECTION_EFFECT", gui_characters.rect, "", (0, 255, 0), 25, charcter_height, image_path="Ressources/Pictures/selection_highlight_v2.png")
+        selection_effect_enemy.image.set_colorkey((255, 255, 255))
+        selection_effect_enemy.image.set_alpha(150)
+        selection_effect_enemy.is_visible = False
+        selection_effect_enemy.relative_x = enemy_character_sprite.relative_x + character_width + 25
+        selection_effect_enemy.relative_y = enemy_character_sprite.relative_y
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, selection_effect_enemy)
+        self.ecso_context.add_game_object(selection_effect_enemy.context_id, selection_effect_enemy)
+        gui_characters.add_interactible(selection_effect_enemy.context_id)
+
         # SPRITE LIST AS EFFECT LIST
         # base_color = pygame.Color(50, 120, 90)
         # sprite_list = SpriteList(len(gui_characters.interactibles) - 1, "ENEMY_EFFECTS", "SPRITELIST", base_color, enemy_character_sprite.rect.width, 50)
@@ -323,11 +348,31 @@ class GUIFactory():
         #     sprite_list.add_sprite(sprite)
         # ### MAIN ENEMY SPRITE ### #
 
+    def update_character_selection_effect(self, desired_state: bool):
+        """Sets the is_visible flag positive or negative
+            The selection effect is currently an InteractibleLabel"""
+        try:
+            gui_entity = None
+            gui_object = None
+            for gui_items in self.check_for__guis(LevelGUI):
+                if gui_items[1].type_id is DEFAULT_CHARACTER_TYPE_ID:
+                    gui_entity = gui_items[0]
+                    gui_object = gui_items[1]
+
+            for interactible_entity in gui_object.get_interactibles():
+                try:
+                    label = cast(InteractibleLabel, self.ecso_context.get_game_object(interactible_entity, InteractibleLabel))
+                    if label.type_id == "INTERACTIBLE_GUI_CHARACTERS_SELECTION_EFFECT":
+                        label.is_visible = desired_state
+                except AttributeError:
+                    continue
+        except TypeError as e:
+            print("[GUIFactory][SELECTIONEFFECT]", e)
+
     def generate_status_bar(self, scene, player_character_id=-1, enemy_character_id=-1, round=-1) -> int:
         try:
             if scene is None:
                 return -1
-            TODO: "PENISS"
             entity = self.ecso_context.add_entity()
             window_rect = self.application.get_window().get_rect()
             height_percentage = 0.08

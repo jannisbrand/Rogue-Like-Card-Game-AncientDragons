@@ -352,7 +352,7 @@ class Endless(Gamemode):
                     if not self.is_creating_gui:
                         self.is_creating_gui = True
                         # self.__create_character_LevelGUI()
-                        cast(GUIFactory, self.factories["GUIS"]).generate_character_gui(self.active_level, self.active_player_character, self.active_enemy_character, self.current_round, self.stage_select_targets)
+                        cast(GUIFactory, self.factories["GUIS"]).generate_character_gui(self, self.active_level, self.active_player_character, self.active_enemy_character, self.current_round, self.stage_select_targets)
 
                     gui_entities = level.get_guis()
                     for gui_entity in gui_entities:

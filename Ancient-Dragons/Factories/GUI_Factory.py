@@ -192,7 +192,7 @@ class GUIFactory():
 
         self.draw_cards(card_gui, cards)
 
-    def generate_character_gui(self, level_id: int, player_character_id: int, enemy_character_id: int, round: int, character_callback_on_click: Any):
+    def generate_character_gui(self, scene: Any, level_id: int, player_character_id: int, enemy_character_id: int, round: int, character_callback_on_click: Any):
         level = cast(Level, self.ecso_context.get_game_object(level_id, Level))
         ressource_directory = "Ressources/Pictures"
         # ground_level = level.get_environment_type("FOREGROUND2")[0].rect.y  # ...
@@ -346,6 +346,13 @@ class GUIFactory():
         #     sprite.image = pygame.image.load(f"Levels/Data/Charakters/{image}")
         #     sprite_list.add_sprite(sprite)
         # ### MAIN ENEMY SPRITE ### #
+
+        end_turn = InteractibleLabel(self.ecso_context.add_entity(), "INTERACTIBLE_GUI_CHARACTERS_END_TURN", gui_characters.rect, "", (0, 0, 0), 100, 50, "", image_path="Ressources/Pictures/end_turn.png")
+        end_turn.relative_x = gui_characters.rect.width - end_turn.rect.width - 50
+        end_turn.relative_y = gui_characters.rect.height + 50
+        self.ecso_context.add_game_object(end_turn.context_id, end_turn)
+        self.renderer.add_sprite(SpriteGroupTypes.INTERACTIBLES, end_turn)
+        gui_characters.add_interactible(end_turn.context_id)
 
     def update_character_selection_effect(self, desired_state: bool):
         """Sets the is_visible flag positive or negative

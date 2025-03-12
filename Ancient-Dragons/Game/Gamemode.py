@@ -9,8 +9,8 @@ from Factories.Card_Factory import CardFactory
 from Factories.Character_Factory import CharacterFactory
 from Factories.GUI_Factory import GUIFactory
 from Factories.Level_Factory import LevelFactory
-from GUI.Base import GUISprite
-from GUI.GUI import GUI
+from GUI.BaseGUI import BaseGUI
+from GUI.Level_GUI import LevelGUI
 from GUI.Interactibles.Base import InteractibleSprite
 from GUI.Interactibles.Button import Button
 from GUI.Interactibles.Card import Card
@@ -18,6 +18,7 @@ from GUI.Interactibles.Character import InteractibleCharacter
 from GUI.Interactibles.Environmental import InteractibleEnvironmental
 from GUI.Interactibles.Slider import ProgressBar
 from GUI.Interactibles.Sprite_List import SpriteList
+from GUI.Scene_GUI import SceneGUI
 from Handlers.Input_Handler import InputHandler
 from Handlers.Subscriptions.Types import InputSubscribtion
 from Levels.Base import Level
@@ -100,14 +101,18 @@ class Gamemode():
                         if issubclass(type(game_object), Level):
                             stage_deletions.extend(self.handle_level(game_object))
                             continue
-                        if issubclass(type(game_object), GUISprite):
-                            stage_deletions.extend(self.handle_gui(game_object))
+                        if issubclass(type(game_object), LevelGUI):
+                            stage_deletions.extend(self.handle_level_gui(game_object))
+                            continue
+                        if issubclass(type(game_object), SceneGUI):
+                            stage_deletions.extend(self.handle_scene_gui(game_object))
                             continue
                         if issubclass(type(game_object), InteractibleSprite):
                             stage_deletions.extend(self.handle_interactible(game_object))
                             continue
                         if issubclass(type(game_object), InputSubscribtion):
                             stage_deletions.extend(self.handle_subscribtion(game_object))
+                        # TODO: Handle global entities (GUIs)
                     except TypeError:
                         continue
                     except AttributeError:
@@ -137,7 +142,7 @@ class Gamemode():
         if level.destroy:
             level.kill()
             for gui_id in level.get_guis():
-                gui = cast(GUI, self.ecso_context.get_game_object(gui_id, GUI))
+                gui = cast(LevelGUI, self.ecso_context.get_game_object(gui_id, LevelGUI))
                 gui.destroy = True
                 for interactible_id in gui.get_interactibles():
                     try:
@@ -150,7 +155,7 @@ class Gamemode():
 
         return deletion
 
-    def handle_gui(self, gui: GUISprite) -> list:
+    def handle_level_gui(self, gui: LevelGUI) -> list:
         deletion = []
         if gui.is_visible:
             if len(gui.groups()) == 0:
@@ -164,6 +169,30 @@ class Gamemode():
 
         if gui.destroy:
             gui.kill()
+            deletion.append(gui.context_id)
+
+        return deletion
+
+    def handle_scene_gui(self, gui: SceneGUI) -> list:
+        deletion = []
+        if gui.is_visible:
+            if len(gui.groups()) == 0:
+                print(len(gui.groups()))
+                self.renderer.add_sprite(SpriteGroupTypes.GUIS, gui)
+        else:
+            gui.kill()
+
+        if gui.is_active:
+            gui.update()
+
+        if gui.destroy:
+            gui.kill()
+            for interactible_id in gui.get_interactibles():
+                try:
+                    interactible = cast(InteractibleSprite, self.ecso_context.get_game_objects(interactible_id)[0])
+                    interactible.destroy = True
+                except IndexError:
+                    pass
             deletion.append(gui.context_id)
 
         return deletion

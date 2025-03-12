@@ -3,9 +3,9 @@ import pygame
 import pygame.display
 from GUI.GUI import GUI
 from GUI.Interactibles.Button import Button
-from Game.Gamemode_Handler import GamemodeHandler
-from Game.Endless import Endless
-from Game.Main_Menu import MainMenu
+from Scenes.Scene_Handler import SceneHandler
+from Scenes.Endless import Endless
+from Scenes.Main_Menu import MainMenu
 from Handlers.Flags import SubscriptionType
 from Handlers.Input_Handler import InputHandler
 from Handlers.Event_Handler import Event_Handler
@@ -72,7 +72,7 @@ class Application():
 if __name__ == "__main__":
     application = Application(1440, 900, (1440 - 720) - 450, 100, pygame.RESIZABLE, "")
     application.initialise()
-    application.set_window_caption("Ancient Dragons - Ver: 0.1.7_12.03.2025")
+    application.set_window_caption("Ancient Dragons - Ver: 0.1.7.1_13.03.2025")
     
     event_handler = Event_Handler(application)
     input_handler = InputHandler(application)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     print("\n\n\n")
 
-    gm_handler = GamemodeHandler()
+    gm_handler = SceneHandler()
     gm_handler.initialise()
 
     gm_menu = MainMenu(0, "START", application, input_handler, renderer)

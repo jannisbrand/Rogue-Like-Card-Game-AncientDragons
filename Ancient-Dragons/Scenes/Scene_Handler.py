@@ -1,9 +1,9 @@
 from typing import Any
 
-from Game.Gamemode import Gamemode
+from Scenes.Scene import Scene
 
 
-class GamemodeHandler():
+class SceneHandler():
     def __init__(self):
         self.active_gamemode: int  # Index
         self.gamemodes: list[Any]

@@ -29,7 +29,7 @@ from Sprites.Base import Sprite
 from Systems.Stacks.Base import CardStack
 
 
-class Gamemode():
+class Scene():
     def __init__(self, id: int, name: str, application, input_handler: InputHandler, renderer: "Renderer") -> None:
         # ### GAMEMODE RELATED ### #
         self.id = id
